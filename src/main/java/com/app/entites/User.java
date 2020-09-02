@@ -19,9 +19,8 @@ public class User {
     @PrimaryKeyJoinColumn()
     private List<Poll> userPolls;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
-    @JoinColumn(name ="vote_pk")
-    private List<Vote> votes;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Voter voter;
 
 
 

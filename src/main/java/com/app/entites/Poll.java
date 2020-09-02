@@ -3,6 +3,7 @@ package com.app.entites;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -16,12 +17,14 @@ public class Poll {
     private String question;
     private String alternativeA;
     private String alternativeB;
+    private Date deadline;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn()
     private User user;
 
     @OneToMany
-    private List<PollVote> pollVotes;
+    @PrimaryKeyJoinColumn()
+    private List<Vote> votes;
 
 }
