@@ -17,14 +17,13 @@ public class Poll {
     private String question;
     private String alternativeA;
     private String alternativeB;
-    private Date deadline;
+    private int duration;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn()
-    private User user;
+    @JoinColumn(name = "owner_id")
+    private User owner;
 
-    @OneToMany
-    @PrimaryKeyJoinColumn()
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "voter")
     private List<Vote> votes;
 
 }

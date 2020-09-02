@@ -10,13 +10,15 @@ public class Vote {
 
     @Id
     private Long id;
+    private int voteA;
+    private int voteB;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn()
+    @JoinColumn(name = "poll_id")
     private Poll poll;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn()
+    @JoinColumn(name = "voter_id")
     private Voter voter;
 
 }

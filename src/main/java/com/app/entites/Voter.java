@@ -12,11 +12,10 @@ public class Voter {
     @Id
     private Long id;
 
-    @OneToMany
-    @PrimaryKeyJoinColumn()
+    @OneToMany(mappedBy = "voter")
     private List<Vote> votes;
 
-    @OneToOne
+    @OneToOne(mappedBy = "voter")
     private User user;
 
     public boolean isGuest() {

@@ -15,11 +15,10 @@ public class User {
     private String username;
     private String password;
 
-    @OneToMany
-    @PrimaryKeyJoinColumn()
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Poll> userPolls;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private Voter voter;
 
 
