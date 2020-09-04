@@ -1,20 +1,21 @@
 package no.hvl.dat250.h2020.group5.entities;
 
-import javax.persistence.Entity;
+import lombok.Data;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 
-@Entity
-public class Vote {
+@Data
+@MappedSuperclass
+public abstract class Device {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
-    private Voter voter;
-
-    private Poll poll;
+    private User deviceUser;
 
     public Integer getId() {
         return id;
@@ -24,19 +25,11 @@ public class Vote {
         this.id = id;
     }
 
-    public Voter getVoter() {
-        return voter;
+    public User getDeviceUser() {
+        return deviceUser;
     }
 
-    public void setVoter(Voter voter) {
-        this.voter = voter;
-    }
-
-    public Poll getPoll() {
-        return poll;
-    }
-
-    public void setPoll(Poll poll) {
-        this.poll = poll;
+    public void setDeviceUser(User deviceUser) {
+        this.deviceUser = deviceUser;
     }
 }
