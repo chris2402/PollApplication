@@ -13,8 +13,7 @@ public class Poll {
 
     // TODO : Design/Implement own Generation type for Poll PIN - https://thorben-janssen.com/custom-sequence-based-idgenerator/
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    private String id;
 
     private String name;
 
@@ -26,7 +25,7 @@ public class Poll {
     @ManyToOne(fetch = FetchType.LAZY)
     private User pollOwner;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "voter", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
 
 }

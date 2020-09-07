@@ -6,18 +6,20 @@ import javax.persistence.*;
 
 @Data
 @Entity
+@IdClass(VoteId.class)
 public class Vote {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="voter_id")
+    private Voter voter;
+
+    @Id
+    @JoinColumn(name="poll_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Poll poll;
 
     private Integer voteA;
     private Integer voteB;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Voter voter;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Poll poll;
 }
