@@ -6,7 +6,7 @@ import java.util.List;
 
 public class JPATest {
 
-    private static final String PERSISTENCE_UNIT_NAME = "polls";
+    private static final String PERSISTENCE_UNIT_NAME = "test-polls";
     private static EntityManagerFactory factory;
     private EntityManager em;
 
