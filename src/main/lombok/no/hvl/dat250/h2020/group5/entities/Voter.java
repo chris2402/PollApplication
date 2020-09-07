@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -10,13 +11,15 @@ import java.util.List;
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class Voter {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    @EqualsAndHashCode.Include
+    private String id;
 
     @Column(length = 20)
+    @EqualsAndHashCode.Include
     private String userName;
 
     @OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)

@@ -3,16 +3,14 @@ package no.hvl.dat250.h2020.group5.entities;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
-@Entity // (name = "User")
+@Entity
+@Table(name="APP_USER")
+@EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
     private String password;

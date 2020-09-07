@@ -2,34 +2,17 @@ package no.hvl.dat250.h2020.group5.entities;
 
 import lombok.Data;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 
 @Data
 @MappedSuperclass
 public abstract class Device {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
+    @OneToOne
     private User deviceUser;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public User getDeviceUser() {
-        return deviceUser;
-    }
-
-    public void setDeviceUser(User deviceUser) {
-        this.deviceUser = deviceUser;
-    }
 }
