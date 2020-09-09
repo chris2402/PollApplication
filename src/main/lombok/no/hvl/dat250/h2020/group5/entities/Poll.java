@@ -20,9 +20,6 @@ public class Poll {
 
     private String question;
 
-    private String alternativeA;
-    private String alternativeB;
-
     private Date startTime;
     private Integer pollDuration;
 
