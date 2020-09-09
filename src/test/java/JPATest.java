@@ -22,21 +22,21 @@ public class JPATest {
         EntityManager em = factory.createEntityManager();
         em.getTransaction().begin();
 
-        Query q1 = em.createQuery("DELETE FROM Guest");
-        Query q2 = em.createQuery("DELETE FROM User");
-        Query q3 = em.createQuery("DELETE FROM Voter");
-        Query q4 = em.createQuery("DELETE FROM Vote");
+        Query q1 = em.createQuery("DELETE FROM Vote");
+        Query q2 = em.createQuery("DELETE FROM Voter");
+        Query q3 = em.createQuery("DELETE FROM Guest");
+        Query q4 = em.createQuery("DELETE FROM User");
         Query q5 = em.createQuery("DELETE FROM Poll");
-        Query q7 = em.createQuery("DELETE FROM VotingDevice");
-        Query q8 = em.createQuery("DELETE FROM DisplayDevice");
+        Query q6 = em.createQuery("DELETE FROM VotingDevice");
+        Query q7 = em.createQuery("DELETE FROM DisplayDevice");
 
         q1.executeUpdate();
         q2.executeUpdate();
         q3.executeUpdate();
         q4.executeUpdate();
         q5.executeUpdate();
+        q6.executeUpdate();
         q7.executeUpdate();
-        q8.executeUpdate();
 
         em.getTransaction().commit();
         em.close();
