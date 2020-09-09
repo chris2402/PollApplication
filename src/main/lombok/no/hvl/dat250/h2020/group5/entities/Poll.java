@@ -20,8 +20,8 @@ public class Poll {
 
     private String question;
 
-    private String alternativeA;
-    private String alternativeB;
+    private String answeredYes;
+    private String answeredNo;
 
     private Date startTime;
     private Integer pollDuration;
