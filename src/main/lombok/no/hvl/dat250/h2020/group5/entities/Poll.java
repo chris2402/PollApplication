@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -21,6 +22,9 @@ public class Poll {
 
     private String alternativeA;
     private String alternativeB;
+
+    private Date startTime;
+    private Integer pollDuration;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User pollOwner;
