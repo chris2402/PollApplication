@@ -26,7 +26,7 @@ public class Poll {
     @ManyToOne(fetch = FetchType.LAZY)
     private User pollOwner;
 
-    @OneToMany(mappedBy = "poll", targetEntity = Vote.class, orphanRemoval = true, cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
 
 }
