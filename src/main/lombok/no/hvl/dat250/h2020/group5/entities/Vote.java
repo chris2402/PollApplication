@@ -19,6 +19,6 @@ public class Vote {
     @ManyToOne(fetch = FetchType.LAZY)
     private Poll poll;
 
-    private AnswerType answer;
+    private String answer;
 
 }

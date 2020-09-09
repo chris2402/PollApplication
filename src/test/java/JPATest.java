@@ -73,7 +73,7 @@ public class JPATest {
     @Test
     public void shouldPersistYesWhenVotingYesTest() {
         Vote vote = new Vote();
-        vote.setAnswer(AnswerType.YES);
+        vote.setAnswer(AnswerType.YES.toString());
 
         Poll poll = new Poll();
         poll.setId("1");
@@ -92,6 +92,6 @@ public class JPATest {
         Query query = em.createQuery("select v from Vote v");
         List<Vote> votes = query.getResultList();
 
-        Assertions.assertEquals(AnswerType.YES, votes.get(0).getAnswer());
+        Assertions.assertEquals(AnswerType.YES.toString(), votes.get(0).getAnswer());
     }
 }
