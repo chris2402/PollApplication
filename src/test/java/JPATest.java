@@ -16,7 +16,7 @@ public class JPATest {
     private static EntityManagerFactory factory;
     private EntityManager em;
 
-    @BeforeAll
+    @BeforeEach
     public static void setUpEMF() throws Exception{
         factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         EntityManager em = factory.createEntityManager();
@@ -93,5 +93,11 @@ public class JPATest {
         List<Vote> votes = query.getResultList();
 
         Assertions.assertEquals(AnswerType.YES.toString(), votes.get(0).getAnswer());
+    }
+
+    @Test
+    public void shouldCountTwoYesVotesWhenGivenOnPollTest() {
+        Poll poll = new Poll();
+        poll.setId("1");
     }
 }
