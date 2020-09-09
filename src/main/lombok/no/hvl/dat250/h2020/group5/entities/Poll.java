@@ -20,16 +20,13 @@ public class Poll {
 
     private String question;
 
-    private String answeredYes;
-    private String answeredNo;
-
     private Date startTime;
     private Integer pollDuration;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User pollOwner;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "poll", targetEntity = Vote.class, orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<Vote> votes = new ArrayList<>();
 
 }

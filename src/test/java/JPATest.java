@@ -17,7 +17,7 @@ public class JPATest {
     private EntityManager em;
 
     @BeforeEach
-    public static void setUpEMF() throws Exception{
+    public void setUpEMF() throws Exception{
         factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         EntityManager em = factory.createEntityManager();
         em.getTransaction().begin();
@@ -73,7 +73,7 @@ public class JPATest {
     @Test
     public void shouldPersistYesWhenVotingYesTest() {
         Vote vote = new Vote();
-        vote.setAnswer(AnswerType.YES.toString());
+        vote.setAnswer(AnswerType.YES);
 
         Poll poll = new Poll();
         poll.setId("1");
@@ -83,6 +83,7 @@ public class JPATest {
 
         Guest voter = new Guest();
         voter.setId("1");
+        // Many-side is the owning side, vote persists voter
         vote.setVoter(voter);
 
         em.getTransaction().begin();
@@ -92,12 +93,40 @@ public class JPATest {
         Query query = em.createQuery("select v from Vote v");
         List<Vote> votes = query.getResultList();
 
-        Assertions.assertEquals(AnswerType.YES.toString(), votes.get(0).getAnswer());
+        Assertions.assertEquals(AnswerType.YES, votes.get(0).getAnswer());
     }
 
     @Test
-    public void shouldCountTwoYesVotesWhenGivenOnPollTest() {
+    public void shouldCountTwoVotesWhenGivenOnPollTest() {
         Poll poll = new Poll();
         poll.setId("1");
+
+        Guest voter1 = new Guest();
+        voter1.setId("1");
+
+        Guest voter2 = new Guest();
+        voter2.setId("2");
+
+        Vote vote1 = new Vote();
+        vote1.setVoter(voter1);
+        vote1.setAnswer(AnswerType.YES);
+
+        Vote vote2 = new Vote();
+        vote2.setVoter(voter2);
+        vote2.setAnswer(AnswerType.YES);
+
+        // Many-side is the owning side, vote persists poll
+        vote1.setPoll(poll);
+        vote2.setPoll(poll);
+        poll.setVotes(Arrays.asList(vote1, vote2));
+
+        em.persist(vote1);
+        em.persist(vote2);
+        em.getTransaction().commit();
+
+        Query query = em.createQuery("select p from Poll p");
+        List<Poll> polls = query.getResultList();
+
+        Assertions.assertEquals(2, polls.get(0).getVotes().size());
     }
 }

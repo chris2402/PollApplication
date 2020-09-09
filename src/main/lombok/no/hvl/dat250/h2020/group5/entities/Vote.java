@@ -10,15 +10,16 @@ import javax.persistence.*;
 public class Vote {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name="voter_id")
     private Voter voter;
 
     @Id
     @JoinColumn(name="poll_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Poll poll;
 
-    private String answer;
+    @Enumerated(EnumType.STRING)
+    private AnswerType answer;
 
 }
