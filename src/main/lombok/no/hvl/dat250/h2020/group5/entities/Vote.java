@@ -10,7 +10,7 @@ import javax.persistence.*;
 public class Vote {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name="voter_id")
     private Voter voter;
 
@@ -19,7 +19,6 @@ public class Vote {
     @ManyToOne(fetch = FetchType.LAZY)
     private Poll poll;
 
-    private Integer voteA;
-    private Integer voteB;
+    private AnswerType answer;
 
 }

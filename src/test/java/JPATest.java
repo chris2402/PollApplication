@@ -1,7 +1,13 @@
 import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.entities.AnswerType;
+import no.hvl.dat250.h2020.group5.entities.Voter;
 import org.junit.jupiter.api.*;
 
 import javax.persistence.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class JPATest {
@@ -62,5 +68,30 @@ public class JPATest {
 
         Assertions.assertEquals(resultList.size(), 1);
         Assertions.assertEquals(resultList.get(0).getId(), "123");
+    }
+
+    @Test
+    public void shouldPersistYesWhenVotingYesTest() {
+        Vote vote = new Vote();
+        vote.setAnswer(AnswerType.YES);
+
+        Poll poll = new Poll();
+        poll.setId("1");
+        em.persist(poll);
+        em.getTransaction().commit();
+        vote.setPoll(poll);
+
+        Guest voter = new Guest();
+        voter.setId("1");
+        vote.setVoter(voter);
+
+        em.getTransaction().begin();
+        em.persist(vote);
+        em.getTransaction().commit();
+
+        Query query = em.createQuery("select v from Vote v");
+        List<Vote> votes = query.getResultList();
+
+        Assertions.assertEquals(AnswerType.YES, votes.get(0).getAnswer());
     }
 }
