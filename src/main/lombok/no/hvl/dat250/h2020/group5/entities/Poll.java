@@ -23,6 +23,8 @@ public class Poll {
     private Date startTime;
     private Integer pollDuration;
 
+    private PollVisibilityType visibilityType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User pollOwner;
 
