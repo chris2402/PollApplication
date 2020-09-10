@@ -13,6 +13,9 @@
         <class>no.hvl.dat250.h2020.group5.entities.DisplayDevice</class>
 
 
+        <!-- CONVERTERS -->
+        <class>no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long</class>
+
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver" />
             <property name="javax.persistence.jdbc.url"  value="jdbc:derby:target/dev_test_db;create=true" />

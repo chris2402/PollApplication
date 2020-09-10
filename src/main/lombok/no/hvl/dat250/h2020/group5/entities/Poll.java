@@ -14,7 +14,8 @@ import java.util.List;
 public class Poll {
 
 
-    private final int LOWEST_4_DIGIT_BASE36 = 1679616;
+    private final static int LOWEST_4_DIGIT_BASE36 = 1679616;
+
     @Id
     @SequenceGenerator(name="PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PollID_Sequence")
