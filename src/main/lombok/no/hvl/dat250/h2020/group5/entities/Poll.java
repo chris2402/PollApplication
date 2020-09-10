@@ -1,9 +1,11 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import lombok.Data;
+import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -11,16 +13,23 @@ import java.util.List;
 @Entity
 public class Poll {
 
-    // TODO : Design/Implement own Generation type for Poll PIN - https://thorben-janssen.com/custom-sequence-based-idgenerator/
+
+    private final static int LOWEST_4_DIGIT_BASE36 = 1679616;
+
     @Id
+    @SequenceGenerator(name="PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PollID_Sequence")
+    @Convert(converter = AlphaNumeric2Long.class)
     private String id;
 
     private String name;
 
     private String question;
 
-    private String alternativeA;
-    private String alternativeB;
+    private Date startTime;
+    private Integer pollDuration;
+
+    private PollVisibilityType visibilityType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User pollOwner;

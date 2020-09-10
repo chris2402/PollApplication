@@ -3,6 +3,7 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
     <persistence-unit name="polls" transaction-type="RESOURCE_LOCAL">
+        <!-- ENTITIES -->
         <class>no.hvl.dat250.h2020.group5.entities.Poll</class>
         <class>no.hvl.dat250.h2020.group5.entities.Voter</class>
         <class>no.hvl.dat250.h2020.group5.entities.Vote</class>
@@ -11,6 +12,9 @@
         <class>no.hvl.dat250.h2020.group5.entities.Device</class>
         <class>no.hvl.dat250.h2020.group5.entities.VotingDevice</class>
         <class>no.hvl.dat250.h2020.group5.entities.DisplayDevice</class>
+
+        <!-- CONVERTERS -->
+        <class>no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="@javax.persistence.jdbc.driver@" />
