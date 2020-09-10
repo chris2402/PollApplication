@@ -37,8 +37,6 @@ public class Poll {
     @Enumerated(EnumType.STRING)
     private PollVisibilityType visibilityType;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private User pollOwner;
 
