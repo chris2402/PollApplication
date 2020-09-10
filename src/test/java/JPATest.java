@@ -137,7 +137,6 @@ public class JPATest {
         em.getTransaction().begin();
         em.persist(poll);
         em.getTransaction().commit();
-        em.flush();
 
         Poll fetched_poll = em.find(Poll.class, POLL_ID);
 
