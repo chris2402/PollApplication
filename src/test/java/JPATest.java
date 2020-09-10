@@ -1,11 +1,13 @@
 import enums.AnswerType;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import org.junit.jupiter.api.*;
 
 import javax.persistence.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class JPATest {
@@ -139,6 +141,44 @@ public class JPATest {
         Poll fetched_poll = em.find(Poll.class, POLL_ID);
 
         Assertions.assertEquals(fetched_poll.getId(), POLL_ID);
+    }
+
+    @Test
+    public void shouldDeletePollOwnedByUserWhenDeletingUserTest() {
+        User user = new User();
+        user.setId("1");
+        user.setUserName("User1");
+        user.setPassword("MyPassword");
+
+        Poll poll = new Poll();
+        //poll.setPollOwner(user);
+        poll.setId("POLL123");
+
+        user.setUserPolls(Collections.singletonList(poll));
+        poll.setPollOwner(user);
+
+        em.getTransaction().begin();
+        em.persist(poll);
+        em.getTransaction().commit();
+
+
+
+        Query query = em.createQuery("select p from Poll p");
+        List<Poll> polls = query.getResultList();
+
+        System.out.println(polls);
+
+        em.getTransaction().begin();
+        em.remove(user);
+        em.getTransaction().commit();
+
+        Query query2 = em.createQuery("select p from Poll p");
+        List<Poll> polls2 = query.getResultList();
+
+        System.out.println(polls2);
+
+
+        Assertions.assertEquals(0, polls2.size());
     }
 
 }

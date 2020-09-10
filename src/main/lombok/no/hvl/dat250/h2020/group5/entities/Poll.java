@@ -1,7 +1,8 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import enums.PollVisibilityType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 
 import javax.persistence.*;
@@ -10,7 +11,8 @@ import java.util.Date;
 import java.util.List;
 
 
-@Data
+@Getter
+@Setter
 @Entity
 public class Poll {
 
@@ -33,7 +35,7 @@ public class Poll {
     @Enumerated(EnumType.STRING)
     private PollVisibilityType visibilityType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private User pollOwner;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
