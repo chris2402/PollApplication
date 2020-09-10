@@ -129,4 +129,39 @@ public class JPATest {
 
         Assertions.assertEquals(2, polls.get(0).getVotes().size());
     }
+
+    @Test
+    public void shouldDeleteVoterWithoutDeletingVoteAndSetFkToNull(){
+        Poll poll = new Poll();
+        poll.setId("1");
+
+        Guest voter1 = new Guest();
+        voter1.setId("1");
+
+        Vote vote1 = new Vote();
+        vote1.setVoter(voter1);
+        vote1.setAnswer(AnswerType.YES);
+
+        em.persist(vote1);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        List<Vote> votes = em.createQuery("select v from Vote v where v.voter.id = :id")
+                        .setParameter("id", voter1.getId())
+                        .getResultList();
+        for(Vote vote : votes){
+            vote.setVoter(null);
+        }
+        em.remove(voter1);
+        em.getTransaction().commit();
+
+        List<Vote> updatedVotes = em.createQuery("select v from Vote v")
+                                    .getResultList();
+
+        List<Vote> voters = em.createQuery("select v from Voter v")
+                              .getResultList();
+
+        Assertions.assertNull(updatedVotes.get(0).getVoter());
+        Assertions.assertEquals(0,voters.size());
+    }
 }
