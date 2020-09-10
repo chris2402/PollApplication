@@ -19,7 +19,7 @@ public class JPATest {
     @BeforeEach
     public void setUpEMF() throws Exception{
         factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-        EntityManager em = factory.createEntityManager();
+        em = factory.createEntityManager();
         em.getTransaction().begin();
 
         Query q1 = em.createQuery("DELETE FROM Vote");
@@ -39,15 +39,8 @@ public class JPATest {
         q7.executeUpdate();
 
         em.getTransaction().commit();
-        em.close();
-
     }
 
-    @BeforeEach
-    public void setUpEM(){
-        em = factory.createEntityManager();
-        em.getTransaction().begin();
-    }
 
     @AfterEach
     public void tearDownEM(){
@@ -60,6 +53,9 @@ public class JPATest {
         Guest g = new Guest();
         g.setId("123");
         g.setUserName("IM A USER");
+
+        EntityTransaction trans = em.getTransaction();
+        trans.begin();
         em.persist(g);
         em.getTransaction().commit();
 
@@ -77,6 +73,7 @@ public class JPATest {
 
         Poll poll = new Poll();
         poll.setId("1");
+        em.getTransaction().begin();
         em.persist(poll);
         em.getTransaction().commit();
         vote.setPoll(poll);
@@ -120,6 +117,7 @@ public class JPATest {
         vote2.setPoll(poll);
         poll.setVotes(Arrays.asList(vote1, vote2));
 
+        em.getTransaction().begin();
         em.persist(vote1);
         em.persist(vote2);
         em.getTransaction().commit();
@@ -129,4 +127,20 @@ public class JPATest {
 
         Assertions.assertEquals(2, polls.get(0).getVotes().size());
     }
+
+    @Test
+    public void PollIdStringConvertPersistAndFindTest() {
+        final String POLL_ID = "ABC123";
+        Poll poll = new Poll();
+        poll.setId(POLL_ID);
+
+        em.getTransaction().begin();
+        em.persist(poll);
+        em.getTransaction().commit();
+
+        Poll fetched_poll = em.find(Poll.class, POLL_ID);
+
+        Assertions.assertEquals(fetched_poll.getId(), POLL_ID);
+    }
+
 }
