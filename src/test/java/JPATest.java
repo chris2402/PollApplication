@@ -151,7 +151,6 @@ public class JPATest {
         user.setPassword("MyPassword");
 
         Poll poll = new Poll();
-        //poll.setPollOwner(user);
         poll.setId("POLL123");
 
         user.setUserPolls(Collections.singletonList(poll));
@@ -161,24 +160,51 @@ public class JPATest {
         em.persist(poll);
         em.getTransaction().commit();
 
-
-
-        Query query = em.createQuery("select p from Poll p");
-        List<Poll> polls = query.getResultList();
-
-        System.out.println(polls);
+        Query queryBeforeDeletion = em.createQuery("select p from Poll p");
+        List<Poll> pollsBeforeDeletion = queryBeforeDeletion.getResultList();
 
         em.getTransaction().begin();
         em.remove(user);
         em.getTransaction().commit();
 
-        Query query2 = em.createQuery("select p from Poll p");
-        List<Poll> polls2 = query.getResultList();
+        Query queryAfterDeletion = em.createQuery("select p from Poll p");
+        List<Poll> pollsAfterDeletion = queryAfterDeletion.getResultList();
 
-        System.out.println(polls2);
+        Assertions.assertEquals(1, pollsBeforeDeletion.size());
+        Assertions.assertEquals(0, pollsAfterDeletion.size());
+    }
 
+    @Test
+    public void shouldDeleteVoteWhenPollIsDeletedTest() {
+        Poll poll = new Poll();
+        poll.setId("POLL123");
 
-        Assertions.assertEquals(0, polls2.size());
+        Vote vote = new Vote();
+        vote.setAnswer(AnswerType.NO);
+        vote.setPoll(poll);
+
+        Guest voter = new Guest();
+        voter.setId("1");
+
+        vote.setVoter(voter);
+        poll.setVotes(Collections.singletonList(vote));
+
+        em.getTransaction().begin();
+        em.persist(poll);
+        em.getTransaction().commit();
+
+        Query queryBeforeDeletion = em.createQuery("select v from Vote v");
+        List<Vote> votesBeforeDeletion = queryBeforeDeletion.getResultList();
+
+        em.getTransaction().begin();
+        em.remove(poll);
+        em.getTransaction().commit();
+
+        Query queryAfterDeletion = em.createQuery("select v from Vote v");
+        List<Vote> votesAfterDeletion = queryAfterDeletion.getResultList();
+
+        Assertions.assertEquals(1, votesBeforeDeletion.size());
+        Assertions.assertEquals(0, votesAfterDeletion.size());
     }
 
 }

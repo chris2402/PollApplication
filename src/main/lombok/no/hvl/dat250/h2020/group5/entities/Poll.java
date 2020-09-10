@@ -40,6 +40,8 @@ public class Poll {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private User pollOwner;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
 
