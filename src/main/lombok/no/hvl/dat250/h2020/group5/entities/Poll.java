@@ -1,5 +1,6 @@
 package no.hvl.dat250.h2020.group5.entities;
 
+import enums.PollVisibilityType;
 import lombok.Data;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 
