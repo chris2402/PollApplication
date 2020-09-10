@@ -1,13 +1,11 @@
+import enums.AnswerType;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.Vote;
-import no.hvl.dat250.h2020.group5.entities.AnswerType;
-import no.hvl.dat250.h2020.group5.entities.Voter;
 import org.junit.jupiter.api.*;
 
 import javax.persistence.*;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class JPATest {
