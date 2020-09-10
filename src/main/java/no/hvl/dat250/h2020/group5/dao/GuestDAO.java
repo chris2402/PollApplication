@@ -1,7 +1,7 @@
-package no.hvl.dat250.h2020.group5.doa;
+package no.hvl.dat250.h2020.group5.dao;
 
 import no.hvl.dat250.h2020.group5.entities.Guest;
 
-public interface GuestDOA {
+public interface GuestDAO {
     Guest createGuest();
 }

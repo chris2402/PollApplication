@@ -1,11 +1,11 @@
-package no.hvl.dat250.h2020.group5.doa;
+package no.hvl.dat250.h2020.group5.dao;
 
 import no.hvl.dat250.h2020.group5.entities.Poll;
 
 import java.util.List;
 
-public interface PollDOA {
-    Boolean createPoll(String name, String question, String alternativeA, String alternativeB);
+public interface PollDAO {
+    Poll createPoll(String name, String question, String alternativeA, String alternativeB, String userId);
     Boolean deletePoll(String pollId);
 
     List<Poll> getAllPublicPolls();

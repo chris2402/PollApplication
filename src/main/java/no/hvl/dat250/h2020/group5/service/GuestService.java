@@ -1,6 +1,6 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.doa.GuestDOA;
+import no.hvl.dat250.h2020.group5.dao.GuestDAO;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 
 import javax.persistence.EntityManager;
@@ -8,7 +8,7 @@ import javax.persistence.PersistenceContext;
 
 import java.util.Random;
 
-public class GuestService implements GuestDOA {
+public class GuestService implements GuestDAO {
 
     @PersistenceContext
     private EntityManager em;
@@ -23,7 +23,7 @@ public class GuestService implements GuestDOA {
         do{
             id = Integer.toString(getRandomIntInRange(1000000, 10000));
 
-        }while(em.find(Guest.class, id) != null);
+        } while(em.find(Guest.class, id) != null);
 
         guest.setId(id);
         guest.setUserName("Guest" + id);
