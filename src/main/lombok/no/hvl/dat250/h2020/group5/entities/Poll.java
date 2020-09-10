@@ -30,6 +30,7 @@ public class Poll {
     private Date startTime;
     private Integer pollDuration;
 
+    @Enumerated(EnumType.STRING)
     private PollVisibilityType visibilityType;
 
     @ManyToOne(fetch = FetchType.LAZY)
