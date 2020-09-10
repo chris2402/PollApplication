@@ -31,6 +31,8 @@ public class Poll {
 
     private PollVisibilityType visibilityType;
 
+    private boolean active;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User pollOwner;
 
