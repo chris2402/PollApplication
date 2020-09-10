@@ -1,8 +1,11 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import enums.PollVisibilityType;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 
 import javax.persistence.*;
@@ -11,8 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 
-@Getter
-@Setter
+@Data
 @Entity
 public class Poll {
 
@@ -35,10 +37,27 @@ public class Poll {
     @Enumerated(EnumType.STRING)
     private PollVisibilityType visibilityType;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private User pollOwner;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
 
+    /*
+    @Override
+    public String toString() {
+        return "Poll{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", question='" + question + '\'' +
+                ", startTime=" + startTime +
+                ", pollDuration=" + pollDuration +
+                ", visibilityType=" + visibilityType +
+                ", votes=" + votes +
+                '}';
+    }
+
+     */
 }
