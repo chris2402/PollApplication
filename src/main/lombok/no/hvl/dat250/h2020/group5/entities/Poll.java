@@ -43,19 +43,4 @@ public class Poll {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
 
-    /*
-    @Override
-    public String toString() {
-        return "Poll{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", question='" + question + '\'' +
-                ", startTime=" + startTime +
-                ", pollDuration=" + pollDuration +
-                ", visibilityType=" + visibilityType +
-                ", votes=" + votes +
-                '}';
-    }
-
-     */
 }
