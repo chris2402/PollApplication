@@ -10,7 +10,7 @@ ___
 
 #### JPA   
 - [x] Entity classes and ORM   
-- [ ] Load data in to database (see Page 120 in Chapter 4) on JPA   
+- [x] Load data in to database (see Page 120 in Chapter 4) on JPA   
 - [ ] Implement Data Access Objects   
 
 #### Specification   
