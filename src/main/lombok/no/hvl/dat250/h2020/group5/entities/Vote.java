@@ -2,22 +2,26 @@ package no.hvl.dat250.h2020.group5.entities;
 
 import enums.AnswerType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Data
 @Entity
-@IdClass(VoteId.class)
 public class Vote {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name="voter_id")
+    @EqualsAndHashCode.Exclude
     private Voter voter;
 
-    @Id
     @JoinColumn(name="poll_id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @EqualsAndHashCode.Exclude
     private Poll poll;
 
     @Enumerated(EnumType.STRING)

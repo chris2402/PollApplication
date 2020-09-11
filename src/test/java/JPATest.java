@@ -144,6 +144,45 @@ public class JPATest {
     }
 
     @Test
+    public void shouldKeepVoteAndChangeFkWhenVoterIsDeleted(){
+        Poll poll = new Poll();
+        poll.setId("1");
+
+        Guest voter1 = new Guest();
+        voter1.setId("1");
+
+        Vote vote1 = new Vote();
+        vote1.setVoter(voter1);
+        vote1.setPoll(poll);
+        vote1.setAnswer(AnswerType.YES);
+
+        em.getTransaction().begin();
+        em.persist(vote1);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        List<Vote> votes = em.createQuery("select v from Vote v where v.voter.id = :voteid AND v.poll.id = :pollid")
+                .setParameter("pollid", voter1.getId())
+                .setParameter("voteid", poll.getId())
+                .getResultList();
+        for(Vote vote : votes){
+            vote.setVoter(null);
+        }
+        em.remove(voter1);
+        em.getTransaction().commit();
+
+        List<Vote> updatedVotes = em.createQuery("select v from Vote v")
+                .getResultList();
+
+        List<Vote> voters = em.createQuery("select v from Voter v")
+                .getResultList();
+
+        Assertions.assertNull(updatedVotes.get(0).getVoter());
+        Assertions.assertEquals(poll,updatedVotes.get(0).getPoll());
+        Assertions.assertEquals(0,voters.size());
+    }
+
+    @Test
     public void shouldDeletePollOwnedByUserWhenDeletingUserTest() {
         User user = new User();
         user.setId("1");
@@ -205,6 +244,7 @@ public class JPATest {
 
         Assertions.assertEquals(1, votesBeforeDeletion.size());
         Assertions.assertEquals(0, votesAfterDeletion.size());
+
     }
 
 }
