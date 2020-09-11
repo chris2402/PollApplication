@@ -1,4 +1,4 @@
-package no.hvl.dat250.h2020.group5.entities;
+package enums;
 
 public enum PollVisibilityType {
     PUBLIC,
