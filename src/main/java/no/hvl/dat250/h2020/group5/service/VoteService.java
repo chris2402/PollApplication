@@ -2,6 +2,7 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.dao.VoteDAO;
 import no.hvl.dat250.h2020.group5.entities.*;
+import no.hvl.dat250.h2020.group5.enums.AnswerType;
 
 import javax.persistence.*;
 
