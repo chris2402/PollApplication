@@ -1,4 +1,12 @@
-# PollApplication
+# PollApplication  
+
+[![Build Status](https://travis-ci.com/chris2402/PollApplication.svg?token=AsNzGpopnC9RcQp5F1w4&branch=dev)](https://travis-ci.com/chris2402/PollApplication)
+
+[Specification Assignment A](AssignmentA.md)      
+
+
+#### Plugins   
+Lombok plugin need to be install in order to run the application.
 
 # Branch naming convention
 
@@ -34,5 +42,8 @@ Eksempel
 
 ---
 
+### Slett branch etter merge.
+
 
 ### Om merges også blir lagt labels på så er det litt enklere å lete etter konkrete merges senere ;) 
+
