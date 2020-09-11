@@ -2,3 +2,4 @@ language: java
 script: mvn clean test
 jdk:
   openjdk14
+  oraclejdk14
