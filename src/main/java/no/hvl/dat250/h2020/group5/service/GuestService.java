@@ -19,7 +19,7 @@ public class GuestService implements GuestDAO {
     private Random random = new Random();
 
     @Override
-    public Guest createGuest() {
+    public Guest createGuest(String id) {
         Guest guest = new Guest();
         em.getTransaction().begin();
 //        String id;
@@ -30,8 +30,8 @@ public class GuestService implements GuestDAO {
 //        } while(em.find(Guest.class, id) != null);
 //
 //        guest.setId(id);
-        guest.setId("123");
-        guest.setUserName("Guest" + 123);
+        guest.setId(id);
+        guest.setUserName("Guest " + id);
 
         em.persist(guest);
         em.getTransaction().commit();
