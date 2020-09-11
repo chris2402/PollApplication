@@ -38,8 +38,8 @@ public class TestClass {
         voteService.setup();
     }
 
-    public void createGuest(){
-        guestService.createGuest();
+    public void createGuest(String id){
+        guestService.createGuest(String id);
         Guest guest = (Guest) em.createQuery("select g from Guest g").getResultList().get(0);
         userId = guest.getId();
         System.out.println("-----------------Create guest---------------------------");
