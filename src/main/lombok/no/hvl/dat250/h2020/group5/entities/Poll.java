@@ -1,6 +1,6 @@
 package no.hvl.dat250.h2020.group5.entities;
 
-import enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
