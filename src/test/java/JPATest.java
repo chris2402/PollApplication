@@ -1,8 +1,8 @@
+import enums.AnswerType;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
-import no.hvl.dat250.h2020.group5.entities.AnswerType;
-import no.hvl.dat250.h2020.group5.entities.Voter;
 import org.junit.jupiter.api.*;
 
 import javax.persistence.*;
@@ -144,7 +144,7 @@ public class JPATest {
     }
 
     @Test
-    public void shouldDeleteVoterAndSetFkInVoteToNull(){
+    public void shouldDeleteVoterWithoutDeletingVoteAndSetFkToNull(){
         Poll poll = new Poll();
         poll.setId("1");
 
@@ -181,4 +181,134 @@ public class JPATest {
         Assertions.assertEquals(poll,updatedVotes.get(0).getPoll());
         Assertions.assertEquals(0,voters.size());
     }
+
+    @Test
+    public void shouldDeletePollAndVotesNotUsers(){
+        Poll poll1 = new Poll();
+        poll1.setId("1");
+
+        Poll poll2 = new Poll();
+        poll2.setId("2");
+
+        Guest voter1 = new Guest();
+        voter1.setId("1");
+
+        Guest voter2 = new Guest();
+        voter2.setId("2");
+
+        Vote vote1 = new Vote();
+        vote1.setVoter(voter1);
+        vote1.setAnswer(AnswerType.YES);
+
+        Vote vote2 = new Vote();
+        vote2.setVoter(voter1);
+        vote2.setAnswer(AnswerType.YES);
+
+        Vote vote3 = new Vote();
+        vote3.setVoter(voter2);
+        vote3.setAnswer(AnswerType.NO);
+
+        Vote vote4 = new Vote();
+        vote4.setVoter(voter2);
+        vote4.setAnswer(AnswerType.NO);
+
+        vote1.setPoll(poll1);
+        vote3.setPoll(poll1);
+        poll1.setVotes(Arrays.asList(vote1, vote3));
+
+        vote2.setPoll(poll2);
+        vote4.setPoll(poll2);
+        poll2.setVotes(Arrays.asList(vote2, vote4));
+
+        em.getTransaction().begin();
+        em.persist(poll1);
+        em.persist(poll2);
+        em.persist(voter1);
+        em.persist(voter2);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        em.remove(poll1);
+        em.getTransaction().commit();
+
+        Query query1 = em.createQuery("select v from Vote v");
+        List<Vote> votes = query1.getResultList();
+
+        Query query2 = em.createQuery("select p from Poll p");
+        List<Poll> polls = query2.getResultList();
+
+        Query query3 = em.createQuery("select vo from Voter vo");
+        List<Poll> voters = query3.getResultList();
+
+        Assertions.assertEquals(1, polls.size());
+        Assertions.assertEquals(2, votes.size());
+        Assertions.assertEquals(2, voters.size());
+        Assertions.assertTrue(votes.contains(vote2));
+        Assertions.assertTrue(votes.contains(vote4));
+        Assertions.assertTrue(polls.contains(poll2));
+
+    public void shouldDeletePollOwnedByUserWhenDeletingUserTest() {
+        User user = new User();
+        user.setId("1");
+        user.setUserName("User1");
+        user.setPassword("MyPassword");
+
+        Poll poll = new Poll();
+        poll.setId("POLL123");
+
+        user.setUserPolls(Collections.singletonList(poll));
+        poll.setPollOwner(user);
+
+        em.getTransaction().begin();
+        em.persist(poll);
+        em.getTransaction().commit();
+
+        Query queryBeforeDeletion = em.createQuery("select p from Poll p");
+        List<Poll> pollsBeforeDeletion = queryBeforeDeletion.getResultList();
+
+        em.getTransaction().begin();
+        em.remove(user);
+        em.getTransaction().commit();
+
+        Query queryAfterDeletion = em.createQuery("select p from Poll p");
+        List<Poll> pollsAfterDeletion = queryAfterDeletion.getResultList();
+
+        Assertions.assertEquals(1, pollsBeforeDeletion.size());
+        Assertions.assertEquals(0, pollsAfterDeletion.size());
+    }
+
+    @Test
+    public void shouldDeleteVoteWhenPollIsDeletedTest() {
+        Poll poll = new Poll();
+        poll.setId("POLL123");
+
+        Vote vote = new Vote();
+        vote.setAnswer(AnswerType.NO);
+        vote.setPoll(poll);
+
+        Guest voter = new Guest();
+        voter.setId("1");
+
+        vote.setVoter(voter);
+        poll.setVotes(Collections.singletonList(vote));
+
+        em.getTransaction().begin();
+        em.persist(poll);
+        em.getTransaction().commit();
+
+        Query queryBeforeDeletion = em.createQuery("select v from Vote v");
+        List<Vote> votesBeforeDeletion = queryBeforeDeletion.getResultList();
+
+        em.getTransaction().begin();
+        em.remove(poll);
+        em.getTransaction().commit();
+
+        Query queryAfterDeletion = em.createQuery("select v from Vote v");
+        List<Vote> votesAfterDeletion = queryAfterDeletion.getResultList();
+
+        Assertions.assertEquals(1, votesBeforeDeletion.size());
+        Assertions.assertEquals(0, votesAfterDeletion.size());
+
+    }
+
 }
