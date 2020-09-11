@@ -7,7 +7,6 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@EqualsAndHashCode()
 public class Vote {
 
     @Id
