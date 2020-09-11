@@ -6,15 +6,16 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@IdClass(VoteId.class)
 public class Vote {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name="voter_id")
     private Voter voter;
 
-    @Id
     @JoinColumn(name="poll_id")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Poll poll;
