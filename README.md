@@ -42,6 +42,8 @@ Eksempel
 
 ---
 
+### Slett branch etter merge.
+
 
 ### Om merges også blir lagt labels på så er det litt enklere å lete etter konkrete merges senere ;) 
 
