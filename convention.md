@@ -1,6 +1,4 @@
-# PollApplication
-
-# Branch naming convention
+# Github convention
 
 ## 1. Bruk prefixes
 * feat/
@@ -34,5 +32,3 @@ Eksempel
 
 ---
 
-
-### Om merges også blir lagt labels på så er det litt enklere å lete etter konkrete merges senere ;) 
