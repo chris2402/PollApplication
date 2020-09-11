@@ -3,19 +3,19 @@ package no.hvl.dat250.h2020.group5.service;
 import no.hvl.dat250.h2020.group5.dao.VoteDAO;
 import no.hvl.dat250.h2020.group5.entities.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.*;
 
-//TODO: Change from user to voter during finds.
-
+//TODO: Check if poll is active
 public class VoteService implements VoteDAO {
+
+
+    private static final String PERSISTENCE_UNIT_NAME = "polls";
+    private static EntityManagerFactory factory;
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    //TODO: Check if poll is active
     public boolean vote(String pollId, String userId, String vote) {
         Poll p = em.find(Poll.class, pollId);
         User u = em.find(User.class, userId);
@@ -27,7 +27,9 @@ public class VoteService implements VoteDAO {
             v.setVoter(u);
             v.setAnswer(answer);
 
+            em.getTransaction().begin();
             em.persist(v);
+            em.getTransaction().commit();
             return true;
 
         }else{
@@ -38,12 +40,13 @@ public class VoteService implements VoteDAO {
     @Override
     //Might be better to just use the vote function
     public boolean changeVote(String pollId, String userId, String vote) {
-
         Vote foundVote = findVote(pollId, userId);
 
         if(setAnswer(vote) != null && foundVote != null) {
             foundVote.setAnswer(setAnswer(vote));
+            em.getTransaction().begin();
             em.merge(foundVote);
+            em.getTransaction().commit();
             return true;
         }
         else{
@@ -86,11 +89,17 @@ public class VoteService implements VoteDAO {
 
     private Vote findVote(String pollId, String userId){
         Poll p = em.find(Poll.class, pollId);
-        User u = em.find(User.class, userId);
+        Voter u = em.find(Voter.class, userId);
 
         Query q = em.createQuery("select v from Vote v where v.poll = :poll and v.voter = :voter");
         q.setParameter("poll", p);
         q.setParameter("voter", u);
         return (Vote) q.getResultList().get(0);
     }
+
+    public void setup(){
+        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+        em = factory.createEntityManager();
+    }
+
 }

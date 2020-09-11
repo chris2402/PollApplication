@@ -5,7 +5,7 @@ import no.hvl.dat250.h2020.group5.entities.Poll;
 import java.util.List;
 //TODO: Edit poll
 public interface PollDAO {
-    Poll createPoll(String name, String question, String userId, Integer duration);
+    Poll createPoll(String name, String question, String userId, Integer duration, boolean isPublic);
     boolean deletePoll(String pollId);
 
     List<Poll> getAllPublicPolls();

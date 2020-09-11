@@ -39,4 +39,12 @@ public class Poll {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
 
+    public boolean getActive(){
+        return active;
+    }
+
+    public boolean setActive(){
+        return active;
+    }
+
 }

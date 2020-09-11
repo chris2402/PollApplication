@@ -3,13 +3,14 @@ package no.hvl.dat250.h2020.group5.service;
 import no.hvl.dat250.h2020.group5.dao.UserDAO;
 import no.hvl.dat250.h2020.group5.entities.User;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.*;
 
 import java.util.List;
 
 public class UserService implements UserDAO {
+
+    private static final String PERSISTENCE_UNIT_NAME = "polls";
+    private static EntityManagerFactory factory;
 
     @PersistenceContext
     private EntityManager em;
@@ -18,14 +19,17 @@ public class UserService implements UserDAO {
     public User createUser(String name, String password) {
         Query q = em.createQuery("SELECT u.userName FROM User u where u.userName = :username");
         q.setParameter("username", name);
-        //TODO: Return something else than null
         if(q.getResultList().size() > 0){
             return null;
         } else{
             User user = new User();
             user.setUserName(name);
+            //TODO: Automatic set id
+            user.setId("1");
             user.setPassword(password);
+            em.getTransaction().begin();
             em.persist(user);
+            em.getTransaction().commit();
             return user;
 
         }
@@ -35,7 +39,6 @@ public class UserService implements UserDAO {
     public boolean deleteUser(String userId) {
         User user = em.find(User.class, userId);
 
-        //TODO: Return something more useful than null
         if(user == null){
             return false;
         }
@@ -64,33 +67,43 @@ public class UserService implements UserDAO {
     public boolean updateUsername(String userId, String newName) {
         User user = em.find(User.class, userId);
 
-        //TODO: Return something more useful than null
         if(user == null){
             return false;
         }
         else{
             user.setUserName(newName);
+
+            em.getTransaction().begin();
             em.merge(user);
+            em.flush();
+            em.getTransaction().commit();
             return em.find(User.class, userId).getUserName().equals(newName);
         }
     }
 
     @Override
-    //TODO: Retrieve userID from cookie/JWT or similar
     public boolean updatePassword(String userId, String oldPassword, String newPassword) {
         User user = em.find(User.class, userId);
+
         if(user == null){
             return false;
         }
         else{
             if(user.getPassword().equals(oldPassword)){
                 user.setPassword(newPassword);
+                em.getTransaction().begin();
                 em.merge(user);
+                em.getTransaction().commit();
                 return em.find(User.class, userId).getPassword().equals(newPassword);
             }
             else{
                 return false;
             }
         }
+    }
+
+    public void setup(){
+        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+        em = factory.createEntityManager();
     }
 }

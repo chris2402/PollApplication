@@ -2,21 +2,24 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.dao.PollDAO;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.entities.User;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.*;
 import java.util.List;
 
 //TODO: Edit poll
 public class PollService implements PollDAO {
 
+
+    private static final String PERSISTENCE_UNIT_NAME = "polls";
+    private static EntityManagerFactory factory;
+
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public Poll createPoll(String name, String question, String userId, Integer duration) {
+    public Poll createPoll(String name, String question, String userId, Integer duration, boolean isPublic) {
         Poll poll = new Poll();
 
         User pollOwner = em.find(User.class, userId);
@@ -25,14 +28,19 @@ public class PollService implements PollDAO {
         poll.setQuestion(question);
         poll.setPollOwner(pollOwner);
         poll.setPollDuration(duration);
+        PollVisibilityType visibilityType = isPublic ? PollVisibilityType.PUBLIC : PollVisibilityType.PRIVATE;
 
+        em.getTransaction().begin();
         em.persist(poll);
+        em.getTransaction().commit();
+
         Query q = em.createQuery("select p from Poll p where p.name = :pollName and p.question =:pollQuestion " +
                 "and p.pollOwner = :pollOwner and p.pollDuration = :pollDuration");
         q.setParameter("pollName", name);
         q.setParameter("pollQuestion", question);
         q.setParameter("pollOwner", pollOwner);
         q.setParameter("pollDuration", duration);
+        
 
         try{
             return (Poll) q.getResultList().get(0);
@@ -63,7 +71,8 @@ public class PollService implements PollDAO {
 
     @Override
     public List<Poll> getAllPublicPolls() {
-        Query q = em.createQuery("select p from Poll p where p.visibilityType = 1");
+        Query q = em.createQuery("select p from Poll p where p.visibilityType = :pollVisibilityType");
+        q.setParameter("pollVisibilityType", PollVisibilityType.PUBLIC);
         List<Poll> polls = q.getResultList();
         return polls;
     }
@@ -108,5 +117,10 @@ public class PollService implements PollDAO {
         q.setParameter("id", pollId);
         q.executeUpdate();
         em.getTransaction().commit();
+    }
+
+    public void setup(){
+        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+        em = factory.createEntityManager();
     }
 }
