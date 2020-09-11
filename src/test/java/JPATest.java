@@ -144,7 +144,7 @@ public class JPATest {
     }
 
     @Test
-    public void shouldDeleteVoterWithoutDeletingVoteAndSetFkToNull(){
+    public void shouldDeleteVoterAndSetFkInVoteToNull(){
         Poll poll = new Poll();
         poll.setId("1");
 
@@ -181,71 +181,4 @@ public class JPATest {
         Assertions.assertEquals(poll,updatedVotes.get(0).getPoll());
         Assertions.assertEquals(0,voters.size());
     }
-
-    @Test
-    public void shouldDeletePollAndVotesNotUsers(){
-        Poll poll1 = new Poll();
-        poll1.setId("1");
-
-        Poll poll2 = new Poll();
-        poll2.setId("2");
-
-        Guest voter1 = new Guest();
-        voter1.setId("1");
-
-        Guest voter2 = new Guest();
-        voter2.setId("2");
-
-        Vote vote1 = new Vote();
-        vote1.setVoter(voter1);
-        vote1.setAnswer(AnswerType.YES);
-
-        Vote vote2 = new Vote();
-        vote2.setVoter(voter1);
-        vote2.setAnswer(AnswerType.YES);
-
-        Vote vote3 = new Vote();
-        vote3.setVoter(voter2);
-        vote3.setAnswer(AnswerType.NO);
-
-        Vote vote4 = new Vote();
-        vote4.setVoter(voter2);
-        vote4.setAnswer(AnswerType.NO);
-
-        vote1.setPoll(poll1);
-        vote3.setPoll(poll1);
-        poll1.setVotes(Arrays.asList(vote1, vote3));
-
-        vote2.setPoll(poll2);
-        vote4.setPoll(poll2);
-        poll2.setVotes(Arrays.asList(vote2, vote4));
-
-        em.getTransaction().begin();
-        em.persist(poll1);
-        em.persist(poll2);
-        em.persist(voter1);
-        em.persist(voter2);
-        em.getTransaction().commit();
-
-        em.getTransaction().begin();
-        em.remove(poll1);
-        em.getTransaction().commit();
-
-        Query query1 = em.createQuery("select v from Vote v");
-        List<Vote> votes = query1.getResultList();
-
-        Query query2 = em.createQuery("select p from Poll p");
-        List<Poll> polls = query2.getResultList();
-
-        Query query3 = em.createQuery("select vo from Voter vo");
-        List<Poll> voters = query3.getResultList();
-
-        Assertions.assertEquals(1, polls.size());
-        Assertions.assertEquals(2, votes.size());
-        Assertions.assertEquals(2, voters.size());
-        Assertions.assertTrue(votes.contains(vote2));
-        Assertions.assertTrue(votes.contains(vote4));
-        Assertions.assertTrue(polls.contains(poll2));
-    }
-
 }
