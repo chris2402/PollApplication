@@ -7,8 +7,8 @@ import lombok.ToString;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -29,7 +29,7 @@ public class Poll {
 
     private String question;
 
-    private Date startTime;
+    private Instant startTime;
     private Integer pollDuration;
 
     @Enumerated(EnumType.STRING)
