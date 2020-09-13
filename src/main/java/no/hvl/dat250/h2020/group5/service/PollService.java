@@ -2,7 +2,7 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.dao.PollDAO;
 import no.hvl.dat250.h2020.group5.entities.Poll;
-import no.hvl.dat250.h2020.group5.entities.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.entities.User;
 
 import javax.persistence.*;

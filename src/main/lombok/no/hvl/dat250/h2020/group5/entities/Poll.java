@@ -1,6 +1,9 @@
 package no.hvl.dat250.h2020.group5.entities;
 
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 
 import javax.persistence.*;
@@ -29,22 +32,17 @@ public class Poll {
     private Date startTime;
     private Integer pollDuration;
 
+    @Enumerated(EnumType.STRING)
     private PollVisibilityType visibilityType;
 
-    private boolean active;
+    private Boolean active;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private User pollOwner;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
-
-    public boolean getActive(){
-        return active;
-    }
-
-    public boolean setActive(){
-        return active;
-    }
 
 }
