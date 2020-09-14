@@ -1,5 +1,6 @@
 package no.hvl.dat250.h2020.group5;
 
+import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -20,7 +21,6 @@ public class TestClass {
     @PersistenceContext
     EntityManager em;
 
-
     GuestService guestService = new GuestService();
     UserService userService = new UserService();
     PollService pollService = new PollService();
@@ -39,69 +39,73 @@ public class TestClass {
     }
 
     public void createGuest(String id){
-        guestService.createGuest(String id);
+        guestService.createGuest(id);
         Guest guest = (Guest) em.createQuery("select g from Guest g").getResultList().get(0);
         userId = guest.getId();
-        System.out.println("-----------------Create guest---------------------------");
-        System.out.println(em.createQuery("select g from Guest g").getResultList().size());
-        System.out.println("--------------------------------------------");
+        System.out.println("----- CREATE GUEST -----");
+        System.out.println(guest.getUserName());
     }
 
-    public void createuser(){
-        User user = userService.createUser("Bob", "Bob1");
+    public void createUser(String name, String pass){
+        User user = userService.createUser(name, pass);
         userId = user.getId();
-        System.out.println("---------------------create user-----------------------");
-        System.out.println(em.createQuery("select u from User u").getResultList().size());
-        System.out.println("--------------------------------------------");
+        System.out.println("----- CREATE USER -----");
+        System.out.println(em.find(Voter.class, userId).getUserName());
     }
 
     public void getAllUsers(){
         List<User> users = userService.getAllUsers();
+        System.out.println("----- GET ALL USERS -----");
         for(User user : users){
-            System.out.println("----------------------get all users----------------------");
             System.out.println(user.getUserName());
-            System.out.println("--------------------------------------------");
+        }
+    }
+
+    public void getAllVoters(){
+        System.out.println("----- GET ALL Voters -----");
+        List<Voter> voters = em.createQuery("select v from Voter v").getResultList();
+        for(Voter v : voters){
+            System.out.println(v.getUserName());
         }
     }
 
     public void getUser(){
         User user = userService.getUser(userId);
-        System.out.println("----------------------------get user ----------------");
+        System.out.println("----- GET USER -----");
         System.out.println(user.getUserName());
-        System.out.println("--------------------------------------------");
     }
 
     public void updateUserName(){
-        boolean changedName = userService.updateUsername(userId, "Kåre");
-        System.out.println("------------------------update username--------------------");
+        boolean changedName = userService.updateUsername(userId, "KåreJ25");
+        em.clear();
+        System.out.println("----- CHANGE USERNAME -----");
         System.out.println(changedName);
         System.out.println(em.find(User.class, userId).getUserName());
-        System.out.println("--------------------------------------------");
     }
 
     public void updatePassword(){
-        boolean changedPassword = userService.updatePassword(userId, "Bob1", "BigPP");
-        System.out.println("----------------------update password----------------------");
+        boolean changedPassword = userService.updatePassword(userId, "Bob1", "MobilLadder27");
+        System.out.println("---- CHANGE PASSWORD -----");
+        em.clear();
         User user = (User) em.createQuery("select u from User u").getResultList().get(0);
         System.out.println(user.getPassword());
         System.out.println(changedPassword);
-        System.out.println("--------------------------------------------");
     }
 
     public void createPoll(){
-        Poll poll = pollService.createPoll("Annanas", "Annanas on pizza?", userId, 20, true);
+        Poll poll = pollService.createPoll("Annanas", "Annanas on pizza?",
+                userId, 20, true);
         pollId = poll.getId();
-        System.out.println("---------------------create poll-----------------------");
+        System.out.println("---- CREATE POLL -----");
         System.out.println(poll.getName());
-        System.out.println("-------------------------------------------");
+        System.out.println(poll.getId());
     }
 
     public void getAllPublicPolls(){
         List<Poll> publicPolls = pollService.getAllPublicPolls();
         for(Poll poll : publicPolls){
-            System.out.println("---------------------------get all public polls-----------------");
+            System.out.println("---- GET ALL PUBLIC POLLS ----");
             System.out.println(poll.getName());
-            System.out.println("--------------------------------------------");
         }
     }
 
@@ -109,79 +113,79 @@ public class TestClass {
         System.out.println("Get own polls, wrong version");
         List<Poll> publicPolls = pollService.getOwnPolls("1234");
         for(Poll poll : publicPolls){
-            System.out.println("---------------------get own polls 1-----------------------");
+            System.out.println("---- GET OWN POLLS (NO POLLS) ----");
             System.out.println(poll.getName());
-            System.out.println("--------------------------------------------");
         }
     }
 
     public void getOwnPolls2(){
         List<Poll> publicPolls = pollService.getOwnPolls(userId);
         for(Poll poll : publicPolls){
-            System.out.println("--------------------get own pols 2------------------------");
+            System.out.println("---- GET OWN POLLS ----");
+            System.out.print("Poll name: ");
             System.out.println(poll.getName());
-            System.out.println("--------------------------------------------");
+            System.out.print("Poll id: ");
+            System.out.println(poll.getId());
+            System.out.print("Poll owner: ");
+            System.out.println(poll.getPollOwner().getUserName());
         }
     }
 
     public void getPoll(){
         Poll poll = pollService.getPoll(pollId);
-        System.out.println("--------------------------------------------");
+        System.out.println("---- GET POLL -----");
         System.out.println(poll.getName());
         System.out.println(poll.getId());
-        System.out.println("--------------------------------------------");
     }
 
     public void changePollStatus(){
         System.out.println(em.find(Poll.class, pollId).getActive());
         pollService.changePollStatus(pollId, true);
-        System.out.println("----------------------change poll status----------------------");
+        System.out.println("----- CHANGE POLL STATUS -----");
+        em.clear();
         System.out.println(em.find(Poll.class, pollId).getActive());
-        System.out.println("--------------------------------------------");
+
     }
 
     public void vote(){
         voteService.vote(pollId, userId, "yes");
-        System.out.println("----------------- vote ---------------------------");
+        System.out.println("----- VOTE -----");
+        em.clear();
         Query q = em.createQuery("select v from Vote v where v.voter = :voter and v.poll = :poll");
         q.setParameter("voter", em.find(Voter.class, userId));
         q.setParameter("poll", em.find(Poll.class, pollId));
         System.out.println(q.getResultList().size());
-        System.out.println("--------------------------------------------");
     }
 
     public void changeVote(){
         voteService.changeVote(pollId, userId, "no");
-        System.out.println("-------------------- change vote ------------------------");
+        System.out.println("----- CHANGE VOTE -----");
+        em.clear();
         Query q = em.createQuery("select v from Vote v where v.voter = :voter and v.poll = :poll");
         q.setParameter("voter", em.find(Voter.class, userId));
         q.setParameter("poll", em.find(Poll.class, pollId));
         System.out.println(q.getResultList().size());
-        System.out.println("--------------------------------------------");
     }
 
     public void deleteVote(){
         voteService.deleteVote(pollId, userId);
-        System.out.println("--------------------- delete vote -----------------------");
+        System.out.println("----- DELETE VOTE -----");
         Query q = em.createQuery("select v from Vote v where v.voter = :voter and v.poll = :poll");
         q.setParameter("voter", em.find(Voter.class, userId));
         q.setParameter("poll", em.find(Poll.class, pollId));
         System.out.println(q.getResultList().size());
-        System.out.println("--------------------------------------------");
     }
 
     public void deletePoll(){
         pollService.deletePoll(pollId);
-        System.out.println("------------------- delete poll -------------------------");
+        System.out.println("----- DELETE POLL -----");
         System.out.println(em.createQuery("select p from Poll p").getResultList().size());
-        System.out.println("--------------------------------------------");
     }
 
     public void deleteUser(){
         userService.deleteUser(userId);
-        System.out.println("--------------------- delete user -----------------------");
+        System.out.println("----- DELETE USER -----");
         System.out.println(em.createQuery("select u from User u").getResultList().size());
-        System.out.println("--------------------------------------------");
     }
 
 

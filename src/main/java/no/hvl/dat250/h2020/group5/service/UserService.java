@@ -25,7 +25,7 @@ public class UserService implements UserDAO {
             User user = new User();
             user.setUserName(name);
             //TODO: Automatic set id
-            user.setId("1");
+            user.setId((Integer.toString(em.createQuery("select u from User u").getResultList().size() + 1)));
             user.setPassword(password);
             em.getTransaction().begin();
             em.persist(user);
@@ -93,6 +93,7 @@ public class UserService implements UserDAO {
                 user.setPassword(newPassword);
                 em.getTransaction().begin();
                 em.merge(user);
+                em.flush();
                 em.getTransaction().commit();
                 return em.find(User.class, userId).getPassword().equals(newPassword);
             }

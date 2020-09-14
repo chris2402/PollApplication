@@ -1,5 +1,6 @@
 package no.hvl.dat250.h2020.group5.service;
 
+import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 import no.hvl.dat250.h2020.group5.dao.PollDAO;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
@@ -15,12 +16,15 @@ public class PollService implements PollDAO {
     private static final String PERSISTENCE_UNIT_NAME = "polls";
     private static EntityManagerFactory factory;
 
+    AlphaNumeric2Long alphaNumeric2Long = new AlphaNumeric2Long();
+
     @PersistenceContext
     private EntityManager em;
 
     @Override
     public Poll createPoll(String name, String question, String userId, Integer duration, boolean isPublic) {
         Poll poll = new Poll();
+        PollVisibilityType visibilityType = isPublic ? PollVisibilityType.PUBLIC : PollVisibilityType.PRIVATE;
 
         User pollOwner = em.find(User.class, userId);
 
@@ -28,7 +32,8 @@ public class PollService implements PollDAO {
         poll.setQuestion(question);
         poll.setPollOwner(pollOwner);
         poll.setPollDuration(duration);
-        PollVisibilityType visibilityType = isPublic ? PollVisibilityType.PUBLIC : PollVisibilityType.PRIVATE;
+        poll.setActive(false);
+        poll.setVisibilityType(visibilityType);
 
         em.getTransaction().begin();
         em.persist(poll);
@@ -40,7 +45,6 @@ public class PollService implements PollDAO {
         q.setParameter("pollQuestion", question);
         q.setParameter("pollOwner", pollOwner);
         q.setParameter("pollDuration", duration);
-        
 
         try{
             return (Poll) q.getResultList().get(0);
@@ -105,8 +109,10 @@ public class PollService implements PollDAO {
         if(poll == null){
             return false;
         }else{
-            poll.setActive(true);
+            em.getTransaction().begin();
+            poll.setActive(status);
             em.merge(poll);
+            em.getTransaction().commit();
             return true;
         }
     }
