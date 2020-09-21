@@ -4,12 +4,14 @@ import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import org.junit.jupiter.api.*;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@SpringBootTest
 public class JPATest {
 
     private static final String PERSISTENCE_UNIT_NAME = "test-polls";

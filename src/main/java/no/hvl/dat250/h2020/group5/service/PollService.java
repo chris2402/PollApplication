@@ -1,15 +1,17 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.PollDAO;
+import no.hvl.dat250.h2020.group5.dao.PollRepository;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.entities.User;
+import org.springframework.stereotype.Service;
 
 import javax.persistence.*;
 import java.util.List;
 
 //TODO: Edit poll
-public class PollService implements PollDAO {
+@Service
+public class PollService  {
 
 
     private static final String PERSISTENCE_UNIT_NAME = "polls";

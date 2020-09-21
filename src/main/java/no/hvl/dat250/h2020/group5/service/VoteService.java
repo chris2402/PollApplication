@@ -1,38 +1,43 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.VoteDAO;
+import no.hvl.dat250.h2020.group5.dao.PollRepository;
+import no.hvl.dat250.h2020.group5.dao.UserRepository;
+import no.hvl.dat250.h2020.group5.dao.VoteRepository;
+import no.hvl.dat250.h2020.group5.dao.VoterRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.persistence.*;
+import java.util.Optional;
 
 //TODO: Check if poll is active
-public class VoteService implements VoteDAO {
+@Service
+public class VoteService {
 
+    @Autowired
+    PollRepository pollRepository;
 
-    private static final String PERSISTENCE_UNIT_NAME = "polls";
-    private static EntityManagerFactory factory;
+    @Autowired
+    VoterRepository voterRepository;
 
-    @PersistenceContext
-    private EntityManager em;
+    @Autowired
+    VoteRepository voteRepository;
 
-    @Override
     public boolean vote(String pollId, String userId, String vote) {
-        Poll p = em.find(Poll.class, pollId);
-        User u = em.find(User.class, userId);
+        Optional<Poll> p = pollRepository.findById(pollId);
+        Optional<Voter> u = voterRepository.findById(userId);
         AnswerType answer = setAnswer(vote);
 
-        if(p != null && u != null && answer != null){
+        if(p.isPresent() && u.isPresent() && answer != null){
             Vote v = new Vote();
-            v.setPoll(p);
-            v.setVoter(u);
+            v.setPoll(p.get());
+            v.setVoter(u.get());
             v.setAnswer(answer);
 
-            em.getTransaction().begin();
-            em.persist(v);
-            em.getTransaction().commit();
+            voteRepository.save(v);
             return true;
-
         }else{
             return false;
         }
@@ -56,25 +61,14 @@ public class VoteService implements VoteDAO {
 
     }
 
-    @Override
     public boolean deleteVote(String pollId, String userId) {
-        Vote foundVote = findVote(pollId, userId);
-
-        if(foundVote == null){
+        Optional<Vote> foundVote = voteRepository.findByUserIdAmdPollId(userId, pollId);
+        if(foundVote.isEmpty()){
             return false;
         }
-        else{
-            em.getTransaction().begin();
-            Query q = em.createQuery("DELETE from Vote v WHERE v.poll = :poll and v.voter = :voter");
 
-            q.setParameter("poll", em.find(Poll.class, pollId));
-            q.setParameter("voter", em.find(Voter.class, userId));
-
-            int deleted = q.executeUpdate();
-            em.getTransaction().commit();
-
-            return deleted == 1;
-        }
+        voteRepository.delete(foundVote.get());
+        return true;
     }
 
     private AnswerType setAnswer(String answer){

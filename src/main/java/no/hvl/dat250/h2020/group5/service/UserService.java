@@ -1,13 +1,14 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.UserDAO;
+import no.hvl.dat250.h2020.group5.dao.UserRepository;
 import no.hvl.dat250.h2020.group5.entities.User;
+import org.springframework.stereotype.Service;
 
 import javax.persistence.*;
 
 import java.util.List;
-
-public class UserService implements UserDAO {
+@Service
+public class UserService {
 
     private static final String PERSISTENCE_UNIT_NAME = "polls";
     private static EntityManagerFactory factory;
