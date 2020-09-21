@@ -43,26 +43,19 @@ public class VoteService {
         }
     }
 
-    @Override
     //Might be better to just use the vote function
     public boolean changeVote(String pollId, String userId, String vote) {
-        Vote foundVote = findVote(pollId, userId);
-
-        if(setAnswer(vote) != null && foundVote != null) {
-            foundVote.setAnswer(setAnswer(vote));
-            em.getTransaction().begin();
-            em.merge(foundVote);
-            em.getTransaction().commit();
+        Optional<Vote> foundVote = voteRepository.findByUserIdAndPollId(userId, pollId);
+        if(setAnswer(vote) != null && foundVote.isPresent()) {
+            foundVote.get().setAnswer(setAnswer(vote));
+            voteRepository.save(foundVote.get());
             return true;
         }
-        else{
-            return false;
-        }
-
+        return false;
     }
 
     public boolean deleteVote(String pollId, String userId) {
-        Optional<Vote> foundVote = voteRepository.findByUserIdAmdPollId(userId, pollId);
+        Optional<Vote> foundVote = voteRepository.findByUserIdAndPollId(userId, pollId);
         if(foundVote.isEmpty()){
             return false;
         }
@@ -83,18 +76,11 @@ public class VoteService {
     }
 
     private Vote findVote(String pollId, String userId){
-        Poll p = em.find(Poll.class, pollId);
-        Voter u = em.find(Voter.class, userId);
-
-        Query q = em.createQuery("select v from Vote v where v.poll = :poll and v.voter = :voter");
-        q.setParameter("poll", p);
-        q.setParameter("voter", u);
-        return (Vote) q.getResultList().get(0);
-    }
-
-    public void setup(){
-        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-        em = factory.createEntityManager();
+        Optional<Vote> vote = voteRepository.findByUserIdAndPollId(userId,pollId);
+        if(vote.isEmpty()){
+            return null;
+        }
+        return vote.get();
     }
 
 }
