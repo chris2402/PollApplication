@@ -15,9 +15,7 @@ public class GuestService  {
 
     public Guest createGuest() {
         Guest guest = new Guest();
-        String id = UUID.randomUUID().toString();
-        guest.setId(id);
-        guest.setUserName("Guest " + id);
+        guest.setUserName("Guest " + guest.getId());
         return guestRepository.save(guest);
     }
 

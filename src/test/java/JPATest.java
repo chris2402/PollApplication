@@ -53,7 +53,6 @@ public class JPATest {
     @Test
     public void testInsertGuest(){
         Guest g = new Guest();
-        g.setId("123");
         g.setUserName("IM A USER");
 
         EntityTransaction trans = em.getTransaction();
@@ -65,7 +64,7 @@ public class JPATest {
         List<Guest> resultList = q.getResultList();
 
         Assertions.assertEquals(resultList.size(), 1);
-        Assertions.assertEquals(resultList.get(0).getId(), "123");
+        Assertions.assertEquals(resultList.get(0).getId(), g.getId());
     }
 
     @Test
@@ -81,7 +80,6 @@ public class JPATest {
         vote.setPoll(poll);
 
         Guest voter = new Guest();
-        voter.setId("1");
         // Many-side is the owning side, vote persists voter
         vote.setVoter(voter);
 
@@ -101,10 +99,8 @@ public class JPATest {
         poll.setId("1");
 
         Guest voter1 = new Guest();
-        voter1.setId("1");
 
         Guest voter2 = new Guest();
-        voter2.setId("2");
 
         Vote vote1 = new Vote();
         vote1.setVoter(voter1);
@@ -151,7 +147,6 @@ public class JPATest {
         poll.setId("1");
 
         Guest voter1 = new Guest();
-        voter1.setId("1");
 
         Vote vote1 = new Vote();
         vote1.setVoter(voter1);
@@ -187,7 +182,6 @@ public class JPATest {
     @Test
     public void shouldDeletePollOwnedByUserWhenDeletingUserTest() {
         User user = new User();
-        user.setId("1");
         user.setUserName("User1");
         user.setPassword("MyPassword");
 
@@ -225,7 +219,6 @@ public class JPATest {
         vote.setPoll(poll);
 
         Guest voter = new Guest();
-        voter.setId("1");
 
         vote.setVoter(voter);
         poll.setVotes(Collections.singletonList(vote));
