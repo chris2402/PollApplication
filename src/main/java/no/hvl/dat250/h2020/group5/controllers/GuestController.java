@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/createguest")
 public class GuestController {
 
     @Autowired
     private GuestService guestService;
 
-    @PostMapping
+    @PostMapping("/")
     public Guest createGuest(){
-        return guestService.createGuest("fdss");
+        return guestService.createGuest();
     }
 
 
