@@ -30,7 +30,6 @@ public class UserService {
     @Transactional
     public boolean deleteUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        System.out.println(user.isPresent());
 
         if(user.isEmpty()){
             return false;
