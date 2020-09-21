@@ -56,7 +56,7 @@ public class VoteService {
 
     //Might be better to just use the vote function
     public boolean changeVote(String pollId, String userId, String vote) {
-        Optional<Vote> foundVote = voteRepository.findByUserIdAndPollId(userId, pollId);
+        Optional<Vote> foundVote = voteRepository.findByVoterAndPollId(userId, pollId);
         if(setAnswer(vote) != null && foundVote.isPresent()) {
             foundVote.get().setAnswer(setAnswer(vote));
             voteRepository.save(foundVote.get());
@@ -66,7 +66,7 @@ public class VoteService {
     }
 
     public boolean deleteVote(String pollId, String userId) {
-        Optional<Vote> foundVote = voteRepository.findByUserIdAndPollId(userId, pollId);
+        Optional<Vote> foundVote = voteRepository.findByVoterAndPollId(userId, pollId);
         if(foundVote.isEmpty()){
             return false;
         }
@@ -87,7 +87,7 @@ public class VoteService {
     }
 
     private Vote findVote(String pollId, String userId){
-        Optional<Vote> vote = voteRepository.findByUserIdAndPollId(userId,pollId);
+        Optional<Vote> vote = voteRepository.findByVoterAndPollId(userId,pollId);
         if(vote.isEmpty()){
             return null;
         }
