@@ -1,8 +1,8 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.service.UserService;
+import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +17,6 @@ public class UserController {
         this.userService = userService;
     }
 
-
     @GetMapping
     public List<User> getUsers() {
         return userService.getAllUsers();
@@ -29,18 +28,12 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public Boolean updateUser(@PathVariable String id, String newPassword, String oldPassword, String username){
-        if (!newPassword.isEmpty() || !oldPassword.isEmpty()){
-            return userService.updatePassword(id, oldPassword, newPassword);
-        } else if (!username.isEmpty()) {
-            return userService.updateUsername(id, username);
-        }
-
-        return false;
+    public Boolean updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
+        return userService.updateUser(id, updateUserRequest);
     }
 
     @DeleteMapping("/{id}")
-    public Boolean deleteUser(@PathVariable String id){
+    public Boolean deleteUser(@PathVariable Long id){
         return userService.deleteUser(id);
     }
 
