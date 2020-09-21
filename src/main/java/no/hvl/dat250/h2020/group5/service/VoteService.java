@@ -1,46 +1,57 @@
 package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
 import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.dao.VoterRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.*;
+import java.time.Instant;
 import java.util.Optional;
 
-//TODO: Check if poll is active
+
 @Service
 public class VoteService {
 
-    @Autowired
+    final
     PollRepository pollRepository;
 
-    @Autowired
+    final
     VoterRepository voterRepository;
 
-    @Autowired
+    final
     VoteRepository voteRepository;
+
+    public VoteService(PollRepository pollRepository, VoterRepository voterRepository, VoteRepository voteRepository) {
+        this.pollRepository = pollRepository;
+        this.voterRepository = voterRepository;
+        this.voteRepository = voteRepository;
+    }
 
     public boolean vote(String pollId, String userId, String vote) {
         Optional<Poll> p = pollRepository.findById(pollId);
         Optional<Voter> u = voterRepository.findById(userId);
         AnswerType answer = setAnswer(vote);
 
-        if(p.isPresent() && u.isPresent() && answer != null){
-            Vote v = new Vote();
-            v.setPoll(p.get());
-            v.setVoter(u.get());
-            v.setAnswer(answer);
-
-            voteRepository.save(v);
-            return true;
-        }else{
+        if (p.isEmpty() || u.isEmpty() || answer == null ){
             return false;
         }
+
+        //Checking if the vote is cast before poll ended.
+        Instant startTime = p.get().getStartTime().toInstant();
+        Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
+        if(Instant.now().isAfter(startTimePlusDuration)){
+            return false;
+        }
+
+        Vote v = new Vote();
+        v.setPoll(p.get());
+        v.setVoter(u.get());
+        v.setAnswer(answer);
+
+        voteRepository.save(v);
+        return true;
     }
 
     //Might be better to just use the vote function
