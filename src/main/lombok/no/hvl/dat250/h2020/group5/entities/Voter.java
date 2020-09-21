@@ -16,7 +16,8 @@ public abstract class Voter {
 
     @Id
     @EqualsAndHashCode.Include
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     @Column(length = 20)
     @EqualsAndHashCode.Include
