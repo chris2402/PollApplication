@@ -5,7 +5,6 @@ import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +15,16 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    @Autowired
+    final
     UserRepository userRepository;
 
-    @Autowired
+    final
     VoteRepository voteRepository;
+
+    public UserService(UserRepository userRepository, VoteRepository voteRepository) {
+        this.userRepository = userRepository;
+        this.voteRepository = voteRepository;
+    }
 
 
     public User createUser(User user) {
@@ -55,14 +59,14 @@ public class UserService {
 
     public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest) {
         Optional<User> user = userRepository.findById(userId);
-        Boolean changesMade = false;
+        boolean changesMade = false;
 
         if(user.isEmpty()){
             return false;
         }
 
         if(updateUserRequest.getUsername() != null && !updateUserRequest.getUsername().isEmpty()){
-            user.get().setUserName(updateUserRequest.getUsername());
+            user.get().setUsername(updateUserRequest.getUsername());
             changesMade = true;
         }
 
