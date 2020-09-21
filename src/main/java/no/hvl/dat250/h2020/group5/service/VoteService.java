@@ -5,6 +5,7 @@ import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.dao.VoterRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,10 +30,10 @@ public class VoteService {
         this.voteRepository = voteRepository;
     }
 
-    public boolean vote(String pollId, Long userId, String vote) {
-        Optional<Poll> p = pollRepository.findById(pollId);
-        Optional<Voter> u = voterRepository.findById(userId);
-        AnswerType answer = setAnswer(vote);
+    public boolean vote(CastVoteRequest castVoteRequest) {
+        Optional<Poll> p = pollRepository.findById(castVoteRequest.getPollId());
+        Optional<Voter> u = voterRepository.findById(castVoteRequest.getUserId());
+        AnswerType answer = setAnswer(castVoteRequest.getVote());
 
         if (p.isEmpty() || u.isEmpty() || answer == null ){
             return false;
@@ -55,10 +56,10 @@ public class VoteService {
     }
 
     //Might be better to just use the vote function
-    public boolean changeVote(String pollId, Long userId, String vote) {
-        Optional<Vote> foundVote = voteRepository.findByVoterAndPollId(userId, pollId);
-        if(setAnswer(vote) != null && foundVote.isPresent()) {
-            foundVote.get().setAnswer(setAnswer(vote));
+    public boolean changeVote(CastVoteRequest castVoteRequest) {
+        Optional<Vote> foundVote = voteRepository.findByVoterAndPollId(castVoteRequest.getUserId(), castVoteRequest.getPollId());
+        if(setAnswer(castVoteRequest.getVote()) != null && foundVote.isPresent()) {
+            foundVote.get().setAnswer(setAnswer(castVoteRequest.getVote()));
             voteRepository.save(foundVote.get());
             return true;
         }
@@ -75,23 +76,21 @@ public class VoteService {
         return true;
     }
 
-    private AnswerType setAnswer(String answer){
-        switch(answer.toLowerCase()){
-            case "yes":
-                return AnswerType.YES;
-            case "no":
-                return AnswerType.NO;
-            default:
-                return null;
-        }
-    }
 
-    private Vote findVote(String pollId, Long userId){
+    public Vote findVote(String pollId, Long userId){
         Optional<Vote> vote = voteRepository.findByVoterAndPollId(userId,pollId);
         if(vote.isEmpty()){
             return null;
         }
         return vote.get();
+    }
+
+    private AnswerType setAnswer(String answer){
+        return switch (answer.toLowerCase()) {
+            case "yes" -> AnswerType.YES;
+            case "no" -> AnswerType.NO;
+            default -> null;
+        };
     }
 
 }
