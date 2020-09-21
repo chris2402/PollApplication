@@ -4,11 +4,11 @@ import no.hvl.dat250.h2020.group5.dao.UserRepository;
 import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,14 +28,15 @@ public class UserService {
     }
 
     @Transactional
-    public boolean deleteUser(String userId) {
+    public boolean deleteUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
+        System.out.println(user.isPresent());
 
         if(user.isEmpty()){
             return false;
         }
 
-        List<Vote> votes = voteRepository.findByUserId(userId);
+        List<Vote> votes = voteRepository.findByVoter(user.get());
         for (Vote vote : votes) {
             vote.setVoter(null);
         }
@@ -49,32 +50,35 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUser(String userId) {
+    public Optional<User> getUser(Long userId) {
         return userRepository.findById(userId);
     }
 
-    public boolean updateUsername(String userId, String newName) {
+    public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest) {
         Optional<User> user = userRepository.findById(userId);
+        Boolean changesMade = false;
 
-        if(user.isEmpty() || newName.isEmpty()){
+        if(user.isEmpty()){
             return false;
         }
 
-        user.get().setUserName(newName);
-        userRepository.save(user.get());
-        return true;
-    }
-
-    public boolean updatePassword(String userId, String oldPassword, String newPassword) {
-        Optional<User> user = userRepository.findById(userId);
-
-        if(user.isEmpty() || !user.get().getPassword().equals(oldPassword) || newPassword.length() < 6) {
-            return false;
+        if(updateUserRequest.getUsername() != null && !updateUserRequest.getUsername().isEmpty()){
+            user.get().setUserName(updateUserRequest.getUsername());
+            changesMade = true;
         }
-        user.get().setPassword(newPassword);
-        userRepository.save(user.get());
-        return true;
 
+        if(updateUserRequest.getOldPassword() != null &&
+           updateUserRequest.getNewPassword() != null &&
+           updateUserRequest.getNewPassword().equals(user.get().getPassword())) {
+            user.get().setPassword(updateUserRequest.getNewPassword());
+            changesMade = true;
+        }
+
+        if (changesMade){
+            userRepository.save(user.get());
+        }
+
+        return changesMade;
     }
 
 }
