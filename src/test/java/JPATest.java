@@ -53,7 +53,7 @@ public class JPATest {
     @Test
     public void testInsertGuest(){
         Guest g = new Guest();
-        g.setUserName("IM A USER");
+        g.setUsername("IM A USER");
 
         EntityTransaction trans = em.getTransaction();
         trans.begin();
@@ -182,7 +182,7 @@ public class JPATest {
     @Test
     public void shouldDeletePollOwnedByUserWhenDeletingUserTest() {
         User user = new User();
-        user.setUserName("User1");
+        user.setUsername("User1");
         user.setPassword("MyPassword");
 
         Poll poll = new Poll();
