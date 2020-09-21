@@ -29,7 +29,7 @@ public class VoteService {
         this.voteRepository = voteRepository;
     }
 
-    public boolean vote(String pollId, String userId, String vote) {
+    public boolean vote(String pollId, Long userId, String vote) {
         Optional<Poll> p = pollRepository.findById(pollId);
         Optional<Voter> u = voterRepository.findById(userId);
         AnswerType answer = setAnswer(vote);
@@ -55,7 +55,7 @@ public class VoteService {
     }
 
     //Might be better to just use the vote function
-    public boolean changeVote(String pollId, String userId, String vote) {
+    public boolean changeVote(String pollId, Long userId, String vote) {
         Optional<Vote> foundVote = voteRepository.findByVoterAndPollId(userId, pollId);
         if(setAnswer(vote) != null && foundVote.isPresent()) {
             foundVote.get().setAnswer(setAnswer(vote));
@@ -65,7 +65,7 @@ public class VoteService {
         return false;
     }
 
-    public boolean deleteVote(String pollId, String userId) {
+    public boolean deleteVote(String pollId, Long userId) {
         Optional<Vote> foundVote = voteRepository.findByVoterAndPollId(userId, pollId);
         if(foundVote.isEmpty()){
             return false;
@@ -86,7 +86,7 @@ public class VoteService {
         }
     }
 
-    private Vote findVote(String pollId, String userId){
+    private Vote findVote(String pollId, Long userId){
         Optional<Vote> vote = voteRepository.findByVoterAndPollId(userId,pollId);
         if(vote.isEmpty()){
             return null;
