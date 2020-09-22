@@ -2,13 +2,17 @@ package no.hvl.dat250.h2020.group5.requests;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Setter
 @Getter
-@Component
 public class CastVoteRequest {
+    @NotBlank
     String pollId;
+    @NotNull
     Long userId;
-    String Vote;
+    @NotBlank
+    String vote;
 }
