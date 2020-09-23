@@ -34,8 +34,6 @@ public class PollService  {
         User user = new User();
         user.setUsername("oasfdikj");
         user.setPassword("ljkasdf");
-        user.setId((long) i);
-        i++;
         poll.setPollOwner(user);
 
 
@@ -47,8 +45,21 @@ public class PollService  {
 
     }
 
+    public Poll createPoll2(Poll poll, Long userId){
+        Optional<User> foundUser = userRepository.findById(userId);
+        if(foundUser.isPresent()){
+            User user = foundUser.get();
+            poll.setPollOwner(user);
+            return pollRepository.save(poll);
+        }
+        else{
+            return null;
+        }
+
+    }
+
     //TODO: Check if user owns the poll or is an admin
-    public boolean deletePoll(String pollId) {
+    public boolean deletePoll(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if(poll.isEmpty()){
             return false;

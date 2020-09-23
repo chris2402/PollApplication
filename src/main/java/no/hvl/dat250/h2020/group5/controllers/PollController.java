@@ -33,13 +33,19 @@ public class PollController {
         return pollService.createPoll(body);
     }
 
-    @DeleteMapping
-    public boolean deletePoll(@RequestBody String pollId){
+    @RequestMapping(method = RequestMethod.POST, path="/{user-id}")
+    //TODO: Remove userId and use JWT or similar.
+    public Poll createPoll2(@RequestBody Poll body, Long userId){
+        return pollService.createPoll2(body, userId);
+    }
+
+    @DeleteMapping(path="/{poll-id}")
+    public boolean deletePoll(@PathVariable("poll-id") Long pollId){
         return pollService.deletePoll(pollId);
     }
 
     @RequestMapping
-    public List<Poll> getOwnPolls(@RequestParam("owner-id") String ownerId){
+    public List<Poll> getOwnPolls(@RequestParam("owner-id") Long ownerId){
         return pollService.getOwnPolls(ownerId);
     }
 
