@@ -1,14 +1,14 @@
 package no.hvl.dat250.h2020.group5.dao;
 
-import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Voter;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+
 import java.util.Optional;
 
 //TODO: Edit poll

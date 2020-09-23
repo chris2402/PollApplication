@@ -16,14 +16,15 @@ public abstract class Voter {
 
     @Id
     @EqualsAndHashCode.Include
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    protected Long id;
 
     @Column(length = 20)
     @EqualsAndHashCode.Include
-    private String userName;
+    protected String username;
 
     @OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
-    private List<Vote> votes = new ArrayList<>();
+    protected List<Vote> votes = new ArrayList<>();
 
 }
 

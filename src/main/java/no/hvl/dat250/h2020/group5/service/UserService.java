@@ -1,110 +1,87 @@
 package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.dao.UserRepository;
+import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class UserService {
 
-    private static final String PERSISTENCE_UNIT_NAME = "polls";
-    private static EntityManagerFactory factory;
+    final
+    UserRepository userRepository;
 
-    @PersistenceContext
-    private EntityManager em;
+    final
+    VoteRepository voteRepository;
 
-    @Override
-    public User createUser(String name, String password) {
-        Query q = em.createQuery("SELECT u.userName FROM User u where u.userName = :username");
-        q.setParameter("username", name);
-        if(q.getResultList().size() > 0){
-            return null;
-        } else{
-            User user = new User();
-            user.setUserName(name);
-            //TODO: Automatic set id
-            user.setId("1");
-            user.setPassword(password);
-            em.getTransaction().begin();
-            em.persist(user);
-            em.getTransaction().commit();
-            return user;
-
-        }
+    public UserService(UserRepository userRepository, VoteRepository voteRepository) {
+        this.userRepository = userRepository;
+        this.voteRepository = voteRepository;
     }
 
-    @Override
-    public boolean deleteUser(String userId) {
-        User user = em.find(User.class, userId);
 
-        if(user == null){
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public boolean deleteUser(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+
+        if(user.isEmpty()){
             return false;
         }
-        else{
-            em.getTransaction().begin();
-            Query q = em.createQuery("DELETE from User u WHERE u.id = :id");
-            q.setParameter("id", userId);
-            int deleted = q.executeUpdate();
-            em.getTransaction().commit();
-            return deleted == 1;
+
+        List<Vote> votes = voteRepository.findByVoter(user.get());
+        for (Vote vote : votes) {
+            vote.setVoter(null);
         }
+        voteRepository.saveAll(votes);
+        userRepository.delete(user.get());
+        return true;
+
     }
 
-    @Override
     public List<User> getAllUsers() {
-        List<User> userList = em.createQuery("select u from User u").getResultList();
-        return userList;
+        return userRepository.findAll();
     }
 
-    @Override
-    public User getUser(String userId) {
-        return em.find(User.class, userId);
+    public Optional<User> getUser(Long userId) {
+        return userRepository.findById(userId);
     }
 
-    @Override
-    public boolean updateUsername(String userId, String newName) {
-        User user = em.find(User.class, userId);
+    public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest) {
+        Optional<User> user = userRepository.findById(userId);
+        boolean changesMade = false;
 
-        if(user == null){
+        if(user.isEmpty()){
             return false;
         }
-        else{
-            user.setUserName(newName);
 
-            em.getTransaction().begin();
-            em.merge(user);
-            em.flush();
-            em.getTransaction().commit();
-            return em.find(User.class, userId).getUserName().equals(newName);
+        if(updateUserRequest.getUsername() != null && !updateUserRequest.getUsername().isEmpty()){
+            user.get().setUsername(updateUserRequest.getUsername());
+            changesMade = true;
         }
+
+        if(updateUserRequest.getOldPassword() != null &&
+           updateUserRequest.getNewPassword() != null &&
+           updateUserRequest.getNewPassword().equals(user.get().getPassword())) {
+            user.get().setPassword(updateUserRequest.getNewPassword());
+            changesMade = true;
+        }
+
+        if (changesMade){
+            userRepository.save(user.get());
+        }
+
+        return changesMade;
     }
 
-    @Override
-    public boolean updatePassword(String userId, String oldPassword, String newPassword) {
-        User user = em.find(User.class, userId);
-
-        if(user == null){
-            return false;
-        }
-        else{
-            if(user.getPassword().equals(oldPassword)){
-                user.setPassword(newPassword);
-                em.getTransaction().begin();
-                em.merge(user);
-                em.getTransaction().commit();
-                return em.find(User.class, userId).getPassword().equals(newPassword);
-            }
-            else{
-                return false;
-            }
-        }
-    }
-
-    public void setup(){
-        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-        em = factory.createEntityManager();
-    }
 }

@@ -9,7 +9,7 @@ import no.hvl.dat250.h2020.group5.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.*;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -30,22 +30,11 @@ public class PollService  {
      private int i = 1;
 
     public Poll createPoll(Poll poll) {
-//        Poll poll = new Poll();
-//        Optional<User> pollOwner = userRepository.findById(userId);
-
-//        PollVisibilityType visibilityType = isPublic ? PollVisibilityType.PUBLIC : PollVisibilityType.PRIVATE;
-
-//        if(pollOwner.isPresent()){
-//            poll.setName(name);
-//            poll.setQuestion(question);
-//            poll.setPollOwner(pollOwner.get());
-//            poll.setPollDuration(duration);
-
         //TODO: Finn bruker ikkje opprett
         User user = new User();
-        user.setUserName("oasfdikj");
+        user.setUsername("oasfdikj");
         user.setPassword("ljkasdf");
-        user.setId("sadf" + i);
+        user.setId((long) i);
         i++;
         poll.setPollOwner(user);
 
@@ -77,7 +66,7 @@ public class PollService  {
     }
 
 
-    public List<Poll> getOwnPolls(String userId) {
+    public List<Poll> getOwnPolls(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
     }
@@ -110,10 +99,5 @@ public class PollService  {
 //        q.setParameter("id", pollId);
 //        q.executeUpdate();
 //        em.getTransaction().commit();
-//    }
-//
-//    public void setup(){
-//        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-//        em = factory.createEntityManager();
 //    }
 }
