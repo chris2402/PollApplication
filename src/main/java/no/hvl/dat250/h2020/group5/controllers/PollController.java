@@ -35,7 +35,7 @@ public class PollController {
 
     @RequestMapping(method = RequestMethod.POST, path="/{user-id}")
     //TODO: Remove userId and use JWT or similar.
-    public Poll createPoll2(@RequestBody Poll body, Long userId){
+    public Poll createPoll2(@RequestBody Poll body, @PathVariable("user-id") Long userId){
         return pollService.createPoll2(body, userId);
     }
 
