@@ -30,11 +30,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable Long id){
-        Optional<User> user = userService.getUser(id);
-        if (user.isEmpty()){
-            return null;
-        }
-        return user.get();
+        return userService.getUser(id).orElse(null);
     }
 
     @PatchMapping("/{id}")
