@@ -1,7 +1,5 @@
 package no.hvl.dat250.h2020.group5.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,9 +17,9 @@ public class User extends Voter {
 
     private String password;
 
-//    @ToString.Exclude
-//    @EqualsAndHashCode.Exclude
-    @JsonManagedReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonManagedReference(value="pollOwner")
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "pollOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Poll> userPolls = new ArrayList<>();
 

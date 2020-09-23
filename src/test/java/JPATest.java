@@ -73,7 +73,6 @@ public class JPATest {
         vote.setAnswer(AnswerType.YES);
 
         Poll poll = new Poll();
-        poll.setId("1");
         em.getTransaction().begin();
         em.persist(poll);
         em.getTransaction().commit();
@@ -96,7 +95,6 @@ public class JPATest {
     @Test
     public void shouldCountTwoVotesWhenGivenOnPollTest() {
         Poll poll = new Poll();
-        poll.setId("1");
 
         Guest voter1 = new Guest();
 
@@ -126,25 +124,24 @@ public class JPATest {
         Assertions.assertEquals(2, polls.get(0).getVotes().size());
     }
 
-    @Test
-    public void PollIdStringConvertPersistAndFindTest() {
-        final String POLL_ID = "ABC123";
-        Poll poll = new Poll();
-        poll.setId(POLL_ID);
-
-        em.getTransaction().begin();
-        em.persist(poll);
-        em.getTransaction().commit();
-
-        Poll fetched_poll = em.find(Poll.class, POLL_ID);
-
-        Assertions.assertEquals(fetched_poll.getId(), POLL_ID);
-    }
+//    @Test
+//    public void PollIdStringConvertPersistAndFindTest() {
+//        final String POLL_ID = "ABC123";
+//        Poll poll = new Poll();
+//        poll.setId(POLL_ID);
+//
+//        em.getTransaction().begin();
+//        em.persist(poll);
+//        em.getTransaction().commit();
+//
+//        Poll fetched_poll = em.find(Poll.class, POLL_ID);
+//
+//        Assertions.assertEquals(fetched_poll.getId(), POLL_ID);
+//    }
 
     @Test
     public void shouldKeepVoteAndChangeFkWhenVoterIsDeleted(){
         Poll poll = new Poll();
-        poll.setId("1");
 
         Guest voter1 = new Guest();
 
@@ -186,7 +183,6 @@ public class JPATest {
         user.setPassword("MyPassword");
 
         Poll poll = new Poll();
-        poll.setId("POLL123");
 
         user.setUserPolls(Collections.singletonList(poll));
         poll.setPollOwner(user);
@@ -212,7 +208,6 @@ public class JPATest {
     @Test
     public void shouldDeleteVoteWhenPollIsDeletedTest() {
         Poll poll = new Poll();
-        poll.setId("POLL123");
 
         Vote vote = new Vote();
         vote.setAnswer(AnswerType.NO);

@@ -6,7 +6,6 @@ import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")

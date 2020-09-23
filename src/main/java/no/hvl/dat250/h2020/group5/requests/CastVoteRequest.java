@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
 @Setter
 @Getter
 public class CastVoteRequest {
-    @NotBlank
-    String pollId;
+    @NotNull
+    Long pollId;
     @NotNull
     Long userId;
     @NotBlank

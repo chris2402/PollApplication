@@ -4,9 +4,12 @@ import no.hvl.dat250.h2020.group5.dao.PollRepository;
 import no.hvl.dat250.h2020.group5.dao.UserRepository;
 import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import no.hvl.dat250.h2020.group5.converters.StringToAnswerType;
+
 import org.springframework.stereotype.Service;
 
 
@@ -17,17 +20,27 @@ import java.util.Optional;
 @Service
 public class PollService  {
 
-     @Autowired
+     final
      PollRepository pollRepository;
 
-     @Autowired
+     final
      UserRepository userRepository;
 
-     @Autowired
+     final
      VoteRepository voteRepository;
+
+
+     StringToAnswerType stringToAnswerType = new StringToAnswerType();
 
      //TODO: REMOVE.
      private int i = 1;
+
+    public PollService(PollRepository pollRepository, UserRepository userRepository, VoteRepository voteRepository) {
+        this.pollRepository = pollRepository;
+        this.userRepository = userRepository;
+        this.voteRepository = voteRepository;
+    }
+
 
     public Poll createPoll(Poll poll) {
         //TODO: Finn bruker ikkje opprett
@@ -65,7 +78,6 @@ public class PollService  {
             return false;
         }
         else{
-            //TODO: DELETE VOTES
             pollRepository.delete(poll.get());
             return true;
         }
@@ -90,18 +102,32 @@ public class PollService  {
 
 
 
-    //TODO: Check if user is an admin
-    public boolean changePollStatus(String pollId, String userId, boolean status) {
+    //TODO: Check if user is an admin or user owns poll
+    public boolean changePollStatus(String pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
-        if(poll.isPresent() && poll.get().getPollOwner().getId().equals(userId)){
+        if(poll.isPresent()){
             Poll foundPoll = poll.get();
-            foundPoll.setActive(status);
+            foundPoll.setActive(!foundPoll.getActive());
             pollRepository.save(foundPoll);
             return true;
         }
         else{
             return false;
         }
+    }
+
+    public int getNumberOfVotes(Long pollId, String avt){
+        Optional<Poll> foundPoll = pollRepository.findById(pollId);
+        AnswerType answerType = stringToAnswerType.convert(avt);
+
+        if(foundPoll.isPresent() && answerType != null){
+            List<Vote> votes = voteRepository.findByPollAndAnswer(foundPoll.get(), answerType);
+            return votes.size();
+        }
+        else{
+            return -1;
+        }
+
     }
 
 //    private void deleteVotes(String pollId){

@@ -1,19 +1,12 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
-import no.hvl.dat250.h2020.group5.entities.Guest;
+
 import no.hvl.dat250.h2020.group5.entities.Poll;
-import no.hvl.dat250.h2020.group5.service.GuestService;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 //TODO: Better feedback
 //TODO: userId from JWT or similar
@@ -49,16 +42,20 @@ public class PollController {
         return pollService.getOwnPolls(ownerId);
     }
 
-    @RequestMapping(path="/{poll-id}")
+    @GetMapping(path="/{poll-id}")
     public Poll getPoll(@PathVariable("poll-id") long pollId){
         return pollService.getPoll(pollId);
     }
 
     @PatchMapping(path="/{poll-id}")
-    public boolean changePollStatus(@PathVariable("poll-id") String pollId,
-            @RequestBody boolean status,
-            @RequestBody String userId){
-        return pollService.changePollStatus(pollId, userId, status);
+    public boolean changePollStatus(@PathVariable("poll-id") String pollId){
+        return pollService.changePollStatus(pollId);
+    }
+
+    @GetMapping(path="/{poll-id}/votes")
+    public int getNumberOfVotes(@PathVariable("poll-id") long pollId,
+                   @RequestParam String answerType) {
+        return pollService.getNumberOfVotes(pollId, answerType);
     }
 
 }

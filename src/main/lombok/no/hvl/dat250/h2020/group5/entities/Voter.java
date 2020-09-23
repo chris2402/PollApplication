@@ -1,7 +1,9 @@
 package no.hvl.dat250.h2020.group5.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -24,6 +26,9 @@ public abstract class Voter {
     protected String username;
 
     @OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     protected List<Vote> votes = new ArrayList<>();
 
 }

@@ -1,7 +1,6 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import lombok.Data;
@@ -40,13 +39,18 @@ public class Poll {
 
     private Boolean active = false;
 
-    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference(value="pollOwner")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private User pollOwner;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
+    @JsonManagedReference(value="votes")
     private List<Vote> votes = new ArrayList<>();
+
+
 
 }

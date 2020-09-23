@@ -19,17 +19,22 @@ public class VoteController {
     }
 
     @PostMapping()
-    public Boolean castVote(@Valid @RequestBody CastVoteRequest castVoteRequest){
+    public Vote castVote(@Valid @RequestBody CastVoteRequest castVoteRequest){
         return voteService.vote(castVoteRequest);
     }
 
-    @PatchMapping()
-    public Boolean changeVote(@Valid @RequestBody CastVoteRequest castVoteRequest){
-        return voteService.changeVote(castVoteRequest);
+    @PatchMapping("/{id}")
+    public Boolean changeVote(@PathVariable Long id, @RequestParam String newAnswer){
+        return voteService.changeVote(id, newAnswer);
     }
 
     @GetMapping()
-    public Vote findVote(@RequestParam Long userId, @RequestParam String pollId){
+    public Vote findVote(@RequestParam Long userId, @RequestParam Long pollId){
         return voteService.findVote(pollId, userId);
+    }
+
+    @DeleteMapping("/{id}")
+    public boolean deleteVote(@PathVariable Long id){
+        return voteService.deleteVote(id);
     }
 }
