@@ -1,128 +1,119 @@
 package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.dao.PollRepository;
+import no.hvl.dat250.h2020.group5.dao.UserRepository;
+import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.entities.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Optional;
 
 //TODO: Edit poll
 @Service
 public class PollService  {
 
+     @Autowired
+     PollRepository pollRepository;
 
-    private static final String PERSISTENCE_UNIT_NAME = "polls";
-    private static EntityManagerFactory factory;
+     @Autowired
+     UserRepository userRepository;
 
-    @PersistenceContext
-    private EntityManager em;
+     @Autowired
+     VoteRepository voteRepository;
 
-    @Override
-    public Poll createPoll(String name, String question, String userId, Integer duration, boolean isPublic) {
-        Poll poll = new Poll();
+     //TODO: REMOVE.
+     private int i = 1;
 
-        User pollOwner = em.find(User.class, userId);
+    public Poll createPoll(Poll poll) {
+//        Poll poll = new Poll();
+//        Optional<User> pollOwner = userRepository.findById(userId);
 
-        poll.setName(name);
-        poll.setQuestion(question);
-        poll.setPollOwner(pollOwner);
-        poll.setPollDuration(duration);
-        PollVisibilityType visibilityType = isPublic ? PollVisibilityType.PUBLIC : PollVisibilityType.PRIVATE;
+//        PollVisibilityType visibilityType = isPublic ? PollVisibilityType.PUBLIC : PollVisibilityType.PRIVATE;
 
-        em.getTransaction().begin();
-        em.persist(poll);
-        em.getTransaction().commit();
+//        if(pollOwner.isPresent()){
+//            poll.setName(name);
+//            poll.setQuestion(question);
+//            poll.setPollOwner(pollOwner.get());
+//            poll.setPollDuration(duration);
 
-        Query q = em.createQuery("select p from Poll p where p.name = :pollName and p.question =:pollQuestion " +
-                "and p.pollOwner = :pollOwner and p.pollDuration = :pollDuration");
-        q.setParameter("pollName", name);
-        q.setParameter("pollQuestion", question);
-        q.setParameter("pollOwner", pollOwner);
-        q.setParameter("pollDuration", duration);
-        
+        //TODO: Finn bruker ikkje opprett
+        User user = new User();
+        user.setUserName("oasfdikj");
+        user.setPassword("ljkasdf");
+        user.setId("sadf" + i);
+        i++;
+        poll.setPollOwner(user);
 
-        try{
-            return (Poll) q.getResultList().get(0);
-        }catch(ClassCastException e){
-            return null;
-        }
+
+            return pollRepository.save(poll);
+//        }
+//        else{
+//            return null;
+//        }
+
     }
 
-    @Override
     //TODO: Check if user owns the poll or is an admin
     public boolean deletePoll(String pollId) {
-        Poll pollToDelete = em.find(Poll.class, pollId);
-        if(pollToDelete == null){
+        Optional<Poll> poll = pollRepository.findById(pollId);
+        if(poll.isEmpty()){
             return false;
         }
         else{
-            deleteVotes(pollId);
-
-            em.getTransaction().begin();
-            Query q = em.createQuery("DELETE from Poll p WHERE p.id = :id");
-            q.setParameter("id", pollId);
-            int deleted = q.executeUpdate();
-            em.getTransaction().commit();
-
-            return deleted == 1;
-        }
-    }
-
-    @Override
-    public List<Poll> getAllPublicPolls() {
-        Query q = em.createQuery("select p from Poll p where p.visibilityType = :pollVisibilityType");
-        q.setParameter("pollVisibilityType", PollVisibilityType.PUBLIC);
-        List<Poll> polls = q.getResultList();
-        return polls;
-    }
-
-    @Override
-    public List<Poll> getOwnPolls(String userId) {
-        User user = em.find(User.class, userId);
-
-        Query q = em.createQuery("select p from Poll p where p.pollOwner = :owner");
-        q.setParameter("owner", user);
-
-        try{
-            return (List<Poll>) q.getResultList();
-        }catch(ClassCastException e){
-            return null;
-        }
-    }
-
-    @Override
-    public Poll getPoll(String pollId) {
-        return em.find(Poll.class, pollId);
-    }
-
-
-
-    @Override
-    //TODO: Check if user owns the poll or is an admin
-    public boolean changePollStatus(String pollId, boolean status) {
-        Poll poll = em.find(Poll.class, pollId);
-        if(poll == null){
-            return false;
-        }else{
-            poll.setActive(true);
-            em.merge(poll);
+            //TODO: DELETE VOTES
+            pollRepository.delete(poll.get());
             return true;
         }
     }
 
-    private void deleteVotes(String pollId){
-        em.getTransaction().begin();
-        Query q = em.createQuery("DELETE from Poll p WHERE p.id = :id");
-        q.setParameter("id", pollId);
-        q.executeUpdate();
-        em.getTransaction().commit();
+
+    public List<Poll> getAllPublicPolls() {
+        return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
     }
 
-    public void setup(){
-        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-        em = factory.createEntityManager();
+
+    public List<Poll> getOwnPolls(String userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
     }
+
+
+    public Poll getPoll(long pollId) {
+        Optional<Poll> poll = pollRepository.findById(pollId);
+        return poll.orElse(null);
+    }
+
+
+
+    //TODO: Check if user is an admin
+    public boolean changePollStatus(String pollId, String userId, boolean status) {
+        Optional<Poll> poll = pollRepository.findById(pollId);
+        if(poll.isPresent() && poll.get().getPollOwner().getId().equals(userId)){
+            Poll foundPoll = poll.get();
+            foundPoll.setActive(status);
+            pollRepository.save(foundPoll);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+//    private void deleteVotes(String pollId){
+//        em.getTransaction().begin();
+//        Query q = em.createQuery("DELETE from Poll p WHERE p.id = :id");
+//        q.setParameter("id", pollId);
+//        q.executeUpdate();
+//        em.getTransaction().commit();
+//    }
+//
+//    public void setup(){
+//        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+//        em = factory.createEntityManager();
+//    }
 }

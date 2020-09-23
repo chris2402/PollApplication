@@ -2,18 +2,20 @@ package no.hvl.dat250.h2020.group5.dao;
 
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Voter;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
+
 //TODO: Edit poll
-public interface PollRepository extends CrudRepository<Poll, String> {
+public interface PollRepository extends JpaRepository<Poll, String> {
+    List<Poll> findAllByVisibilityType(PollVisibilityType pvt);
+    List<Poll> findAllByPollOwner(Voter owner);
+    List<Poll> findAllByPollOwnerEquals(User owner);
 
-    Poll createPoll(String name, String question, String userId, Integer duration, boolean isPublic);
-    boolean deletePoll(String pollId);
-
-    List<Poll> getAllPublicPolls();
-    List<Poll> getPollsByUserId(String userId);
-    Poll getPoll(String pollId);
-
-    boolean changePollStatus(String pollId, boolean status);
+    Optional<Poll> findById(long pollId);
 }
