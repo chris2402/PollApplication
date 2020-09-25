@@ -17,5 +17,5 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
     List<Poll> findAllByPollOwner(Voter owner);
     List<Poll> findAllByPollOwnerEquals(User owner);
 
-    Optional<Poll> findById(long pollId);
+    Optional<Poll> findById(Long pollId);
 }
