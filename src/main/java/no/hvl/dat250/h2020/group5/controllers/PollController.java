@@ -29,11 +29,6 @@ public class PollController {
         return pollService.deletePoll(pollId);
     }
 
-    @RequestMapping
-    public List<Poll> getOwnPolls(@RequestParam Long ownerId){
-        return pollService.getOwnPolls(ownerId);
-    }
-
     @GetMapping(path="/{pollId}")
     public Poll getPoll(@PathVariable long pollId){
         return pollService.getPoll(pollId);
