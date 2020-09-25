@@ -1,5 +1,7 @@
 package no.hvl.dat250.h2020.group5.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,7 +25,7 @@ public class Poll {
     @SequenceGenerator(name="PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PollID_Sequence")
     @Convert(converter = AlphaNumeric2Long.class)
-    private String id;
+    private Long id;
 
     private String name;
 
@@ -35,14 +37,20 @@ public class Poll {
     @Enumerated(EnumType.STRING)
     private PollVisibilityType visibilityType;
 
-    private Boolean active;
+    private Boolean active = false;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference(value="pollOwner")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private User pollOwner;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL)
+    @JsonManagedReference(value="votes")
     private List<Vote> votes = new ArrayList<>();
+
+
 
 }

@@ -1,7 +1,9 @@
 package no.hvl.dat250.h2020.group5.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -16,14 +18,18 @@ public abstract class Voter {
 
     @Id
     @EqualsAndHashCode.Include
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    protected Long id;
 
     @Column(length = 20)
     @EqualsAndHashCode.Include
-    private String userName;
+    protected String username;
 
     @OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
-    private List<Vote> votes = new ArrayList<>();
+    @JsonManagedReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    protected List<Vote> votes = new ArrayList<>();
 
 }
 
