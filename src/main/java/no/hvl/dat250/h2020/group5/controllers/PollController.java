@@ -38,9 +38,14 @@ public class PollController {
         return pollService.getPoll(pollId);
     }
 
-    @PatchMapping(path="/{poll-id}")
-    public boolean changePollStatus(@PathVariable("poll-id") String pollId){
-        return pollService.changePollStatus(pollId);
+    @PatchMapping(path="/{pollId}")
+    public boolean activatePoll(@PathVariable Long pollId){
+        return pollService.activatePoll(pollId);
+    }
+
+    @GetMapping(path="/{pollId}/active")
+    public boolean isPollActive(@PathVariable Long pollId){
+        return pollService.getPollStatus(pollId);
     }
 
     @GetMapping(path="/{poll-id}/votes")

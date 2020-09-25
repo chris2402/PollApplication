@@ -13,6 +13,8 @@ import no.hvl.dat250.h2020.group5.converters.StringToAnswerType;
 import org.springframework.stereotype.Service;
 
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +48,6 @@ public class PollService {
         } else {
             return null;
         }
-
     }
 
     public boolean deletePoll(Long pollId) {
@@ -75,16 +76,28 @@ public class PollService {
         return poll.orElse(null);
     }
 
-    public boolean changePollStatus(String pollId) {
+    public Boolean activatePoll(long pollId){
         Optional<Poll> poll = pollRepository.findById(pollId);
-        if (poll.isPresent()) {
-            Poll foundPoll = poll.get();
-            foundPoll.setActive(!foundPoll.getActive());
-            pollRepository.save(foundPoll);
-            return true;
-        } else {
+        if (poll.isEmpty()){
             return false;
         }
+
+        poll.get().setStartTime(new Date());
+        pollRepository.save(poll.get());
+        return true;
+    }
+
+
+    public boolean getPollStatus(Long pollId) {
+        Optional<Poll> poll = pollRepository.findById(pollId);
+        if(poll.isEmpty()){
+            return false;
+        }
+
+        Instant startTime = poll.get().getStartTime().toInstant();
+        Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
+
+        return !Instant.now().isAfter(startTimePlusDuration);
     }
 
     public int getNumberOfVotes(Long pollId, String avt) {

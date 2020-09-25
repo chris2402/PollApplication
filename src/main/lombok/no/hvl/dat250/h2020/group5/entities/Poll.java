@@ -37,7 +37,6 @@ public class Poll {
     @Enumerated(EnumType.STRING)
     private PollVisibilityType visibilityType;
 
-    private Boolean active = false;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
