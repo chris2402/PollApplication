@@ -8,6 +8,7 @@ import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.entities.Voter;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,7 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 public class VoteRepositoryTest {
 
     @Autowired
-    VoteRepository repository;
+    VoteRepository voteRepository;
 
     @Autowired
     PollRepository pollRepository;
@@ -26,20 +27,15 @@ public class VoteRepositoryTest {
     @Autowired
     VoterRepository voterRepository;
 
-    @Test
-    public void shouldPersistAVoteTest() {
-        Vote vote = new Vote();
-        repository.save(vote);
+    private Vote vote;
+    private Poll poll;
+    private Voter voter;
 
-        Assertions.assertEquals(1, repository.count());
-    }
-
-    @Test
-    public void shouldAddVoteToPollTest() {
-        Vote vote = new Vote();
-
-        Poll poll = new Poll();
-        Voter voter = new Guest();
+    @BeforeEach
+    public void setUp() {
+        this.vote = new Vote();
+        this.poll = new Poll();
+        this.voter = new Guest();
 
         vote.setPoll(poll);
         vote.setVoter(voter);
@@ -47,9 +43,27 @@ public class VoteRepositoryTest {
 
         pollRepository.save(poll);
         voterRepository.save(voter);
-        repository.save(vote);
+        voteRepository.save(vote);
+    }
 
-        Assertions.assertEquals(vote, repository.findByPollAndAnswer(poll, AnswerType.YES).get(0));
+    @Test
+    public void shouldPersistAVoteTest() {
+        Assertions.assertEquals(1, voteRepository.count());
+    }
+
+    @Test
+    public void shouldFindVoteByPollAndAnswerTest() {
+        Assertions.assertEquals(vote, voteRepository.findByPollAndAnswer(poll, AnswerType.YES).get(0));
+    }
+
+    @Test
+    public void shouldFindVoteByPollAndOwnerTest() {
+            Assertions.assertEquals(vote, voteRepository.findByVoterAndPoll(voter, poll).get());
+    }
+
+    @Test
+    public void shouldFindVoteByOwnerTest() {
+        Assertions.assertEquals(vote, voteRepository.findByVoter(voter).get(0));
     }
 
 }
