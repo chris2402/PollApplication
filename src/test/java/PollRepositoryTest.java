@@ -32,7 +32,6 @@ public class PollRepositoryTest {
 
     @Test
     public void shouldPersistOnePollTest() {
-        pollRepository.save(poll);
         Assertions.assertEquals(1, pollRepository.count());
     }
 
