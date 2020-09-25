@@ -16,7 +16,6 @@ import java.util.Optional;
 
 
 @Service
-//TODO: Check if user owns etc or admin..
 public class VoteService {
 
     final
