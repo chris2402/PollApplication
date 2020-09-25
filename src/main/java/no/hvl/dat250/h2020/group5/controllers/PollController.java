@@ -1,9 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.service.PollService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,25 +10,23 @@ import java.util.List;
 @RequestMapping("/polls")
 public class PollController {
 
-    @Autowired
-    private PollService pollService;
+    private final PollService pollService;
+
+    public PollController(PollService pollService) {
+        this.pollService = pollService;
+    }
 
     @GetMapping
     public List<Poll> getAllPublicPolls(){ return pollService.getAllPublicPolls(); }
 
-    @RequestMapping(method = RequestMethod.POST, path="/{user-id}")
-    public Poll createPoll(@RequestBody Poll body, @PathVariable("user-id") Long userId){
+    @PostMapping(path="/{userId}")
+    public Poll createPoll(@RequestBody Poll body, @PathVariable Long userId){
         return pollService.createPoll(body, userId);
     }
 
-    @DeleteMapping(path="/{poll-id}")
-    public boolean deletePoll(@PathVariable("poll-id") Long pollId){
+    @DeleteMapping(path="/{pollId}")
+    public boolean deletePoll(@PathVariable Long pollId){
         return pollService.deletePoll(pollId);
-    }
-
-    @RequestMapping
-    public List<Poll> getOwnPolls(@RequestParam("owner-id") Long ownerId){
-        return pollService.getOwnPolls(ownerId);
     }
 
     @GetMapping(path="/{poll-id}")
@@ -38,14 +34,23 @@ public class PollController {
         return pollService.getPoll(pollId);
     }
 
-    @PatchMapping(path="/{poll-id}")
-    public boolean changePollStatus(@PathVariable("poll-id") Long pollId){
-        return pollService.changePollStatus(pollId);
-    }
-
     @GetMapping(path="/{poll-id}/votes")
     public int getNumberOfVotes(@PathVariable("poll-id") Long pollId,
                    @RequestParam String answerType) {
+    }
+
+    @PatchMapping(path="/{pollId}")
+    public boolean activatePoll(@PathVariable Long pollId){
+        return pollService.activatePoll(pollId);
+    }
+
+    @GetMapping(path="/{pollId}/active")
+    public boolean isPollActive(@PathVariable Long pollId){
+        return pollService.getPollStatus(pollId);
+    }
+
+    @GetMapping(path="/{pollId}/votes")
+    public int getNumberOfVotes(@PathVariable long pollId, @RequestParam String answerType) {
         return pollService.getNumberOfVotes(pollId, answerType);
     }
 
