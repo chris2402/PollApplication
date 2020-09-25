@@ -2,10 +2,8 @@ package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 
 import javax.persistence.*;
@@ -25,6 +23,7 @@ public class Poll {
     @SequenceGenerator(name="PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PollID_Sequence")
     @Convert(converter = AlphaNumeric2Long.class)
+    @Setter(AccessLevel.NONE)
     private Long id;
 
     private String name;
