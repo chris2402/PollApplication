@@ -1,7 +1,9 @@
 package no.hvl.dat250.h2020.group5.service;
 
+import no.hvl.dat250.h2020.group5.dao.PollRepository;
 import no.hvl.dat250.h2020.group5.dao.UserRepository;
 import no.hvl.dat250.h2020.group5.dao.VoteRepository;
+import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
@@ -21,9 +23,13 @@ public class UserService {
     final
     VoteRepository voteRepository;
 
-    public UserService(UserRepository userRepository, VoteRepository voteRepository) {
+    final
+    PollRepository pollRepository;
+
+    public UserService(UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository) {
         this.userRepository = userRepository;
         this.voteRepository = voteRepository;
+        this.pollRepository = pollRepository;
     }
 
 
@@ -46,7 +52,6 @@ public class UserService {
         voteRepository.saveAll(votes);
         userRepository.delete(user.get());
         return true;
-
     }
 
     public List<User> getAllUsers() {
@@ -82,6 +87,11 @@ public class UserService {
         }
 
         return changesMade;
+    }
+
+    public List<Poll> getUserPolls(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
     }
 
 }
