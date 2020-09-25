@@ -101,7 +101,16 @@ public class PollService  {
         return poll.orElse(null);
     }
 
+    public Boolean activatePoll(long pollId){
+        Optional<Poll> poll = pollRepository.findById(pollId);
+        if (poll.isEmpty()){
+            return false;
+        }
 
+        poll.get().setStartTime(new Date());
+        pollRepository.save(poll.get());
+        return true;
+    }
 
 
     public boolean getPollStatus(Long pollId) {
