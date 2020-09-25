@@ -1,3 +1,8 @@
+# Code convnetions
+* use camelCase on all variables
+* descriptive variable and method names
+* No "else" if the "if" statement contains "return"
+
 # Github convention
 
 ## 1. Bruk prefixes
