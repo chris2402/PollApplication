@@ -30,7 +30,7 @@ public class PollController {
     }
 
     @GetMapping(path="/{pollId}")
-    public Poll getPoll(@PathVariable long pollId){
+    public Poll getPoll(@PathVariable Long pollId){
         return pollService.getPoll(pollId);
     }
 
@@ -45,7 +45,7 @@ public class PollController {
     }
 
     @GetMapping(path="/{pollId}/votes")
-    public int getNumberOfVotes(@PathVariable long pollId, @RequestParam String answerType) {
+    public int getNumberOfVotes(@PathVariable Long pollId, @RequestParam String answerType) {
         return pollService.getNumberOfVotes(pollId, answerType);
     }
 
