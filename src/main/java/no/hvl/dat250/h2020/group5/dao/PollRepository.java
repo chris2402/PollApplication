@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PollRepository extends JpaRepository<Poll, String> {
+public interface PollRepository extends JpaRepository<Poll, Long> {
     List<Poll> findAllByVisibilityType(PollVisibilityType pvt);
     List<Poll> findAllByPollOwner(Voter owner);
     List<Poll> findAllByPollOwnerEquals(User owner);

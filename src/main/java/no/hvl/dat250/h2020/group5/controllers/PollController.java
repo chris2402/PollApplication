@@ -34,17 +34,17 @@ public class PollController {
     }
 
     @GetMapping(path="/{poll-id}")
-    public Poll getPoll(@PathVariable("poll-id") long pollId){
+    public Poll getPoll(@PathVariable("poll-id") Long pollId){
         return pollService.getPoll(pollId);
     }
 
     @PatchMapping(path="/{poll-id}")
-    public boolean changePollStatus(@PathVariable("poll-id") String pollId){
+    public boolean changePollStatus(@PathVariable("poll-id") Long pollId){
         return pollService.changePollStatus(pollId);
     }
 
     @GetMapping(path="/{poll-id}/votes")
-    public int getNumberOfVotes(@PathVariable("poll-id") long pollId,
+    public int getNumberOfVotes(@PathVariable("poll-id") Long pollId,
                    @RequestParam String answerType) {
         return pollService.getNumberOfVotes(pollId, answerType);
     }
