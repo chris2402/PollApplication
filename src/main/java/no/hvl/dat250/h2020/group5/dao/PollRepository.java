@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-//TODO: Edit poll
 public interface PollRepository extends JpaRepository<Poll, String> {
     List<Poll> findAllByVisibilityType(PollVisibilityType pvt);
     List<Poll> findAllByPollOwner(Voter owner);
