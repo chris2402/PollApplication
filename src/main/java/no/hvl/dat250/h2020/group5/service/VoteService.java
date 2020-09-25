@@ -11,6 +11,7 @@ import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
 
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 
@@ -45,16 +46,16 @@ public class VoteService {
         Optional<Voter> u = voterRepository.findById(castVoteRequest.getUserId());
         AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
 
-        if (p.isEmpty() || u.isEmpty() || answer == null ){
+        if (p.isEmpty() || p.get().getStartTime() == null || u.isEmpty() || answer == null ){
             return null;
         }
 
         //Checking if the vote is cast before poll ended.
-//        Instant startTime = p.get().getStartTime().toInstant();
-//        Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
-//        if(Instant.now().isAfter(startTimePlusDuration)){
-//            return false;
-//        }
+        Instant startTime = p.get().getStartTime().toInstant();
+        Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
+        if(Instant.now().isAfter(startTimePlusDuration)){
+            return null;
+        }
 
         Vote v = new Vote();
         v.setPoll(p.get());
