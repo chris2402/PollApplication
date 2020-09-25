@@ -29,14 +29,9 @@ public class PollController {
         return pollService.deletePoll(pollId);
     }
 
-    @GetMapping(path="/{poll-id}")
-    public Poll getPoll(@PathVariable("poll-id") Long pollId){
+    @GetMapping(path="/{pollId}")
+    public Poll getPoll(@PathVariable long pollId){
         return pollService.getPoll(pollId);
-    }
-
-    @GetMapping(path="/{poll-id}/votes")
-    public int getNumberOfVotes(@PathVariable("poll-id") Long pollId,
-                   @RequestParam String answerType) {
     }
 
     @PatchMapping(path="/{pollId}")
