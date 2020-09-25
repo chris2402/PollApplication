@@ -60,15 +60,8 @@ public class PollService {
         }
     }
 
-
     public List<Poll> getAllPublicPolls() {
         return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
-    }
-
-
-    public List<Poll> getOwnPolls(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
     }
 
     public Poll getPoll(long pollId) {
