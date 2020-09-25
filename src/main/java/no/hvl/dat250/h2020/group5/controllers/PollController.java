@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//TODO: Better feedback
-//TODO: userId from JWT or similar
 @RestController
 @RequestMapping("/polls")
 public class PollController {
@@ -20,16 +18,9 @@ public class PollController {
     @GetMapping
     public List<Poll> getAllPublicPolls(){ return pollService.getAllPublicPolls(); }
 
-    @RequestMapping(method = RequestMethod.POST)
-    //TODO: Remove userId and use JWT or similar.
-    public Poll createPoll(@RequestBody Poll body){
-        return pollService.createPoll(body);
-    }
-
     @RequestMapping(method = RequestMethod.POST, path="/{user-id}")
-    //TODO: Remove userId and use JWT or similar.
-    public Poll createPoll2(@RequestBody Poll body, @PathVariable("user-id") Long userId){
-        return pollService.createPoll2(body, userId);
+    public Poll createPoll(@RequestBody Poll body, @PathVariable("user-id") Long userId){
+        return pollService.createPoll(body, userId);
     }
 
     @DeleteMapping(path="/{poll-id}")

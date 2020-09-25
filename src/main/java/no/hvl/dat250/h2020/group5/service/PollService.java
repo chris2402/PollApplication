@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-//TODO: Edit poll
 @Service
 public class PollService  {
 
@@ -41,24 +40,7 @@ public class PollService  {
         this.voteRepository = voteRepository;
     }
 
-
-    public Poll createPoll(Poll poll) {
-        //TODO: Finn bruker ikkje opprett
-        User user = new User();
-        user.setUsername("oasfdikj");
-        user.setPassword("ljkasdf");
-        poll.setPollOwner(user);
-
-
-            return pollRepository.save(poll);
-//        }
-//        else{
-//            return null;
-//        }
-
-    }
-
-    public Poll createPoll2(Poll poll, Long userId){
+    public Poll createPoll(Poll poll, Long userId){
         Optional<User> foundUser = userRepository.findById(userId);
         if(foundUser.isPresent()){
             User user = foundUser.get();
@@ -71,7 +53,6 @@ public class PollService  {
 
     }
 
-    //TODO: Check if user owns the poll or is an admin
     public boolean deletePoll(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if(poll.isEmpty()){
@@ -94,15 +75,11 @@ public class PollService  {
         return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
     }
 
-
     public Poll getPoll(long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         return poll.orElse(null);
     }
 
-
-
-    //TODO: Check if user is an admin or user owns poll
     public boolean changePollStatus(String pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if(poll.isPresent()){
