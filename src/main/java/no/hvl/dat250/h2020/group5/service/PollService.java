@@ -64,6 +64,11 @@ public class PollService {
         return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
     }
 
+    public List<Poll> getUserPolls(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
+    }
+
     public Poll getPoll(long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         return poll.orElse(null);

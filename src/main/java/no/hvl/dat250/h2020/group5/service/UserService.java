@@ -23,13 +23,9 @@ public class UserService {
     final
     VoteRepository voteRepository;
 
-    final
-    PollRepository pollRepository;
-
     public UserService(UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository) {
         this.userRepository = userRepository;
         this.voteRepository = voteRepository;
-        this.pollRepository = pollRepository;
     }
 
 
@@ -87,11 +83,6 @@ public class UserService {
         }
 
         return changesMade;
-    }
-
-    public List<Poll> getUserPolls(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
     }
 
 }
