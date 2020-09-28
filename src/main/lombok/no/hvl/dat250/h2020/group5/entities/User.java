@@ -17,6 +17,8 @@ public class User extends Voter {
 
     private String password;
 
+    private Boolean isAdmin;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonManagedReference(value="pollOwner")
