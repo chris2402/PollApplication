@@ -1,8 +1,6 @@
 package no.hvl.dat250.h2020.group5.entities;
 
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -14,7 +12,5 @@ public abstract class Device {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
-    private User deviceUser;
-
+    @OneToOne private User deviceUser;
 }

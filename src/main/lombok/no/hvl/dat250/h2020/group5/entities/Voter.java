@@ -7,7 +7,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -28,9 +27,7 @@ public abstract class Voter {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     protected List<Vote> votes = new ArrayList<>();
-
 }
-
 
 /*
 * Oddmund sin version av Voter - One to One med nullable "User"
