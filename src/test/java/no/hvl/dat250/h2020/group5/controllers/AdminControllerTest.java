@@ -22,11 +22,6 @@ public class AdminControllerTest {
 
     @LocalServerPort private int port;
 
-    private URL base;
-
-    private User user1;
-    private Poll poll1;
-
     @Autowired TestRestTemplate template;
 
     @Autowired AdminController adminController;
@@ -36,6 +31,10 @@ public class AdminControllerTest {
     @Autowired UserRepository userRepository;
 
     @Autowired GuestRepository guestRepository;
+
+    private URL base;
+    private User user1;
+    private Poll poll1;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -74,7 +73,7 @@ public class AdminControllerTest {
         template.getRestTemplate()
                 .setRequestFactory(
                         new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
-                                                                       // make PATCH request
+        // make PATCH request
     }
 
     @Test
