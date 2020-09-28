@@ -33,7 +33,7 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{id}")
-    public Boolean editUser(@PathVariable Long id, UpdateUserRequest updateUserRequest){
+    public Boolean editUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
         return userService.updateUser(id,updateUserRequest);
     }
 
