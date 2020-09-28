@@ -14,26 +14,24 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 
-
 @Service
 public class VoteService {
 
-    final
-    PollRepository pollRepository;
+    final PollRepository pollRepository;
 
-    final
-    VoterRepository voterRepository;
+    final VoterRepository voterRepository;
 
-    final
-    VoteRepository voteRepository;
+    final VoteRepository voteRepository;
 
     final UserRepository userRepository;
 
-    final
-    StringToAnswerType stringToAnswerType = new StringToAnswerType();
+    final StringToAnswerType stringToAnswerType = new StringToAnswerType();
 
-    public VoteService(PollRepository pollRepository, VoterRepository voterRepository, VoteRepository voteRepository,
-                       UserRepository userRepository) {
+    public VoteService(
+            PollRepository pollRepository,
+            VoterRepository voterRepository,
+            VoteRepository voteRepository,
+            UserRepository userRepository) {
         this.pollRepository = pollRepository;
         this.voterRepository = voterRepository;
         this.voteRepository = voteRepository;
@@ -45,14 +43,14 @@ public class VoteService {
         Optional<Voter> u = voterRepository.findById(castVoteRequest.getUserId());
         AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
 
-        if (p.isEmpty() || p.get().getStartTime() == null || u.isEmpty() || answer == null ){
+        if (p.isEmpty() || p.get().getStartTime() == null || u.isEmpty() || answer == null) {
             return null;
         }
 
-        //Checking if the vote is cast before poll ended.
+        // Checking if the vote is cast before poll ended.
         Instant startTime = p.get().getStartTime().toInstant();
         Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
-        if(Instant.now().isAfter(startTimePlusDuration)){
+        if (Instant.now().isAfter(startTimePlusDuration)) {
             return null;
         }
 
@@ -88,23 +86,20 @@ public class VoteService {
     }
 
 
-    public Vote findVote(Long pollId, Long userId){
-        Optional<Voter> foundVoter = voterRepository.findById(userId);
-        Optional<Poll> foundPoll = pollRepository.findById(pollId);
+    public Vote findVote(Long pollId, Long userId) {
+        Optional<Voter> voter = voterRepository.findById(userId);
+        Optional<Poll> poll = pollRepository.findById(pollId);
 
-        if(foundVoter.isPresent() && foundPoll.isPresent()) {
-            Voter voter = foundVoter.get();
-            Poll poll = foundPoll.get();
-
-            Optional<Vote> vote = voteRepository.findByVoterAndPoll(voter,poll);
-
-            if(vote.isEmpty()){
-                return null;
-            }
-            return vote.get();
-        }
-        else{
+        if (voter.isEmpty() || poll.isEmpty()) {
             return null;
         }
+
+        Optional<Vote> vote = voteRepository.findByVoterAndPoll(voter.get(), poll.get());
+
+        if (vote.isEmpty()) {
+            return null;
+        }
+
+        return vote.get();
     }
 }
