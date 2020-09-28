@@ -1,11 +1,8 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import com.google.gson.JsonObject;
-import no.hvl.dat250.h2020.group5.Main;
 import no.hvl.dat250.h2020.group5.dao.GuestRepository;
 import no.hvl.dat250.h2020.group5.dao.PollRepository;
 import no.hvl.dat250.h2020.group5.dao.UserRepository;
-import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +39,10 @@ public class AdminControllerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        pollRepository.deleteAll();
+        userRepository.deleteAll();
+        guestRepository.deleteAll();
+
         user1 = new User();
         user1.setUsername("user1");
         User user2 = new User();
@@ -70,7 +71,10 @@ public class AdminControllerTest {
         guestRepository.save(guest1);
 
         this.base = new URL("http://localhost:" + port + "/admin");
-        template.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to make PATCH request
+        template.getRestTemplate()
+                .setRequestFactory(
+                        new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
+                                                                       // make PATCH request
     }
 
     @Test
