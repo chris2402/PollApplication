@@ -68,30 +68,6 @@ public class VoteService {
         return voteRepository.save(v);
     }
 
-    //Might be better to just use the vote function
-    public boolean changeVote(Long id, String newAnswer) {
-            Optional<Vote> foundVote = voteRepository.findById(id);
-            AnswerType avt = stringToAnswerType.convert(newAnswer);
-            if (foundVote.isPresent() && avt != null) {
-                foundVote.get().setAnswer(avt);
-                voteRepository.save(foundVote.get());
-                return true;
-            }
-        return false;
-    }
-
-    public boolean deleteVote(Long id) {
-            Optional<Vote> foundVote = voteRepository.findById(id);
-
-            if (foundVote.isEmpty()) {
-                return false;
-            } else{
-                voteRepository.delete(foundVote.get());
-                return true;
-            }
-    }
-
-
     public Vote findVote(Long pollId, Long userId) {
         Optional<Voter> voter = voterRepository.findById(userId);
         Optional<Poll> poll = pollRepository.findById(pollId);
