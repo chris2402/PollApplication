@@ -12,7 +12,6 @@ public abstract class Device {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Setter(AccessLevel.NONE)
     private Long id;
 
     @OneToOne
