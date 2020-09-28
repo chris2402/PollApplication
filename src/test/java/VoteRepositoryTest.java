@@ -14,18 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes=Main.class)
+@ContextConfiguration(classes = Main.class)
 @DataJpaTest
 public class VoteRepositoryTest {
 
-    @Autowired
-    VoteRepository voteRepository;
+    @Autowired VoteRepository voteRepository;
 
-    @Autowired
-    PollRepository pollRepository;
+    @Autowired PollRepository pollRepository;
 
-    @Autowired
-    VoterRepository voterRepository;
+    @Autowired VoterRepository voterRepository;
 
     private Vote vote;
     private Poll poll;
@@ -53,12 +50,13 @@ public class VoteRepositoryTest {
 
     @Test
     public void shouldFindVoteByPollAndAnswerTest() {
-        Assertions.assertEquals(vote, voteRepository.findByPollAndAnswer(poll, AnswerType.YES).get(0));
+        Assertions.assertEquals(
+                vote, voteRepository.findByPollAndAnswer(poll, AnswerType.YES).get(0));
     }
 
     @Test
     public void shouldFindVoteByPollAndOwnerTest() {
-            Assertions.assertEquals(vote, voteRepository.findByVoterAndPoll(voter, poll).get());
+        Assertions.assertEquals(vote, voteRepository.findByVoterAndPoll(voter, poll).get());
     }
 
     @Test
@@ -66,4 +64,9 @@ public class VoteRepositoryTest {
         Assertions.assertEquals(vote, voteRepository.findByVoter(voter).get(0));
     }
 
+    @Test
+    public void shouldNotDeleteAVoteWhenVoterIsDeletedTest() {
+        voterRepository.deleteById(voter.getId());
+        Assertions.assertEquals(1, voteRepository.count());
+    }
 }
