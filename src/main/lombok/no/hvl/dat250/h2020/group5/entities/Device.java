@@ -12,7 +12,5 @@ public abstract class Device {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
-    private User deviceUser;
-
+    @OneToOne private User deviceUser;
 }

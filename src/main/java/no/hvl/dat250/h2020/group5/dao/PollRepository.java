@@ -6,14 +6,16 @@ import no.hvl.dat250.h2020.group5.entities.Voter;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface PollRepository extends JpaRepository<Poll, String> {
+@Repository
+public interface PollRepository extends JpaRepository<Poll, Long> {
     List<Poll> findAllByVisibilityType(PollVisibilityType pvt);
     List<Poll> findAllByPollOwner(Voter owner);
     List<Poll> findAllByPollOwnerEquals(User owner);
 
-    Optional<Poll> findById(long pollId);
+    Optional<Poll> findById(Long pollId);
 }

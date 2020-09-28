@@ -71,12 +71,13 @@ public class PollService {
         return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
     }
 
-    public Poll getPoll(long pollId) {
+    public Poll getPoll(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         return poll.orElse(null);
     }
 
-    public Boolean activatePoll(long pollId){
+    public Boolean activatePoll(Long pollId){
+
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()){
             return false;
