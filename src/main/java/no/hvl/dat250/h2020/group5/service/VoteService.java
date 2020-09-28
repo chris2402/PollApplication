@@ -39,6 +39,12 @@ public class VoteService {
     }
 
     public Vote vote(CastVoteRequest castVoteRequest) {
+        if (castVoteRequest.getPollId() == null
+                || castVoteRequest.getUserId() == null
+                || castVoteRequest.getVote() == null) {
+            return null;
+        }
+
         Optional<Poll> p = pollRepository.findById(castVoteRequest.getPollId());
         Optional<Voter> u = voterRepository.findById(castVoteRequest.getUserId());
         AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
