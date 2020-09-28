@@ -23,7 +23,6 @@ public class Poll {
     @SequenceGenerator(name="PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PollID_Sequence")
     @Convert(converter = AlphaNumeric2Long.class)
-    @Setter(AccessLevel.NONE)
     private Long id;
 
     private String name;

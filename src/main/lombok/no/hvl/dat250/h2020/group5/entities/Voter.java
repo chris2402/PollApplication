@@ -17,7 +17,6 @@ public abstract class Voter {
     @Id
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Setter(AccessLevel.NONE)
     protected Long id;
 
     @Column(length = 20)
