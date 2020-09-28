@@ -24,10 +24,8 @@ import java.util.Optional;
 public class PollRepositoryTest {
 
     @Autowired PollRepository pollRepository;
-    @Autowired
-    VoteRepository voteRepository;
-    @Autowired
-    UserRepository userRepository;
+    @Autowired VoteRepository voteRepository;
+    @Autowired UserRepository userRepository;
 
     private Poll poll;
     private List<Vote> votes;
@@ -82,7 +80,8 @@ public class PollRepositoryTest {
         voteRepository.save(voteNotLinkedToPoll);
         pollRepository.deleteById(poll.getId());
         Assertions.assertEquals(1, voteRepository.count());
-        Assertions.assertEquals(voteNotLinkedToPoll.getId(), voteRepository.findAll().get(0).getId());
+        Assertions.assertEquals(
+                voteNotLinkedToPoll.getId(), voteRepository.findAll().get(0).getId());
     }
 
     @Test
