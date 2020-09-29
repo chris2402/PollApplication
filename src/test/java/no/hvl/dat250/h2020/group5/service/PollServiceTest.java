@@ -2,14 +2,21 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.responses.VotesResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 
@@ -81,5 +88,32 @@ public class PollServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
         pollService.deletePoll(poll.getId(), user.getId());
         verify(pollRepository, times(0)).delete(poll);
+    }
+
+    @Test
+    public void shouldReturnAllPublicPollsTest() {
+        when(pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC))
+                .thenReturn(
+                        Arrays.asList(
+                                new Poll().visibilityType(PollVisibilityType.PUBLIC),
+                                new Poll().visibilityType(PollVisibilityType.PUBLIC),
+                                new Poll().visibilityType(PollVisibilityType.PUBLIC)));
+        Assertions.assertEquals(3, pollService.getAllPublicPolls().size());
+        Assertions.assertEquals(
+                PollVisibilityType.PUBLIC,
+                pollService.getAllPublicPolls().get(0).getVisibilityType());
+    }
+
+    @Test
+    public void shouldGetPollResultTest() {
+        poll.setVotes(
+                Arrays.asList(
+                        new Vote().answer(AnswerType.YES),
+                        new Vote().answer(AnswerType.YES),
+                        new Vote().answer(AnswerType.NO)));
+        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+        VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
+        Assertions.assertEquals(1, votes.getNo());
+        Assertions.assertEquals(2, votes.getYes());
     }
 }
