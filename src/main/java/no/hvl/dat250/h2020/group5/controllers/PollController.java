@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,8 +46,8 @@ public class PollController {
     }
 
     @GetMapping(path="/{pollId}/votes")
-    public int getNumberOfVotes(@PathVariable Long pollId, @RequestParam String answerType) {
-        return pollService.getNumberOfVotes(pollId, answerType);
+    public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
+        return pollService.getNumberOfVotes(pollId);
     }
 
 }
