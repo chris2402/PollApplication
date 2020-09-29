@@ -3,13 +3,11 @@ package no.hvl.dat250.h2020.group5.service;
 import no.hvl.dat250.h2020.group5.dao.PollRepository;
 import no.hvl.dat250.h2020.group5.dao.UserRepository;
 import no.hvl.dat250.h2020.group5.dao.VoteRepository;
-import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -17,17 +15,17 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    final
-    UserRepository userRepository;
+    final UserRepository userRepository;
 
-    final
-    VoteRepository voteRepository;
+    final VoteRepository voteRepository;
 
-    public UserService(UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository) {
+    public UserService(
+            UserRepository userRepository,
+            VoteRepository voteRepository,
+            PollRepository pollRepository) {
         this.userRepository = userRepository;
         this.voteRepository = voteRepository;
     }
-
 
     public User createUser(User user) {
         return userRepository.save(user);
@@ -37,7 +35,7 @@ public class UserService {
     public boolean deleteUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
 
-        if(user.isEmpty()){
+        if (user.isEmpty()) {
             return false;
         }
 
@@ -62,27 +60,26 @@ public class UserService {
         Optional<User> user = userRepository.findById(userId);
         boolean changesMade = false;
 
-        if(user.isEmpty()){
+        if (user.isEmpty()) {
             return false;
         }
 
-        if(updateUserRequest.getUsername() != null && !updateUserRequest.getUsername().isEmpty()){
+        if (updateUserRequest.getUsername() != null && !updateUserRequest.getUsername().isEmpty()) {
             user.get().setUsername(updateUserRequest.getUsername());
             changesMade = true;
         }
 
-        if(updateUserRequest.getOldPassword() != null &&
-           updateUserRequest.getNewPassword() != null &&
-           updateUserRequest.getNewPassword().equals(user.get().getPassword())) {
+        if (updateUserRequest.getOldPassword() != null
+                && updateUserRequest.getNewPassword() != null
+                && updateUserRequest.getOldPassword().equals(user.get().getPassword())) {
             user.get().setPassword(updateUserRequest.getNewPassword());
             changesMade = true;
         }
 
-        if (changesMade){
+        if (changesMade) {
             userRepository.save(user.get());
         }
 
         return changesMade;
     }
-
 }
