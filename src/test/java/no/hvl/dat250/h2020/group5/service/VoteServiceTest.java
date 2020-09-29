@@ -1,8 +1,6 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.Main;
 import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
 import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.dao.VoterRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
