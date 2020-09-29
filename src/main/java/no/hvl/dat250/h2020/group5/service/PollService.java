@@ -8,10 +8,9 @@ import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.entities.User;
-import no.hvl.dat250.h2020.group5.converters.StringToAnswerType;
 
+import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.springframework.stereotype.Service;
-
 
 import java.time.Instant;
 import java.util.Date;
@@ -21,19 +20,16 @@ import java.util.Optional;
 @Service
 public class PollService {
 
-    final
-    PollRepository pollRepository;
+    final PollRepository pollRepository;
 
-    final
-    UserRepository userRepository;
+    final UserRepository userRepository;
 
-    final
-    VoteRepository voteRepository;
+    final VoteRepository voteRepository;
 
-    StringToAnswerType stringToAnswerType = new StringToAnswerType();
-
-
-    public PollService(PollRepository pollRepository, UserRepository userRepository, VoteRepository voteRepository) {
+    public PollService(
+            PollRepository pollRepository,
+            UserRepository userRepository,
+            VoteRepository voteRepository) {
         this.pollRepository = pollRepository;
         this.userRepository = userRepository;
         this.voteRepository = voteRepository;
@@ -64,7 +60,9 @@ public class PollService {
         return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
     }
 
-    public List<Poll> getAllPolls() { return pollRepository.findAll();}
+    public List<Poll> getAllPolls() {
+        return pollRepository.findAll();
+    }
 
     public List<Poll> getUserPolls(Long userId) {
         Optional<User> user = userRepository.findById(userId);
@@ -76,10 +74,10 @@ public class PollService {
         return poll.orElse(null);
     }
 
-    public Boolean activatePoll(Long pollId){
+    public Boolean activatePoll(Long pollId) {
 
         Optional<Poll> poll = pollRepository.findById(pollId);
-        if (poll.isEmpty()){
+        if (poll.isEmpty()) {
             return false;
         }
 
@@ -88,10 +86,9 @@ public class PollService {
         return true;
     }
 
-
     public boolean getPollStatus(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
-        if(poll.isEmpty()){
+        if (poll.isEmpty()) {
             return false;
         }
 
@@ -101,24 +98,26 @@ public class PollService {
         return !Instant.now().isAfter(startTimePlusDuration);
     }
 
-    public int getNumberOfVotes(Long pollId, String avt) {
-        Optional<Poll> foundPoll = pollRepository.findById(pollId);
-        AnswerType answerType = stringToAnswerType.convert(avt);
-
-        if (foundPoll.isPresent() && answerType != null) {
-            List<Vote> votes = voteRepository.findByPollAndAnswer(foundPoll.get(), answerType);
-            return votes.size();
-        } else {
-            return -1;
+    public VotesResponse getNumberOfVotes(Long pollId) {
+        Optional<Poll> poll = pollRepository.findById(pollId);
+        if (poll.isEmpty()) {
+            return null;
         }
 
-    }
+        VotesResponse votesResponse = new VotesResponse();
+        int yes = 0;
+        int no = 0;
 
-//    private void deleteVotes(String pollId){
-//        em.getTransaction().begin();
-//        Query q = em.createQuery("DELETE from Poll p WHERE p.id = :id");
-//        q.setParameter("id", pollId);
-//        q.executeUpdate();
-//        em.getTransaction().commit();
-//    }
+        for (Vote vote : poll.get().getVotes()) {
+            if ((vote.getAnswer().equals(AnswerType.YES))) {
+                yes++;
+            } else {
+                no++;
+            }
+        }
+
+        votesResponse.setNo(no);
+        votesResponse.setYes(yes);
+        return votesResponse;
+    }
 }
