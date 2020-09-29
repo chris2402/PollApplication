@@ -1,3 +1,5 @@
+package no.hvl.dat250.h2020.group5.repostories;
+
 import no.hvl.dat250.h2020.group5.Main;
 import no.hvl.dat250.h2020.group5.dao.PollRepository;
 import no.hvl.dat250.h2020.group5.dao.UserRepository;
