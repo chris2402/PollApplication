@@ -21,10 +21,9 @@ public class GuestServiceTest {
 
     @Mock GuestRepository guestRepository;
 
-    private final List<Guest> guests = Arrays.asList(new Guest(), new Guest(), new Guest());
-
     @Test
     public void shouldReturnAListOfAllGuestsTest() {
+        List<Guest> guests = Arrays.asList(new Guest(), new Guest(), new Guest());
         when(guestRepository.findAll()).thenReturn(guests);
         Assertions.assertEquals(guests, guestService.getAllGuests());
     }
