@@ -24,17 +24,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class VoteServiceTest {
 
-    @InjectMocks
-    VoteService voteService;
+    @InjectMocks VoteService voteService;
 
-    @Mock
-    VoterRepository voterRepository;
+    @Mock VoterRepository voterRepository;
 
-    @Mock
-    VoteRepository voteRepository;
+    @Mock VoteRepository voteRepository;
 
-    @Mock
-    PollRepository pollRepository;
+    @Mock PollRepository pollRepository;
 
     private Poll poll;
     private Voter voter;
@@ -133,5 +129,4 @@ public class VoteServiceTest {
         Assertions.assertNull(voteService.findVote(poll.getId(), 4L));
         Assertions.assertNull(voteService.findVote(3L, voter.getId()));
     }
-
 }
