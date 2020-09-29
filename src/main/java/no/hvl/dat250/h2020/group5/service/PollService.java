@@ -1,14 +1,13 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.repositories.PollRepository;
-import no.hvl.dat250.h2020.group5.repositories.UserRepository;
-import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
-import no.hvl.dat250.h2020.group5.entities.User;
-
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.springframework.stereotype.Service;
 
@@ -46,14 +45,26 @@ public class PollService {
         }
     }
 
-    public boolean deletePoll(Long pollId) {
+    public boolean deletePoll(Long pollId, Long userId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()) {
             return false;
-        } else {
+        }
+        if (canDeletePoll(poll.get(), userId)) {
             pollRepository.delete(poll.get());
             return true;
         }
+        return false;
+    }
+
+    private boolean canDeletePoll(Poll poll, Long userId) {
+        Optional<User> maybeUser = userRepository.findById(userId);
+        return maybeUser
+                .filter(
+                        user ->
+                                user.getId().equals(poll.getPollOwner().getId())
+                                        || user.getIsAdmin())
+                .isPresent();
     }
 
     public List<Poll> getAllPublicPolls() {
