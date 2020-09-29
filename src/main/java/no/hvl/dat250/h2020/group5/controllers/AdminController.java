@@ -33,8 +33,9 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{id}")
-    public Boolean editUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
-        return userService.updateUser(id,updateUserRequest);
+    public Boolean editUser(
+            @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
+        return userService.updateUser(id, updateUserRequest);
     }
 
     @DeleteMapping("/users/{id}")
@@ -57,8 +58,8 @@ public class AdminController {
         return pollService.getPoll(id);
     }
 
-    @DeleteMapping(path = "/polls/{id}")
-    public boolean deletePoll(@PathVariable Long id) {
-        return pollService.deletePoll(id);
+    @DeleteMapping(path = "/polls/{id}/{userId}")
+    public boolean deletePoll(@PathVariable Long id, @PathVariable Long userId) {
+        return pollService.deletePoll(id, userId);
     }
 }
