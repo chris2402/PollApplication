@@ -31,4 +31,9 @@ public class Vote {
 
     @Enumerated(EnumType.STRING)
     private AnswerType answer;
+
+    public Vote answer(AnswerType answer) {
+        this.setAnswer(answer);
+        return this;
+    }
 }
