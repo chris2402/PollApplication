@@ -1,9 +1,12 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
+import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
-import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,18 +23,12 @@ import java.net.URL;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AdminControllerTest {
 
-    @LocalServerPort private int port;
-
     @Autowired TestRestTemplate template;
-
     @Autowired AdminController adminController;
-
     @Autowired PollRepository pollRepository;
-
     @Autowired UserRepository userRepository;
-
     @Autowired GuestRepository guestRepository;
-
+    @LocalServerPort private int port;
     private URL base;
     private User user1;
     private Poll poll1;
@@ -148,7 +145,13 @@ public class AdminControllerTest {
 
     @Test
     public void shouldDeletePollByPollId() {
-        template.delete(base.toString() + "/polls/" + poll1.getId().toString());
+        user1.setIsAdmin(true);
+        template.delete(
+                base.toString()
+                        + "/polls/"
+                        + poll1.getId().toString()
+                        + "/"
+                        + user1.getId().toString());
         Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
     }
 }
