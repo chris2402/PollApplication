@@ -49,14 +49,11 @@ public class VoteService {
         Optional<Voter> u = voterRepository.findById(castVoteRequest.getUserId());
         AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
 
-        if (p.isEmpty() || p.get().getStartTime() == null || u.isEmpty() || answer == null) {
-            return null;
-        }
-
-        // Checking if the vote is cast before poll ended.
-        Instant startTime = p.get().getStartTime().toInstant();
-        Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
-        if (Instant.now().isAfter(startTimePlusDuration)) {
+        if (p.isEmpty()
+                || p.get().getStartTime() == null
+                || u.isEmpty()
+                || answer == null
+                || checkVoteDateTime(p)) {
             return null;
         }
 
@@ -83,5 +80,11 @@ public class VoteService {
         }
 
         return vote.get();
+    }
+
+    private Boolean checkVoteDateTime(Optional<Poll> p) {
+        Instant startTime = p.get().getStartTime().toInstant();
+        Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
+        return Instant.now().isAfter(startTimePlusDuration);
     }
 }
