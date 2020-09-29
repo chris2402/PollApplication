@@ -23,18 +23,8 @@ public class VoteController {
         return voteService.vote(castVoteRequest);
     }
 
-    @PatchMapping("/{id}")
-    public Boolean changeVote(@PathVariable Long id, @RequestParam String newAnswer){
-        return voteService.changeVote(id, newAnswer);
-    }
-
     @GetMapping()
     public Vote findVote(@RequestParam Long userId, @RequestParam Long pollId){
         return voteService.findVote(pollId, userId);
-    }
-
-    @DeleteMapping("/{id}")
-    public boolean deleteVote(@PathVariable Long id){
-        return voteService.deleteVote(id);
     }
 }

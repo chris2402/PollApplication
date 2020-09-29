@@ -14,26 +14,24 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 
-
 @Service
 public class VoteService {
 
-    final
-    PollRepository pollRepository;
+    final PollRepository pollRepository;
 
-    final
-    VoterRepository voterRepository;
+    final VoterRepository voterRepository;
 
-    final
-    VoteRepository voteRepository;
+    final VoteRepository voteRepository;
 
     final UserRepository userRepository;
 
-    final
-    StringToAnswerType stringToAnswerType = new StringToAnswerType();
+    final StringToAnswerType stringToAnswerType = new StringToAnswerType();
 
-    public VoteService(PollRepository pollRepository, VoterRepository voterRepository, VoteRepository voteRepository,
-                       UserRepository userRepository) {
+    public VoteService(
+            PollRepository pollRepository,
+            VoterRepository voterRepository,
+            VoteRepository voteRepository,
+            UserRepository userRepository) {
         this.pollRepository = pollRepository;
         this.voterRepository = voterRepository;
         this.voteRepository = voteRepository;
@@ -41,18 +39,21 @@ public class VoteService {
     }
 
     public Vote vote(CastVoteRequest castVoteRequest) {
+        if (castVoteRequest.getPollId() == null
+                || castVoteRequest.getUserId() == null
+                || castVoteRequest.getVote() == null) {
+            return null;
+        }
+
         Optional<Poll> p = pollRepository.findById(castVoteRequest.getPollId());
         Optional<Voter> u = voterRepository.findById(castVoteRequest.getUserId());
         AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
 
-        if (p.isEmpty() || p.get().getStartTime() == null || u.isEmpty() || answer == null ){
-            return null;
-        }
-
-        //Checking if the vote is cast before poll ended.
-        Instant startTime = p.get().getStartTime().toInstant();
-        Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
-        if(Instant.now().isAfter(startTimePlusDuration)){
+        if (p.isEmpty()
+                || p.get().getStartTime() == null
+                || u.isEmpty()
+                || answer == null
+                || checkVoteDateTime(p)) {
             return null;
         }
 
@@ -64,47 +65,26 @@ public class VoteService {
         return voteRepository.save(v);
     }
 
-    //Might be better to just use the vote function
-    public boolean changeVote(Long id, String newAnswer) {
-            Optional<Vote> foundVote = voteRepository.findById(id);
-            AnswerType avt = stringToAnswerType.convert(newAnswer);
-            if (foundVote.isPresent() && avt != null) {
-                foundVote.get().setAnswer(avt);
-                voteRepository.save(foundVote.get());
-                return true;
-            }
-        return false;
-    }
+    public Vote findVote(Long pollId, Long userId) {
+        Optional<Voter> voter = voterRepository.findById(userId);
+        Optional<Poll> poll = pollRepository.findById(pollId);
 
-    public boolean deleteVote(Long id) {
-            Optional<Vote> foundVote = voteRepository.findById(id);
-
-            if (foundVote.isEmpty()) {
-                return false;
-            } else{
-                voteRepository.delete(foundVote.get());
-                return true;
-            }
-    }
-
-
-    public Vote findVote(Long pollId, Long userId){
-        Optional<Voter> foundVoter = voterRepository.findById(userId);
-        Optional<Poll> foundPoll = pollRepository.findById(pollId);
-
-        if(foundVoter.isPresent() && foundPoll.isPresent()) {
-            Voter voter = foundVoter.get();
-            Poll poll = foundPoll.get();
-
-            Optional<Vote> vote = voteRepository.findByVoterAndPoll(voter,poll);
-
-            if(vote.isEmpty()){
-                return null;
-            }
-            return vote.get();
-        }
-        else{
+        if (voter.isEmpty() || poll.isEmpty()) {
             return null;
         }
+
+        Optional<Vote> vote = voteRepository.findByVoterAndPoll(voter.get(), poll.get());
+
+        if (vote.isEmpty()) {
+            return null;
+        }
+
+        return vote.get();
+    }
+
+    private Boolean checkVoteDateTime(Optional<Poll> p) {
+        Instant startTime = p.get().getStartTime().toInstant();
+        Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
+        return Instant.now().isAfter(startTimePlusDuration);
     }
 }
