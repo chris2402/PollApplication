@@ -29,6 +29,8 @@ public class PollServiceTest {
     public void setUp() {
         this.user = new User();
         this.poll = new Poll();
+        user.setId(1L);
+        poll.setId(2L);
     }
 
     @Test
@@ -46,7 +48,38 @@ public class PollServiceTest {
     }
 
     @Test
-    public void shouldDeleteAPollTest() {
-        Poll poll = new Poll();
+    public void shouldDeleteAPollWhenUserIsOwnerTest() {
+        poll.setPollOwner(user);
+        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+        pollService.deletePoll(poll.getId(), user.getId());
+        verify(pollRepository, times(1)).delete(poll);
+    }
+
+    @Test
+    public void shouldDeleteAPollWhenUserIsAdminTest() {
+        User pollOwner = new User();
+        pollOwner.setId(3L);
+        poll.setPollOwner(pollOwner);
+        user.setIsAdmin(true);
+
+        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+
+        pollService.deletePoll(poll.getId(), user.getId());
+
+        verify(pollRepository, times(1)).delete(poll);
+    }
+
+    @Test
+    public void shouldNotDeletePollWhenUserIsNotOwnerOrAdminTest() {
+        User pollOwner = new User();
+        pollOwner.setId(3L);
+        poll.setPollOwner(pollOwner);
+
+        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+        pollService.deletePoll(poll.getId(), user.getId());
+        verify(pollRepository, times(0)).delete(poll);
     }
 }
