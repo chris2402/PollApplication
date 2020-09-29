@@ -101,17 +101,27 @@ public class PollService {
         return !Instant.now().isAfter(startTimePlusDuration);
     }
 
-    public int getNumberOfVotes(Long pollId, String avt) {
-        Optional<Poll> foundPoll = pollRepository.findById(pollId);
-        AnswerType answerType = stringToAnswerType.convert(avt);
-
-        if (foundPoll.isPresent() && answerType != null) {
-            List<Vote> votes = voteRepository.findByPollAndAnswer(foundPoll.get(), answerType);
-            return votes.size();
-        } else {
-            return -1;
+    public VotesResponse getNumberOfVotes(Long pollId) {
+        Optional<Poll> poll = pollRepository.findById(pollId);
+        if (poll.isEmpty()) {
+            return null;
         }
 
+        VotesResponse votesResponse = new VotesResponse();
+        int yes = 0;
+        int no = 0;
+
+        for (Vote vote : poll.get().getVotes()) {
+            if ((vote.getAnswer().equals(AnswerType.YES))) {
+                yes++;
+            } else {
+                no++;
+            }
+        }
+
+        votesResponse.setNo(no);
+        votesResponse.setYes(yes);
+        return votesResponse;
     }
 
 //    private void deleteVotes(String pollId){
