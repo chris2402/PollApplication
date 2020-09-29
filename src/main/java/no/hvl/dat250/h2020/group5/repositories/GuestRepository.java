@@ -1,4 +1,4 @@
-package no.hvl.dat250.h2020.group5.dao;
+package no.hvl.dat250.h2020.group5.repositories;
 
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import org.springframework.data.jpa.repository.JpaRepository;
