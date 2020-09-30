@@ -1,8 +1,8 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.Poll;
-import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import no.hvl.dat250.h2020.group5.service.UserService;
@@ -34,8 +34,9 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{id}")
-    public Boolean editUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
-        return userService.updateUser(id,updateUserRequest);
+    public Boolean editUser(
+            @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
+        return userService.updateUser(id, updateUserRequest);
     }
 
     @DeleteMapping("/users/{id}")
@@ -54,7 +55,7 @@ public class AdminController {
     }
 
     @GetMapping("/polls/{id}")
-    public Poll getPoll(@PathVariable Long id) {
+    public PollResponse getPoll(@PathVariable Long id) {
         return pollService.getPoll(id);
     }
 
