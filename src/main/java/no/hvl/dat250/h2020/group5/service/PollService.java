@@ -8,6 +8,7 @@ import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PollService {
@@ -57,22 +59,31 @@ public class PollService {
         return false;
     }
 
-    public List<Poll> getAllPublicPolls() {
-        return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
+    public List<PollResponse> getAllPublicPolls() {
+        return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC).stream()
+                .map(PollResponse::new)
+                .collect(Collectors.toList());
     }
 
-    public List<Poll> getAllPolls() {
-        return pollRepository.findAll();
+    public List<PollResponse> getAllPolls() {
+        return pollRepository.findAll().stream()
+                .map(PollResponse::new)
+                .collect(Collectors.toList());
     }
 
-    public List<Poll> getUserPolls(Long userId) {
+    public List<PollResponse> getUserPolls(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        return user.map(pollRepository::findAllByPollOwner).orElse(null);
+        if (user.isPresent()) {
+            return pollRepository.findAllByPollOwner(user.get()).stream()
+                    .map(PollResponse::new)
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
-    public Poll getPoll(Long pollId) {
+    public PollResponse getPoll(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
-        return poll.orElse(null);
+        return poll.map(PollResponse::new).orElse(null);
     }
 
     public Boolean activatePoll(Long pollId) {

@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class PollController {
     }
 
     @GetMapping
-    public List<Poll> getAllPublicPolls() {
+    public List<PollResponse> getAllPublicPolls() {
         return pollService.getAllPublicPolls();
     }
 
@@ -33,7 +34,7 @@ public class PollController {
     }
 
     @GetMapping(path = "/{pollId}")
-    public Poll getPoll(@PathVariable Long pollId) {
+    public PollResponse getPoll(@PathVariable Long pollId) {
         return pollService.getPoll(pollId);
     }
 

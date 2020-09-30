@@ -7,6 +7,7 @@ import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,9 +138,8 @@ public class PollServiceTest {
                         new Poll().pollOwner(user));
         when(pollRepository.findAllByPollOwner(user)).thenReturn(polls);
 
-        List<Poll> pollsFromService = pollService.getUserPolls(user.getId());
+        List<PollResponse> pollsFromService = pollService.getUserPolls(user.getId());
 
         Assertions.assertEquals(3, pollsFromService.size());
-        Assertions.assertEquals(user.getId(), pollsFromService.get(0).getPollOwner().getId());
     }
 }
