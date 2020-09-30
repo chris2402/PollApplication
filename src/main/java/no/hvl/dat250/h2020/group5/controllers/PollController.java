@@ -28,9 +28,9 @@ public class PollController {
         return pollService.createPoll(body, userId);
     }
 
-    @DeleteMapping(path = "/{pollId}")
-    public boolean deletePoll(@PathVariable Long pollId) {
-        return pollService.deletePoll(pollId);
+    @DeleteMapping(path = "/{pollId}/{userId}")
+    public boolean deletePoll(@PathVariable Long pollId, @PathVariable Long userId) {
+        return pollService.deletePoll(pollId, userId);
     }
 
     @GetMapping(path = "/{pollId}")
@@ -45,7 +45,7 @@ public class PollController {
 
     @GetMapping(path = "/{pollId}/active")
     public boolean isPollActive(@PathVariable Long pollId) {
-        return pollService.getPollStatus(pollId);
+        return pollService.isActivated(pollId);
     }
 
     @GetMapping(path = "/{pollId}/votes")

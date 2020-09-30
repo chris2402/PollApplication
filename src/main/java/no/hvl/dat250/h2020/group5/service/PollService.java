@@ -1,13 +1,13 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
-import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.springframework.stereotype.Service;
@@ -47,14 +47,16 @@ public class PollService {
         }
     }
 
-    public boolean deletePoll(Long pollId) {
+    public boolean deletePoll(Long pollId, Long userId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()) {
             return false;
-        } else {
+        }
+        if (isOwnerOrAdmin(poll.get(), userId)) {
             pollRepository.delete(poll.get());
             return true;
         }
+        return false;
     }
 
     public List<PollResponse> getAllPublicPolls() {
@@ -96,7 +98,7 @@ public class PollService {
         return true;
     }
 
-    public boolean getPollStatus(Long pollId) {
+    public boolean isActivated(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()) {
             return false;
@@ -105,7 +107,7 @@ public class PollService {
         Instant startTime = poll.get().getStartTime().toInstant();
         Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
 
-        return !Instant.now().isAfter(startTimePlusDuration);
+        return Instant.now().isBefore(startTimePlusDuration);
     }
 
     public VotesResponse getNumberOfVotes(Long pollId) {
@@ -129,5 +131,15 @@ public class PollService {
         votesResponse.setNo(no);
         votesResponse.setYes(yes);
         return votesResponse;
+    }
+
+    private boolean isOwnerOrAdmin(Poll poll, Long userId) {
+        Optional<User> maybeUser = userRepository.findById(userId);
+        return maybeUser
+                .filter(
+                        user ->
+                                user.getId().equals(poll.getPollOwner().getId())
+                                        || user.getIsAdmin())
+                .isPresent();
     }
 }

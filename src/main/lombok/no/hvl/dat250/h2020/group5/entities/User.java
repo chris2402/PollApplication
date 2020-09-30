@@ -11,18 +11,21 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name="APP_USER")
+@Table(name = "APP_USER")
 @EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
     private String password;
 
-    private Boolean isAdmin;
+    private Boolean isAdmin = false;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonManagedReference(value="pollOwner")
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "pollOwner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "pollOwner")
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "pollOwner",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Poll> userPolls = new ArrayList<>();
-
 }

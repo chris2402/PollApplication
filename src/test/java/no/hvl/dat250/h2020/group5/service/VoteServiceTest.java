@@ -1,8 +1,8 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.VoteRepository;
-import no.hvl.dat250.h2020.group5.dao.VoterRepository;
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoterRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
 import org.junit.jupiter.api.Assertions;

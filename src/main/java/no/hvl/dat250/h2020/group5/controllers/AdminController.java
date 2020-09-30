@@ -59,8 +59,8 @@ public class AdminController {
         return pollService.getPoll(id);
     }
 
-    @DeleteMapping(path = "/polls/{id}")
-    public boolean deletePoll(@PathVariable Long id) {
-        return pollService.deletePoll(id);
+    @DeleteMapping(path = "/polls/{id}/{userId}")
+    public boolean deletePoll(@PathVariable Long id, @PathVariable Long userId) {
+        return pollService.deletePoll(id, userId);
     }
 }

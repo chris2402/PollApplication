@@ -18,7 +18,7 @@ public class GuestController {
 
     @GetMapping()
     public List<Guest> getAllGuests(){
-        return guestService.getAllGuest();
+        return guestService.getAllGuests();
     }
 
     @PostMapping()
