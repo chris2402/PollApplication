@@ -1,9 +1,9 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.dao.GuestRepository;
-import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
-import no.hvl.dat250.h2020.group5.dao.VoteRepository;
+import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
@@ -131,7 +131,7 @@ public class PollControllerTest {
 
     @Test
     public void shouldDeletePollByPollId() {
-        template.delete(base.toString() + "/" + poll1.getId().toString());
+        template.delete(base.toString() + "/" + poll1.getId().toString() + "/" + user1.getId().toString());
         Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
     }
 
