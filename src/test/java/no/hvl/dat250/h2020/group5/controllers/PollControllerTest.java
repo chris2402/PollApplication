@@ -28,7 +28,7 @@ public class PollControllerTest {
 
     @Autowired TestRestTemplate template;
 
-    @Autowired AdminController adminController;
+    @Autowired PollController PollController;
 
     @Autowired PollRepository pollRepository;
 
