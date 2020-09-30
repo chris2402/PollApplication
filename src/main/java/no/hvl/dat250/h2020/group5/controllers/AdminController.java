@@ -47,10 +47,10 @@ public class AdminController {
         return pollService.getUserPolls(id);
     }
 
-    @GetMapping("/polls")
-    public List<Poll> getAllPolls() {
-        return pollService.getAllPolls();
-    }
+//    @GetMapping("/polls")
+//    public List<Poll> getAllPolls() {
+//        return pollService.getAllPolls();
+//    }
 
     @GetMapping("/polls/{id}")
     public Poll getPoll(@PathVariable Long id) {

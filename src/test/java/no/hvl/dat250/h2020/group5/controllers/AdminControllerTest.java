@@ -129,14 +129,14 @@ public class AdminControllerTest {
         Assertions.assertEquals(polls[0], pollRepository.findById(poll1.getId()).get());
     }
 
-    @Test
-    public void shouldGetAllPolls() {
-        ResponseEntity<Poll[]> response =
-                template.getForEntity(base.toString() + "/polls", Poll[].class);
-        Poll[] polls = response.getBody();
-        Assertions.assertNotNull(polls);
-        Assertions.assertEquals(2, polls.length);
-    }
+//    @Test
+//    public void shouldGetAllPolls() {
+//        ResponseEntity<Poll[]> response =
+//                template.getForEntity(base.toString() + "/polls", Poll[].class);
+//        Poll[] polls = response.getBody();
+//        Assertions.assertNotNull(polls);
+//        Assertions.assertEquals(2, polls.length);
+//    }
 
     @Test
     public void shouldPollByPollId() {

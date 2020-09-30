@@ -60,8 +60,11 @@ public class PollService {
         return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
     }
 
-    public List<Poll> getAllPolls() {
-        return pollRepository.findAll();
+    public List<Poll> getAllPolls(Long userId) {
+        if(isAdmin(userId)){
+            return pollRepository.findAll();
+        }
+        return null;
     }
 
     public List<Poll> getUserPolls(Long userId) {
@@ -86,9 +89,13 @@ public class PollService {
         return true;
     }
 
-    public boolean getPollStatus(Long pollId) {
+    public Boolean getPollStatus(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()) {
+            return false;
+        }
+
+        if(poll.get().getStartTime() == null){
             return false;
         }
 
@@ -119,5 +126,13 @@ public class PollService {
         votesResponse.setNo(no);
         votesResponse.setYes(yes);
         return votesResponse;
+    }
+
+    private boolean isAdmin(Long userId){
+        Optional<User> foundUser = userRepository.findById(userId);
+        if(foundUser.isPresent()){
+            return foundUser.get().getIsAdmin();
+        }
+        return false;
     }
 }
