@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class GuestService  {
+public class GuestService {
 
     private final GuestRepository guestRepository;
 
@@ -17,7 +17,7 @@ public class GuestService  {
         this.guestRepository = guestRepository;
     }
 
-    public List<GuestResponse> getAllGuests(){
+    public List<GuestResponse> getAllGuests() {
         List<GuestResponse> guestResponseList = new ArrayList<>();
         guestRepository.findAll().forEach(guest -> guestResponseList.add(new GuestResponse(guest)));
         return guestResponseList;
@@ -26,5 +26,4 @@ public class GuestService  {
     public GuestResponse createGuest(Guest guest) {
         return new GuestResponse(guestRepository.save(guest));
     }
-
 }
