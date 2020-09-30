@@ -6,9 +6,11 @@ import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
+import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,8 +29,8 @@ public class UserService {
         this.voteRepository = voteRepository;
     }
 
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UserResponse createUser(User user) {
+        return  new UserResponse(userRepository.save(user));
     }
 
     @Transactional
@@ -48,12 +50,18 @@ public class UserService {
         return true;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        List<UserResponse> userResponseList = new ArrayList<>();
+        userRepository.findAll().forEach(user -> userResponseList.add(createUser(user)));
+        return userResponseList;
     }
 
-    public Optional<User> getUser(Long userId) {
-        return userRepository.findById(userId);
+    public UserResponse getUser(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()){
+            return null;
+        }
+        return new UserResponse(user.get());
     }
 
     public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest) {
