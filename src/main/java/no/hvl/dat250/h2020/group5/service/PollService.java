@@ -50,21 +50,11 @@ public class PollService {
         if (poll.isEmpty()) {
             return false;
         }
-        if (canDeletePoll(poll.get(), userId)) {
+        if (isOwnerOrAdmin(poll.get(), userId)) {
             pollRepository.delete(poll.get());
             return true;
         }
         return false;
-    }
-
-    private boolean canDeletePoll(Poll poll, Long userId) {
-        Optional<User> maybeUser = userRepository.findById(userId);
-        return maybeUser
-                .filter(
-                        user ->
-                                user.getId().equals(poll.getPollOwner().getId())
-                                        || user.getIsAdmin())
-                .isPresent();
     }
 
     public List<Poll> getAllPublicPolls() {
@@ -77,7 +67,7 @@ public class PollService {
 
     public List<Poll> getUserPolls(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
+        return user.map(pollRepository::findAllByPollOwner).orElse(null);
     }
 
     public Poll getPoll(Long pollId) {
@@ -130,5 +120,15 @@ public class PollService {
         votesResponse.setNo(no);
         votesResponse.setYes(yes);
         return votesResponse;
+    }
+
+    private boolean isOwnerOrAdmin(Poll poll, Long userId) {
+        Optional<User> maybeUser = userRepository.findById(userId);
+        return maybeUser
+                .filter(
+                        user ->
+                                user.getId().equals(poll.getPollOwner().getId())
+                                        || user.getIsAdmin())
+                .isPresent();
     }
 }
