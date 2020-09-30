@@ -82,13 +82,13 @@ public class PollControllerTest {
         Vote vote2 = new Vote();
         vote2.setVoter(user2);
         vote2.setPoll(poll1);
-//        vote2.setId((long) 321423412);
+        vote2.setId((long) 321423412);
         vote2.setAnswer(AnswerType.YES);
 
         Vote vote3 = new Vote();
         vote3.setVoter(guest1);
         vote3.setPoll(poll1);
-//        vote3.setId((long) 5644);
+        vote3.setId((long) 5644);
         vote3.setAnswer(AnswerType.NO);
 
         Vote vote4 = new Vote();
