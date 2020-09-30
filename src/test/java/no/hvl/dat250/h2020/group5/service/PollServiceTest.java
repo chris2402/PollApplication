@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -115,5 +116,29 @@ public class PollServiceTest {
         VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
         Assertions.assertEquals(1, votes.getNo());
         Assertions.assertEquals(2, votes.getYes());
+    }
+
+    @Test
+    public void shouldActivateAPollTest() {
+        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+        pollService.activatePoll(poll.getId());
+        Assertions.assertNotNull(poll.getStartTime());
+        Assertions.assertTrue(pollService.isActivated(poll.getId()));
+    }
+
+    @Test
+    public void shouldGetAllPollsByOwnerTest() {
+        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
+        List<Poll> polls =
+                Arrays.asList(
+                        poll.pollOwner(user),
+                        new Poll().pollOwner(user),
+                        new Poll().pollOwner(user));
+        when(pollRepository.findAllByPollOwner(user)).thenReturn(polls);
+
+        List<Poll> pollsFromService = pollService.getUserPolls(user.getId());
+
+        Assertions.assertEquals(3, pollsFromService.size());
+        Assertions.assertEquals(user.getId(), pollsFromService.get(0).getPollOwner().getId());
     }
 }

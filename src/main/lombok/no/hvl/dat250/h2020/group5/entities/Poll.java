@@ -55,4 +55,9 @@ public class Poll {
         this.setVisibilityType(type);
         return this;
     }
+
+    public Poll pollOwner(User owner) {
+        this.setPollOwner(owner);
+        return this;
+    }
 }

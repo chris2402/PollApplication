@@ -44,7 +44,7 @@ public class PollController {
 
     @GetMapping(path = "/{pollId}/active")
     public boolean isPollActive(@PathVariable Long pollId) {
-        return pollService.getPollStatus(pollId);
+        return pollService.isActivated(pollId);
     }
 
     @GetMapping(path = "/{pollId}/votes")
