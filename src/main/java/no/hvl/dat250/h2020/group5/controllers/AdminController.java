@@ -3,6 +3,7 @@ package no.hvl.dat250.h2020.group5.controllers;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
+import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +24,13 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public List<User> getUsers() {
+    public List<UserResponse> getUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/users/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userService.getUser(id).orElse(null);
+    public UserResponse getUser(@PathVariable Long id) {
+        return userService.getUser(id);
     }
 
     @PatchMapping("/users/{id}")
