@@ -1,6 +1,5 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
@@ -45,12 +44,12 @@ public class AdminController {
     }
 
     @GetMapping("/users/{id}/polls")
-    public List<Poll> getAllUserPolls(@PathVariable Long id) {
+    public List<PollResponse> getAllUserPolls(@PathVariable Long id) {
         return pollService.getUserPolls(id);
     }
 
     @GetMapping("/polls")
-    public List<Poll> getAllPolls() {
+    public List<PollResponse> getAllPolls() {
         return pollService.getAllPolls();
     }
 
