@@ -1,7 +1,9 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -25,6 +27,5 @@ public class User extends Voter {
             mappedBy = "pollOwner",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    @Setter(value = AccessLevel.NONE)
     private List<Poll> userPolls = new ArrayList<>();
 }
