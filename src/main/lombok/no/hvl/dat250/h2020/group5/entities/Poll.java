@@ -2,9 +2,11 @@ package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.*;
-import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -48,4 +50,14 @@ public class Poll {
             cascade = CascadeType.ALL)
     @JsonManagedReference(value = "votes")
     private List<Vote> votes = new ArrayList<>();
+
+    public Poll visibilityType(PollVisibilityType type) {
+        this.setVisibilityType(type);
+        return this;
+    }
+
+    public Poll pollOwner(User owner) {
+        this.setPollOwner(owner);
+        return this;
+    }
 }

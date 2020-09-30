@@ -1,6 +1,6 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.GuestRepository;
+import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +16,7 @@ public class GuestService  {
         this.guestRepository = guestRepository;
     }
 
-    public List<Guest> getAllGuest(){
+    public List<Guest> getAllGuests(){
         return guestRepository.findAll();
     }
 
