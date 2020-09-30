@@ -97,7 +97,7 @@ public class PollService {
         return true;
     }
 
-    public boolean getPollStatus(Long pollId) {
+    public boolean isActivated(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()) {
             return false;
@@ -106,7 +106,7 @@ public class PollService {
         Instant startTime = poll.get().getStartTime().toInstant();
         Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
 
-        return !Instant.now().isAfter(startTimePlusDuration);
+        return Instant.now().isBefore(startTimePlusDuration);
     }
 
     public VotesResponse getNumberOfVotes(Long pollId) {
