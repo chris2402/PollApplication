@@ -1,14 +1,14 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
-import no.hvl.dat250.h2020.group5.dao.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
-import no.hvl.dat250.h2020.group5.entities.User;
-
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PollService {
@@ -46,35 +47,46 @@ public class PollService {
         }
     }
 
-    public boolean deletePoll(Long pollId) {
+    public boolean deletePoll(Long pollId, Long userId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()) {
             return false;
-        } else {
+        }
+        if (isOwnerOrAdmin(poll.get(), userId)) {
             pollRepository.delete(poll.get());
             return true;
         }
+        return false;
     }
 
-    public List<Poll> getAllPublicPolls() {
-        return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
+    public List<PollResponse> getAllPublicPolls() {
+        return pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC).stream()
+                .map(PollResponse::new)
+                .collect(Collectors.toList());
     }
 
-    public List<Poll> getAllPolls(Long userId) {
-        if(isAdmin(userId)){
-            return pollRepository.findAll();
+    public List<PollResponse> getAllPolls(Long userId) {
+        if (isAdmin(userId)) {
+            return pollRepository.findAll().stream()
+                    .map(PollResponse::new)
+                    .collect(Collectors.toList());
         }
         return null;
     }
 
-    public List<Poll> getUserPolls(Long userId) {
+    public List<PollResponse> getUserPolls(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        return user.map(value -> pollRepository.findAllByPollOwner(value)).orElse(null);
+        if (user.isPresent()) {
+            return pollRepository.findAllByPollOwner(user.get()).stream()
+                    .map(PollResponse::new)
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
-    public Poll getPoll(Long pollId) {
+    public PollResponse getPoll(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
-        return poll.orElse(null);
+        return poll.map(PollResponse::new).orElse(null);
     }
 
     public Boolean activatePoll(Long pollId) {
@@ -89,20 +101,20 @@ public class PollService {
         return true;
     }
 
-    public Boolean getPollStatus(Long pollId) {
+    public boolean isActivated(Long pollId) {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if (poll.isEmpty()) {
             return false;
         }
 
-        if(poll.get().getStartTime() == null){
+        if (poll.get().getStartTime() == null) {
             return false;
         }
 
         Instant startTime = poll.get().getStartTime().toInstant();
         Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
 
-        return !Instant.now().isAfter(startTimePlusDuration);
+        return Instant.now().isBefore(startTimePlusDuration);
     }
 
     public VotesResponse getNumberOfVotes(Long pollId) {
@@ -128,11 +140,21 @@ public class PollService {
         return votesResponse;
     }
 
-    private boolean isAdmin(Long userId){
+    private boolean isAdmin(Long userId) {
         Optional<User> foundUser = userRepository.findById(userId);
-        if(foundUser.isPresent()){
+        if (foundUser.isPresent()) {
             return foundUser.get().getIsAdmin();
         }
         return false;
+    }
+
+    private boolean isOwnerOrAdmin(Poll poll, Long userId) {
+        Optional<User> maybeUser = userRepository.findById(userId);
+        return maybeUser
+                .filter(
+                        user ->
+                                user.getId().equals(poll.getPollOwner().getId())
+                                        || user.getIsAdmin())
+                .isPresent();
     }
 }

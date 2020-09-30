@@ -1,8 +1,8 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.entities.Poll;
-import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
+import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -23,18 +23,19 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public List<User> getUsers() {
+    public List<UserResponse> getUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/users/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userService.getUser(id).orElse(null);
+    public UserResponse getUser(@PathVariable Long id) {
+        return userService.getUser(id);
     }
 
     @PatchMapping("/users/{id}")
-    public Boolean editUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
-        return userService.updateUser(id,updateUserRequest);
+    public Boolean editUser(
+            @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
+        return userService.updateUser(id, updateUserRequest);
     }
 
     @DeleteMapping("/users/{id}")
@@ -43,7 +44,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/{id}/polls")
-    public List<Poll> getAllUserPolls(@PathVariable Long id) {
+    public List<PollResponse> getAllUserPolls(@PathVariable Long id) {
         return pollService.getUserPolls(id);
     }
 
@@ -53,12 +54,12 @@ public class AdminController {
 //    }
 
     @GetMapping("/polls/{id}")
-    public Poll getPoll(@PathVariable Long id) {
+    public PollResponse getPoll(@PathVariable Long id) {
         return pollService.getPoll(id);
     }
 
-    @DeleteMapping(path = "/polls/{id}")
-    public boolean deletePoll(@PathVariable Long id) {
-        return pollService.deletePoll(id);
+    @DeleteMapping(path = "/polls/{id}/{userId}")
+    public boolean deletePoll(@PathVariable Long id, @PathVariable Long userId) {
+        return pollService.deletePoll(id, userId);
     }
 }

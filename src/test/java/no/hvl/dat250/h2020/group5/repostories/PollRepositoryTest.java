@@ -1,12 +1,13 @@
+package no.hvl.dat250.h2020.group5.repostories;
+
 import no.hvl.dat250.h2020.group5.Main;
-import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
-import no.hvl.dat250.h2020.group5.dao.VoteRepository;
-import no.hvl.dat250.h2020.group5.dao.VoterRepository;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
-import no.hvl.dat250.h2020.group5.entities.Voter;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,5 +88,18 @@ public class PollRepositoryTest {
     public void shouldNotDeleteUserWhenDeletingPollTest() {
         pollRepository.deleteById(poll.getId());
         Assertions.assertEquals(user.getId(), userRepository.findAll().get(0).getId());
+    }
+
+    @Test
+    public void shouldReturnPublicPollsTest() {
+        pollRepository.saveAll(
+                Arrays.asList(
+                        new Poll().visibilityType(PollVisibilityType.PUBLIC),
+                        new Poll().visibilityType(PollVisibilityType.PUBLIC),
+                        new Poll().visibilityType(PollVisibilityType.PRIVATE)));
+        Assertions.assertEquals(
+                2, pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC).size());
+        Assertions.assertEquals(
+                1, pollRepository.findAllByVisibilityType(PollVisibilityType.PRIVATE).size());
     }
 }

@@ -1,10 +1,14 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.dao.GuestRepository;
-import no.hvl.dat250.h2020.group5.dao.PollRepository;
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
-import no.hvl.dat250.h2020.group5.entities.*;
+import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
+import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,22 +20,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import java.net.URL;
+import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AdminControllerTest {
 
-    @LocalServerPort private int port;
-
     @Autowired TestRestTemplate template;
-
     @Autowired AdminController adminController;
-
     @Autowired PollRepository pollRepository;
-
     @Autowired UserRepository userRepository;
-
     @Autowired GuestRepository guestRepository;
-
+    @LocalServerPort private int port;
     private URL base;
     private User user1;
     private Poll poll1;
@@ -78,22 +77,25 @@ public class AdminControllerTest {
 
     @Test
     public void shouldGetAllUsers() {
-        ResponseEntity<User[]> response =
-                template.getForEntity(base.toString() + "/users", User[].class);
-        User[] users = response.getBody();
+        ResponseEntity<UserResponse[]> response =
+                template.getForEntity(base.toString() + "/users", UserResponse[].class);
+        UserResponse[] users = response.getBody();
         Assertions.assertNotNull(users);
         Assertions.assertEquals(2, users.length);
-        Assertions.assertEquals(users[0], userRepository.findById(user1.getId()).get());
+        Assertions.assertEquals(users[0].getId(), userRepository.findById(user1.getId()).get().getId());
     }
 
     @Test
     public void shouldGetUserById() {
 
-        ResponseEntity<User> response =
+        ResponseEntity<UserResponse> response =
                 template.getForEntity(
-                        base.toString() + "/users/" + user1.getId().toString(), User.class);
-        User user = response.getBody();
-        Assertions.assertEquals(user, userRepository.findById(user1.getId()).get());
+                        base.toString() + "/users/" + user1.getId().toString(), UserResponse.class);
+        UserResponse user = response.getBody();
+        Optional<User> userFromRepository = userRepository.findById(user1.getId());
+        Assertions.assertNotNull(user);
+        Assertions.assertTrue(userFromRepository.isPresent());
+        Assertions.assertEquals(user.getId(), userFromRepository.get().getId());
     }
 
     @Test
@@ -119,14 +121,16 @@ public class AdminControllerTest {
 
     @Test
     public void shouldGetAllUsersPolls() {
-        ResponseEntity<Poll[]> response =
+        ResponseEntity<UserResponse[]> response =
                 template.getForEntity(
                         base.toString() + "/users/" + user1.getId().toString() + "/polls",
-                        Poll[].class);
-        Poll[] polls = response.getBody();
+                        UserResponse[].class);
+        UserResponse[] polls = response.getBody();
+        Optional<Poll> fromPollRepository = pollRepository.findById(poll1.getId());
+        Assertions.assertTrue(fromPollRepository.isPresent());
         Assertions.assertNotNull(polls);
         Assertions.assertEquals(1, polls.length);
-        Assertions.assertEquals(polls[0], pollRepository.findById(poll1.getId()).get());
+        Assertions.assertEquals(polls[0].getId(), fromPollRepository.get().getId());
     }
 
 //    @Test
@@ -148,7 +152,13 @@ public class AdminControllerTest {
 
     @Test
     public void shouldDeletePollByPollId() {
-        template.delete(base.toString() + "/polls/" + poll1.getId().toString());
+        user1.setIsAdmin(true);
+        template.delete(
+                base.toString()
+                        + "/polls/"
+                        + poll1.getId().toString()
+                        + "/"
+                        + user1.getId().toString());
         Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
     }
 }

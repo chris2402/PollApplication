@@ -1,10 +1,11 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
+import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import no.hvl.dat250.h2020.group5.service.UserService;
-import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,33 +24,33 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getUsers() {
+    public List<UserResponse> getUsers() {
         return userService.getAllUsers();
     }
 
     @PostMapping()
-    public User createUser(@RequestBody User user){
+    public UserResponse createUser(@RequestBody User user) {
         return userService.createUser(user);
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id){
-        return userService.getUser(id).orElse(null);
+    public UserResponse getUser(@PathVariable Long id) {
+        return userService.getUser(id);
     }
 
     @PatchMapping("/{id}")
-    public Boolean updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
+    public Boolean updateUser(
+            @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
         return userService.updateUser(id, updateUserRequest);
     }
 
     @DeleteMapping("/{id}")
-    public Boolean deleteUser(@PathVariable Long id){
+    public Boolean deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
 
     @RequestMapping(path = "/{id}/polls")
-    public List<Poll> getUserPolls(@PathVariable Long id){
+    public List<PollResponse> getUserPolls(@PathVariable Long id) {
         return pollService.getUserPolls(id);
     }
-
 }

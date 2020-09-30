@@ -1,9 +1,10 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.dao.UserRepository;
-import no.hvl.dat250.h2020.group5.dao.VoteRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
+import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ public class UserServiceTest {
     @Test
     public void shouldCreateUserTest() {
         Assertions.assertNotNull(userService.createUser(user1));
-        Assertions.assertEquals(User.class, userService.createUser(new User()).getClass());
+        Assertions.assertEquals(UserResponse.class, userService.createUser(new User()).getClass());
     }
 
     @Test
@@ -72,8 +73,7 @@ public class UserServiceTest {
 
     @Test
     public void shouldFindUserByUserId() {
-        Assertions.assertTrue(userService.getUser(user1.getId()).isPresent());
-        Assertions.assertEquals(user1, userService.getUser(user1.getId()).get());
+        Assertions.assertEquals(user1.getId(), userService.getUser(user1.getId()).getId());
     }
 
     @Test
