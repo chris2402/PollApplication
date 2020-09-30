@@ -120,6 +120,7 @@ public class PollServiceTest {
 
     @Test
     public void shouldActivateAPollTest() {
+        poll.setPollDuration(10000000);
         when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
         pollService.activatePoll(poll.getId());
         Assertions.assertNotNull(poll.getStartTime());
