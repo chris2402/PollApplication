@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,10 +28,11 @@ public class UserControllerTest {
     @MockBean private PollService pollService;
 
     private UserResponse userResponse;
+    private User user;
 
     @BeforeEach
     public void setUp() {
-        User user = new User();
+        this.user = new User();
         user.setId(1L);
         user.setUsername("my_awesome_name");
         this.userResponse = new UserResponse(user);
@@ -43,6 +45,22 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(
                         content()
-                                .json("{\"id\":1,\"username\":my_awesome_name,\"isAdmin\":false}"));
+                                .json(
+                                        "{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
+    }
+
+    @Test
+    public void shouldCreateUserTest() throws Exception {
+        when(userService.createUser(any())).thenReturn(userResponse);
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/users")
+                                .content(
+                                        "{\"username\":\"my_awesome_name\", \"password\":\"my_password\", \"isAdmin\":\"false\"}")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(
+                        content()
+                                .json(
+                                        "{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
     }
 }
