@@ -2,7 +2,6 @@ package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
-import no.hvl.dat250.h2020.group5.service.PollService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,14 +26,11 @@ public class UserControllerTest {
 
     @MockBean private UserService userService;
 
-    @MockBean private PollService pollService;
-
     private UserResponse userResponse;
-    private User user;
 
     @BeforeEach
     public void setUp() {
-        this.user = new User();
+        User user = new User();
         user.setId(1L);
         user.setUsername("my_awesome_name");
         this.userResponse = new UserResponse(user);
