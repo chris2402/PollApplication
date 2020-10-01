@@ -32,6 +32,7 @@ public class UserControllerTest {
     public void setUp() {
         User user = new User();
         user.setId(1L);
+        user.setUsername("my_awesome_name");
         this.userResponse = new UserResponse(user);
         when(userService.getUser(1L)).thenReturn(userResponse);
     }
@@ -40,6 +41,8 @@ public class UserControllerTest {
     public void shouldReturnOneUserTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/users/1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\":1,\"username\":null,\"isAdmin\":false}"));
+                .andExpect(
+                        content()
+                                .json("{\"id\":1,\"username\":my_awesome_name,\"isAdmin\":false}"));
     }
 }
