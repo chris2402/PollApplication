@@ -23,9 +23,9 @@ public class UserController {
         this.pollService = pollService;
     }
 
-    @GetMapping
-    public List<UserResponse> getUsers() {
-        return userService.getAllUsers();
+    @GetMapping("/admin/{id}")
+    public List<UserResponse> getUsers(@PathVariable Long adminId) {
+        return userService.getAllUsers(adminId);
     }
 
     @PostMapping
