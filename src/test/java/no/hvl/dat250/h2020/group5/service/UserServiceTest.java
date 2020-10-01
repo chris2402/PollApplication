@@ -1,8 +1,9 @@
 package no.hvl.dat250.h2020.group5.service;
 
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
@@ -13,7 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -67,8 +70,14 @@ public class UserServiceTest {
     }
 
     @Test
-    public void shouldFindAllUsers() {
-        Assertions.assertEquals(2, userService.getAllUsers().size());
+    public void shouldGiveAllUsersToAdminTest() {
+        user1.setIsAdmin(true);
+        Assertions.assertEquals(2, userService.getAllUsers(user1.getId()).size());
+    }
+
+    @Test
+    public void shouldNotGiveAllUsersNoAdminTest() {
+        Assertions.assertNull(userService.getAllUsers(user1.getId()));
     }
 
     @Test

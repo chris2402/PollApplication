@@ -76,16 +76,6 @@ public class AdminControllerTest {
     }
 
     @Test
-    public void shouldGetAllUsers() {
-        ResponseEntity<UserResponse[]> response =
-                template.getForEntity(base.toString() + "/users", UserResponse[].class);
-        UserResponse[] users = response.getBody();
-        Assertions.assertNotNull(users);
-        Assertions.assertEquals(2, users.length);
-        Assertions.assertEquals(users[0].getId(), userRepository.findById(user1.getId()).get().getId());
-    }
-
-    @Test
     public void shouldGetUserById() {
 
         ResponseEntity<UserResponse> response =

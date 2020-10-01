@@ -22,11 +22,6 @@ public class AdminController {
         this.pollService = pollService;
     }
 
-    @GetMapping("/users")
-    public List<UserResponse> getUsers() {
-        return userService.getAllUsers();
-    }
-
     @GetMapping("/users/{id}")
     public UserResponse getUser(@PathVariable Long id) {
         return userService.getUser(id);
