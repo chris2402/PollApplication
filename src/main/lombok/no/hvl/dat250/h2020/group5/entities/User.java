@@ -28,4 +28,19 @@ public class User extends Voter {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<Poll> userPolls = new ArrayList<>();
+
+    public User userName(String username) {
+        setUsername(username);
+        return this;
+    }
+
+    public User password(String password) {
+        setPassword(password);
+        return this;
+    }
+
+    public User admin(boolean isAdmin) {
+        setIsAdmin(isAdmin);
+        return this;
+    }
 }
