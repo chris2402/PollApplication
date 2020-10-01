@@ -78,7 +78,13 @@ public class UserControllerTest {
     @Test
     public void shouldUpdateUserTest() throws Exception {
         when(userService.updateUser(any(), any())).thenReturn(true);
-        mockMvc.perform(MockMvcRequestBuilders.put("/users/1").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch("/users/1")
+                                .content(
+                                        "{\"username\":\"my_awesome_username\", \"oldPassword\":\"my_password\"}, \"newPassword\":\"my_new_awesome_password\"}")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
     }
 }
