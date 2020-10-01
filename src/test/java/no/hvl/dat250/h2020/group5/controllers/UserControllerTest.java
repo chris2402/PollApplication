@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Arrays;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -86,5 +88,29 @@ public class UserControllerTest {
                                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
+    }
+
+    @Test
+    public void shouldGiveAllUsersTest() throws Exception {
+        when(userService.getAllUsers(any()))
+                .thenReturn(
+                        Arrays.asList(
+                                new UserResponse(
+                                        new User().userName("user1").admin(true).password("abcde")),
+                                new UserResponse(
+                                        new User().userName("user2").admin(false).password("1234")),
+                                new UserResponse(
+                                        new User()
+                                                .userName("user3")
+                                                .admin(false)
+                                                .password("my_cool_password"))));
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/users/admin/1")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(
+                        content()
+                                .string(
+                                        "[{\"id\":null,\"username\":\"user1\",\"isAdmin\":true},{\"id\":null,\"username\":\"user2\",\"isAdmin\":false},{\"id\":null,\"username\":\"user3\",\"isAdmin\":false}]"));
     }
 }

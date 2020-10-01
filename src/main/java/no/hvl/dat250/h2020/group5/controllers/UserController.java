@@ -23,7 +23,7 @@ public class UserController {
         this.pollService = pollService;
     }
 
-    @GetMapping("/admin/{id}")
+    @GetMapping("/admin/{adminId}")
     public List<UserResponse> getUsers(@PathVariable Long adminId) {
         return userService.getAllUsers(adminId);
     }
