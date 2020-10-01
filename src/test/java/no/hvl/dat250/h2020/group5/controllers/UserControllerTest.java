@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
@@ -25,16 +26,20 @@ public class UserControllerTest {
 
     @MockBean private PollService pollService;
 
+    private UserResponse userResponse;
+
     @BeforeEach
     public void setUp() {
         User user = new User();
         user.setId(1L);
-        when(userService.getUser(1L)).thenReturn(new UserResponse(user));
+        this.userResponse = new UserResponse(user);
+        when(userService.getUser(1L)).thenReturn(userResponse);
     }
 
     @Test
     public void shouldReturnOneUserTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/users/1").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"id\":1,\"username\":null,\"isAdmin\":false}"));
     }
 }
