@@ -38,15 +38,15 @@ public class GuestControllerTest {
 
         this.guest = new Guest();
         this.guest.setUsername("Guest 127348");
-        this.guest.setId((long) 20);
+        this.guest.setId(20L);
 
         Guest guest2 = new Guest();
         guest2.setUsername("Guest 30");
-        guest2.setId((long) 30);
+        guest2.setId(30L);
 
         Guest guest3 = new Guest();
         guest3.setUsername("Guest 60");
-        guest3.setId((long) 60);
+        guest3.setId(60L);
 
         guests.addAll(Arrays.asList(guest, guest2, guest3));
 
@@ -86,7 +86,7 @@ public class GuestControllerTest {
         ResponseEntity<GuestResponse> response =
                 template.postForEntity(base.toString(), newGuest, GuestResponse.class);
         GuestResponse guestResponse = response.getBody();
-        assert guestResponse != null;
+        Assertions.assertNotNull(guestResponse);
         Optional<Guest> guestFromRepository = guestRepository.findById(guestResponse.getId());
 
         Assertions.assertNotNull(guestResponse);

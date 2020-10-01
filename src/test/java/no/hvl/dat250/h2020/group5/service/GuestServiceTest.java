@@ -34,15 +34,15 @@ public class GuestServiceTest {
     public void setup() {
 
         this.guest1 = new Guest();
-        this.guest1.setId((long) 1);
+        this.guest1.setId(1L);
         this.guest1.setUsername("Guest 1");
 
         this.guest2 = new Guest();
-        this.guest2.setId((long) 2);
+        this.guest2.setId(2L);
         this.guest2.setUsername("Guest 2");
 
         this.guest3 = new Guest();
-        this.guest3.setId((long) 3);
+        this.guest3.setId(3L);
         this.guest3.setUsername("Guest 3");
 
         when(guestRepository.save(guest1)).thenReturn(guest1);
