@@ -10,9 +10,9 @@ import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -54,9 +54,9 @@ public class UserService {
         Optional<User> maybeUser = userRepository.findById(adminId);
         if (maybeUser.isPresent()) {
             if (maybeUser.get().getIsAdmin()) {
-                List<UserResponse> userResponseList = new ArrayList<>();
-                userRepository.findAll().forEach(user -> userResponseList.add(createUser(user)));
-                return userResponseList;
+                return userRepository.findAll().stream()
+                        .map(UserResponse::new)
+                        .collect(Collectors.toList());
             }
         }
         return null;
