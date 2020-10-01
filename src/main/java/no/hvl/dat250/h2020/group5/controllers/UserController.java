@@ -51,6 +51,6 @@ public class UserController {
 
     @RequestMapping(path = "/{id}/polls")
     public List<PollResponse> getUserPolls(@PathVariable Long id) {
-        return pollService.getUserPolls(userId, id);
+        return pollService.getUserPollsAsOwner(id);
     }
 }

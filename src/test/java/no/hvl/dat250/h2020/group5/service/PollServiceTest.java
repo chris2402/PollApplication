@@ -33,6 +33,7 @@ public class PollServiceTest {
 
     private User user;
     private Poll poll;
+    private List<Poll> polls;
 
     @BeforeEach
     public void setUp() {
@@ -40,6 +41,14 @@ public class PollServiceTest {
         this.poll = new Poll();
         user.setId(1L);
         poll.setId(2L);
+
+        this.polls =
+                Arrays.asList(
+                        poll.pollOwner(user),
+                        new Poll().pollOwner(user),
+                        new Poll().pollOwner(user));
+
+        when(pollRepository.findAllByPollOwner(user)).thenReturn(polls);
     }
 
     @Test
@@ -131,15 +140,29 @@ public class PollServiceTest {
     @Test
     public void shouldGetAllPollsByOwnerTest() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
-        List<Poll> polls =
-                Arrays.asList(
-                        poll.pollOwner(user),
-                        new Poll().pollOwner(user),
-                        new Poll().pollOwner(user));
-        when(pollRepository.findAllByPollOwner(user)).thenReturn(polls);
 
-        List<PollResponse> pollsFromService = pollService.getUserPolls(userId, user.getId());
+        List<PollResponse> pollsFromService = pollService.getUserPollsAsOwner(user.getId());
 
         Assertions.assertEquals(3, pollsFromService.size());
+    }
+
+    @Test
+    public void shouldOnlyGetAllPollsToUserWhenAdminTest() {
+        User admin = new User();
+        User notAdmin = new User();
+        notAdmin.setId(6L);
+        admin.setId(5L);
+        admin.setIsAdmin(true);
+        when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
+        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
+        when(userRepository.findById(notAdmin.getId())).thenReturn(java.util.Optional.of(notAdmin));
+
+        List<PollResponse> pollsFromServiceAsAdmin =
+                pollService.getUserPollsAsAdmin(user.getId(), admin.getId());
+        List<PollResponse> pollsFromServiceNotAdmin =
+                pollService.getUserPollsAsAdmin(user.getId(), notAdmin.getId());
+
+        Assertions.assertEquals(3, pollsFromServiceAsAdmin.size());
+        Assertions.assertNull(pollsFromServiceNotAdmin);
     }
 }
