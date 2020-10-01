@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import no.hvl.dat250.h2020.group5.service.GuestService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,12 @@ public class GuestController {
     }
 
     @GetMapping()
-    public List<Guest> getAllGuests(){
+    public List<GuestResponse> getAllGuests(){
         return guestService.getAllGuests();
     }
 
     @PostMapping()
-    public Guest createGuest(@RequestBody Guest guest){
+    public GuestResponse createGuest(@RequestBody Guest guest){
         return guestService.createGuest(guest);
     }
 
