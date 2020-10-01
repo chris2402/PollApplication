@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -132,6 +133,8 @@ public class PollControllerTest {
     @Test
     public void shouldDeletePollByPollId() {
         template.delete(base.toString() + "/" + poll1.getId().toString() + "/" + user1.getId().toString());
+        List<Vote> votes = voteRepository.findByPoll(poll1);
+        Assertions.assertEquals(votes.size(), 0);
         Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
     }
 
