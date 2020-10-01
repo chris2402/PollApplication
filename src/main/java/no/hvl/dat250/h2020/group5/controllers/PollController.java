@@ -23,6 +23,17 @@ public class PollController {
         return pollService.getAllPublicPolls();
     }
 
+    @GetMapping("/admin/{adminId}/polls/{userId}")
+    public List<PollResponse> getAllUserPolls(
+            @PathVariable Long adminId, @PathVariable Long userId) {
+        return pollService.getUserPolls(userId, adminId);
+    }
+
+    @GetMapping("/admin/{adminId}/polls")
+    public List<PollResponse> getAllPolls(@PathVariable Long adminId) {
+        return pollService.getAllPolls(adminId);
+    }
+
     @PostMapping(path = "/{userId}")
     public Poll createPoll(@RequestBody Poll body, @PathVariable Long userId) {
         return pollService.createPoll(body, userId);

@@ -65,13 +65,13 @@ public class PollService {
                 .collect(Collectors.toList());
     }
 
-    public List<PollResponse> getAllPolls() {
+    public List<PollResponse> getAllPolls(Long adminId) {
         return pollRepository.findAll().stream()
                 .map(PollResponse::new)
                 .collect(Collectors.toList());
     }
 
-    public List<PollResponse> getUserPolls(Long userId) {
+    public List<PollResponse> getUserPolls(Long id, Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
             return pollRepository.findAllByPollOwner(user.get()).stream()

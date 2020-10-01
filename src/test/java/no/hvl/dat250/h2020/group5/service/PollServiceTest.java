@@ -138,7 +138,7 @@ public class PollServiceTest {
                         new Poll().pollOwner(user));
         when(pollRepository.findAllByPollOwner(user)).thenReturn(polls);
 
-        List<PollResponse> pollsFromService = pollService.getUserPolls(user.getId());
+        List<PollResponse> pollsFromService = pollService.getUserPolls(userId, user.getId());
 
         Assertions.assertEquals(3, pollsFromService.size());
     }
