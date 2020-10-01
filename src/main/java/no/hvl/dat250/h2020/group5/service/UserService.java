@@ -52,12 +52,10 @@ public class UserService {
 
     public List<UserResponse> getAllUsers(Long adminId) {
         Optional<User> maybeUser = userRepository.findById(adminId);
-        if (maybeUser.isPresent()) {
-            if (maybeUser.get().getIsAdmin()) {
-                return userRepository.findAll().stream()
-                        .map(UserResponse::new)
-                        .collect(Collectors.toList());
-            }
+        if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
+            return userRepository.findAll().stream()
+                    .map(UserResponse::new)
+                    .collect(Collectors.toList());
         }
         return null;
     }
