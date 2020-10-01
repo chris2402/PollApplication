@@ -23,10 +23,15 @@ public class PollController {
         return pollService.getAllPublicPolls();
     }
 
-    @GetMapping("/admin/{adminId}/polls/{userId}")
-    public List<PollResponse> getAllUserPolls(
-            @PathVariable Long adminId, @PathVariable Long userId) {
-        return pollService.getUserPolls(userId, adminId);
+    @GetMapping("/admin/{adminId}/polls/{ownerId}")
+    public List<PollResponse> getAllPollsToOwner(
+            @PathVariable Long adminId, @PathVariable Long ownerId) {
+        return pollService.getUserPollsAsAdmin(ownerId, adminId);
+    }
+
+    @GetMapping("polls/{ownerId}")
+    public List<PollResponse> getAllPollsAsOwner(@PathVariable Long ownerId) {
+        return pollService.getUserPollsAsOwner(ownerId);
     }
 
     @GetMapping("/admin/{adminId}/polls")
