@@ -52,4 +52,9 @@ public class PollController {
     public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
         return pollService.getNumberOfVotes(pollId);
     }
+
+    @RequestMapping(path = "/{id}/polls")
+    public List<PollResponse> getUserPolls(@PathVariable Long id) {
+        return pollService.getUserPolls(id);
+    }
 }

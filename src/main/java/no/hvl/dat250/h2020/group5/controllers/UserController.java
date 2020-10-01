@@ -2,7 +2,6 @@ package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
-import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import no.hvl.dat250.h2020.group5.service.UserService;
@@ -47,10 +46,5 @@ public class UserController {
     @DeleteMapping("/{id}")
     public Boolean deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
-    }
-
-    @RequestMapping(path = "/{id}/polls")
-    public List<PollResponse> getUserPolls(@PathVariable Long id) {
-        return pollService.getUserPolls(id);
     }
 }
