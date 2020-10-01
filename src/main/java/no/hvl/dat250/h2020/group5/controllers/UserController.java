@@ -3,7 +3,6 @@ package no.hvl.dat250.h2020.group5.controllers;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
-import no.hvl.dat250.h2020.group5.service.PollService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,11 +14,8 @@ public class UserController {
 
     private final UserService userService;
 
-    private final PollService pollService;
-
-    public UserController(UserService userService, PollService pollService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.pollService = pollService;
     }
 
     @GetMapping("/admin/{adminId}")
