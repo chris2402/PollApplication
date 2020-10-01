@@ -58,9 +58,27 @@ public class UserControllerTest {
                                         "{\"username\":\"my_awesome_name\", \"password\":\"my_password\", \"isAdmin\":\"false\"}")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
                 .andExpect(
                         content()
                                 .json(
                                         "{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
+    }
+
+    @Test
+    public void shouldDeleteUserTest() throws Exception {
+        when(userService.deleteUser(any())).thenReturn(true);
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/users/1")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+    }
+
+    @Test
+    public void shouldUpdateUserTest() throws Exception {
+        when(userService.updateUser(any(), any())).thenReturn(true);
+        mockMvc.perform(MockMvcRequestBuilders.put("/users/1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }
