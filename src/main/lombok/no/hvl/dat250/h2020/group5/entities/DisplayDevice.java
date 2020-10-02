@@ -8,4 +8,4 @@ import javax.persistence.Entity;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-public class DisplayDevice extends Device {}
+public class DisplayDevice extends Voter {}
