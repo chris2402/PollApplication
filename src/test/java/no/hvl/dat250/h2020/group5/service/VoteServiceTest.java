@@ -4,6 +4,7 @@ import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.entities.Voter;
+import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoterRepository;
@@ -17,10 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -135,8 +133,23 @@ public class VoteServiceTest {
   }
 
   @Test
-  public void shouldRegisterOneYesVoteAndNoZeroVoteFromDeviceTest() {
+  public void shouldRegisterOneYesVoteAndZeroNoVoteFromDeviceTest() {
     VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(1, 0);
-    Assertions.assertEquals(1, voteService.saveVotesFromDevice(voteRequestFromDevice).size());
+    List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
+    Assertions.assertEquals(1, savedVotes.size());
+    Assertions.assertEquals(AnswerType.YES, savedVotes.get(0).getAnswer());
+  }
+
+  @Test
+  public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(2, 3);
+    List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
+    Assertions.assertEquals(5, savedVotes.size());
+    int yesVotes =
+        (int) savedVotes.stream().filter(vote -> vote.getAnswer().equals(AnswerType.YES)).count();
+    int noVotes =
+        (int) savedVotes.stream().filter(vote -> vote.getAnswer().equals(AnswerType.NO)).count();
+    Assertions.assertEquals(2, yesVotes);
+    Assertions.assertEquals(3, noVotes);
   }
 }
