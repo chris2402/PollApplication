@@ -17,81 +17,78 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    final UserRepository userRepository;
+  final UserRepository userRepository;
 
-    final VoteRepository voteRepository;
+  final VoteRepository voteRepository;
 
-    public UserService(
-            UserRepository userRepository,
-            VoteRepository voteRepository,
-            PollRepository pollRepository) {
-        this.userRepository = userRepository;
-        this.voteRepository = voteRepository;
+  public UserService(
+      UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository) {
+    this.userRepository = userRepository;
+    this.voteRepository = voteRepository;
+  }
+
+  public UserResponse createUser(User user) {
+    return new UserResponse(userRepository.save(user));
+  }
+
+  @Transactional
+  public boolean deleteUser(Long userId) {
+    Optional<User> user = userRepository.findById(userId);
+
+    if (user.isEmpty()) {
+      return false;
     }
 
-    public UserResponse createUser(User user) {
-        return new UserResponse(userRepository.save(user));
+    List<Vote> votes = voteRepository.findByVoter(user.get());
+    for (Vote vote : votes) {
+      vote.setVoter(null);
+    }
+    voteRepository.saveAll(votes);
+    userRepository.delete(user.get());
+    return true;
+  }
+
+  public List<UserResponse> getAllUsers(Long adminId) {
+    Optional<User> maybeUser = userRepository.findById(adminId);
+    if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
+      return userRepository.findAll().stream().map(UserResponse::new).collect(Collectors.toList());
     }
 
-    @Transactional
-    public boolean deleteUser(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
+    return null;
+  }
 
-        if (user.isEmpty()) {
-            return false;
-        }
+  public UserResponse getUser(Long userId) {
+    Optional<User> user = userRepository.findById(userId);
+    if (user.isEmpty()) {
+      return null;
+    }
+    return new UserResponse(user.get());
+  }
 
-        List<Vote> votes = voteRepository.findByVoter(user.get());
-        for (Vote vote : votes) {
-            vote.setVoter(null);
-        }
-        voteRepository.saveAll(votes);
-        userRepository.delete(user.get());
-        return true;
+  public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest) {
+    Optional<User> user = userRepository.findById(userId);
+    boolean changesMade = false;
+
+    if (user.isEmpty()) {
+      return false;
     }
 
-    public List<UserResponse> getAllUsers(Long adminId) {
-        Optional<User> maybeUser = userRepository.findById(adminId);
-        if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
-            return userRepository.findAll().stream()
-                    .map(UserResponse::new)
-                    .collect(Collectors.toList());
-        }
-        return null;
+    if (updateUserRequest.getUsername() != null && !updateUserRequest.getUsername().isEmpty()) {
+      user.get().setUsername(updateUserRequest.getUsername());
+      changesMade = true;
     }
 
-    public UserResponse getUser(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
-            return null;
-        }
-        return new UserResponse(user.get());
+    if (updateUserRequest.getOldPassword() != null
+        && updateUserRequest.getNewPassword() != null
+        && updateUserRequest.getOldPassword().equals(user.get().getPassword())) {
+      user.get().setPassword(updateUserRequest.getNewPassword());
+      changesMade = true;
     }
 
-    public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest) {
-        Optional<User> user = userRepository.findById(userId);
-        boolean changesMade = false;
-
-        if (user.isEmpty()) {
-            return false;
-        }
-
-        if (updateUserRequest.getUsername() != null && !updateUserRequest.getUsername().isEmpty()) {
-            user.get().setUsername(updateUserRequest.getUsername());
-            changesMade = true;
-        }
-
-        if (updateUserRequest.getOldPassword() != null
-                && updateUserRequest.getNewPassword() != null
-                && updateUserRequest.getOldPassword().equals(user.get().getPassword())) {
-            user.get().setPassword(updateUserRequest.getNewPassword());
-            changesMade = true;
-        }
-
-        if (changesMade) {
-            userRepository.save(user.get());
-        }
-
-        return changesMade;
+    if (changesMade) {
+      userRepository.save(user.get());
     }
+
+    return changesMade;
+  }
 }

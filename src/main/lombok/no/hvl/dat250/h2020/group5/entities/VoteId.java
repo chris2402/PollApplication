@@ -9,7 +9,7 @@ import java.io.Serializable;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 class VoteId implements Serializable {
 
-    @EqualsAndHashCode.Include private String poll;
+  @EqualsAndHashCode.Include private String poll;
 
-    @EqualsAndHashCode.Include private String voter;
+  @EqualsAndHashCode.Include private String voter;
 }

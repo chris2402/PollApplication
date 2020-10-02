@@ -11,19 +11,19 @@ import javax.validation.Valid;
 @RequestMapping("/votes")
 public class VoteController {
 
-    final VoteService voteService;
+  final VoteService voteService;
 
-    public VoteController(VoteService voteService) {
-        this.voteService = voteService;
-    }
+  public VoteController(VoteService voteService) {
+    this.voteService = voteService;
+  }
 
-    @PostMapping
-    public Vote castVote(@Valid @RequestBody CastVoteRequest castVoteRequest) {
-        return voteService.vote(castVoteRequest);
-    }
+  @PostMapping
+  public Vote castVote(@Valid @RequestBody CastVoteRequest castVoteRequest) {
+    return voteService.vote(castVoteRequest);
+  }
 
-    @GetMapping
-    public Vote findVote(@RequestParam Long userId, @RequestParam Long pollId) {
-        return voteService.findVote(pollId, userId);
-    }
+  @GetMapping
+  public Vote findVote(@RequestParam Long userId, @RequestParam Long pollId) {
+    return voteService.findVote(pollId, userId);
+  }
 }

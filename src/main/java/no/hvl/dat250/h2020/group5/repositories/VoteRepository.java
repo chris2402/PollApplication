@@ -12,7 +12,9 @@ import java.util.Optional;
 
 @Repository
 public interface VoteRepository extends JpaRepository<Vote, Long> {
-    Optional<Vote> findByVoterAndPoll(Voter user, Poll poll);
-    List<Vote> findByVoter(Voter voter);
-    List<Vote> findByPollAndAnswer(Poll poll, AnswerType avt);
+  Optional<Vote> findByVoterAndPoll(Voter user, Poll poll);
+
+  List<Vote> findByVoter(Voter voter);
+
+  List<Vote> findByPollAndAnswer(Poll poll, AnswerType avt);
 }

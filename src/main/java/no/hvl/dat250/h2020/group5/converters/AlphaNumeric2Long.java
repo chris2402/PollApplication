@@ -6,7 +6,7 @@ import javax.persistence.Converter;
 @Converter
 public class AlphaNumeric2Long implements AttributeConverter<String, Long> {
 
-    final private int BASE36 = 36;
+    final private int BASE36 = 36; 
 
     @Override
     public String convertToEntityAttribute(Long aLong) {

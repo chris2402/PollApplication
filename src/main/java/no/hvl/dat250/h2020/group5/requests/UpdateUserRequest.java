@@ -9,10 +9,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class UpdateUserRequest {
 
-    private String username;
+  private String username;
 
-    private String oldPassword;
+  private String oldPassword;
 
-    private String newPassword;
-
+  private String newPassword;
 }

@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VotesResponse {
-    Integer yes;
-    Integer no;
+  Integer yes;
+  Integer no;
 }

@@ -11,29 +11,29 @@ import javax.persistence.*;
 @Entity
 public class Vote {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    @ManyToOne(
-            fetch = FetchType.EAGER,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "voter_id")
-    @EqualsAndHashCode.Exclude
-    @JsonBackReference
-    private Voter voter;
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinColumn(name = "voter_id")
+  @EqualsAndHashCode.Exclude
+  @JsonBackReference
+  private Voter voter;
 
-    @JoinColumn(name = "poll_id")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @EqualsAndHashCode.Exclude
-    @JsonBackReference(value = "votes")
-    private Poll poll;
+  @JoinColumn(name = "poll_id")
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+  @EqualsAndHashCode.Exclude
+  @JsonBackReference(value = "votes")
+  private Poll poll;
 
-    @Enumerated(EnumType.STRING)
-    private AnswerType answer;
+  @Enumerated(EnumType.STRING)
+  private AnswerType answer;
 
-    public Vote answer(AnswerType answer) {
-        this.setAnswer(answer);
-        return this;
-    }
+  public Vote answer(AnswerType answer) {
+    this.setAnswer(answer);
+    return this;
+  }
 }

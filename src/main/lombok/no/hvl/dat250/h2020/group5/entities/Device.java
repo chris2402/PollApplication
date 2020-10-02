@@ -8,9 +8,9 @@ import javax.persistence.*;
 @MappedSuperclass
 public abstract class Device {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    @OneToOne private User deviceUser;
+  @OneToOne private User deviceUser;
 }
