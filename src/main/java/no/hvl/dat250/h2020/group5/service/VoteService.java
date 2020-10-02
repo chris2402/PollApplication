@@ -104,6 +104,6 @@ public class VoteService {
         numberOfNoVotes++) {
       votes.add(new Vote().answer(AnswerType.NO));
     }
-    return votes;
+    return voteRepository.saveAll(votes);
   }
 }

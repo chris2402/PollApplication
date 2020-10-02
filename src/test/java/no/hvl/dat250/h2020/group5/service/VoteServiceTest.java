@@ -21,7 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 public class VoteServiceTest {
@@ -39,6 +39,8 @@ public class VoteServiceTest {
   private Voter voter2;
   private Vote vote;
   private CastVoteRequest castVoteRequest;
+  private Vote yesVote;
+  private Vote noVote;
 
   @BeforeEach
   public void setUp() {
@@ -60,6 +62,9 @@ public class VoteServiceTest {
     castVoteRequest.setPollId(poll.getId());
     castVoteRequest.setUserId(voter.getId());
     castVoteRequest.setVote("YES");
+
+    yesVote = new Vote().answer(AnswerType.YES);
+    noVote = new Vote().answer(AnswerType.NO);
 
     when(pollRepository.findById(1L)).thenReturn(Optional.ofNullable(poll));
     when(pollRepository.findById(3L)).thenReturn(Optional.empty());
@@ -135,7 +140,11 @@ public class VoteServiceTest {
   @Test
   public void shouldRegisterOneYesVoteAndZeroNoVoteFromDeviceTest() {
     VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(1, 0);
+    List<Vote> votes = Collections.singletonList(new Vote().answer(AnswerType.YES));
+    when(voteRepository.saveAll(votes)).thenReturn(votes);
+
     List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
+
     Assertions.assertEquals(1, savedVotes.size());
     Assertions.assertEquals(AnswerType.YES, savedVotes.get(0).getAnswer());
   }
@@ -143,6 +152,10 @@ public class VoteServiceTest {
   @Test
   public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
     VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(2, 3);
+    List<Vote> votes = Arrays.asList(yesVote, yesVote, noVote, noVote, noVote);
+
+    when(voteRepository.saveAll(votes)).thenReturn(votes);
+
     List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
     Assertions.assertEquals(5, savedVotes.size());
     int yesVotes =
@@ -151,5 +164,13 @@ public class VoteServiceTest {
         (int) savedVotes.stream().filter(vote -> vote.getAnswer().equals(AnswerType.NO)).count();
     Assertions.assertEquals(2, yesVotes);
     Assertions.assertEquals(3, noVotes);
+  }
+
+  @Test
+  public void shouldSaveAllVotesFromDeviceTest() {
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(4, 3);
+    List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
+    voteService.saveVotesFromDevice(voteRequestFromDevice);
+    verify(voteRepository, times(1)).saveAll(votes);
   }
 }
