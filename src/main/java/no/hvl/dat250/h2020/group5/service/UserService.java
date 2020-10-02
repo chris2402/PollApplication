@@ -1,18 +1,18 @@
 package no.hvl.dat250.h2020.group5.service;
 
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.entities.User;
-import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -30,7 +30,7 @@ public class UserService {
     }
 
     public UserResponse createUser(User user) {
-        return  new UserResponse(userRepository.save(user));
+        return new UserResponse(userRepository.save(user));
     }
 
     @Transactional
@@ -50,15 +50,19 @@ public class UserService {
         return true;
     }
 
-    public List<UserResponse> getAllUsers() {
-        List<UserResponse> userResponseList = new ArrayList<>();
-        userRepository.findAll().forEach(user -> userResponseList.add(createUser(user)));
-        return userResponseList;
+    public List<UserResponse> getAllUsers(Long adminId) {
+        Optional<User> maybeUser = userRepository.findById(adminId);
+        if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
+            return userRepository.findAll().stream()
+                    .map(UserResponse::new)
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
     public UserResponse getUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             return null;
         }
         return new UserResponse(user.get());
