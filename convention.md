@@ -1,7 +1,8 @@
 # Code convnetions
 * use camelCase on all variables
 * descriptive variable and method names
-* No "else" if the "if" statement contains "return"
+* No "else" if the "if" statement contains "return"   
+* use JavaDoc on more complicated methods 
 
 # Github convention
 
