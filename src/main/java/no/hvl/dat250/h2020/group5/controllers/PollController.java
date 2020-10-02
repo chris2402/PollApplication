@@ -18,11 +18,6 @@ public class PollController {
         this.pollService = pollService;
     }
 
-    @GetMapping("/all")
-    public List<PollResponse> getAllPolls(@RequestParam Long userId) {
-        return pollService.getAllPolls(userId);
-    }
-
     @GetMapping
     public List<PollResponse> getAllPublicPolls() {
         return pollService.getAllPublicPolls();

@@ -7,6 +7,7 @@ import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,7 +115,7 @@ public class PollControllerTest {
     public void shouldGetAllPolls() {
         ResponseEntity<Poll[]> response =
                 template.getForEntity(
-                        base.toString() + "/all?userId=" + this.user1.getId().toString(),
+                        base.toString()  + "/admin/" + this.user1.getId().toString() + "/polls",
                         Poll[].class);
         Poll[] polls = response.getBody();
         Assertions.assertNotNull(polls);
