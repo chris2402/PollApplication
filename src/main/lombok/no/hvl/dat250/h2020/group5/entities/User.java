@@ -48,4 +48,8 @@ public class User extends Voter {
     poll.setPollOwner(this);
     this.userPolls.add(poll);
   }
+
+  public boolean deletePoll(Poll poll) {
+    return userPolls.remove(poll);
+  }
 }
