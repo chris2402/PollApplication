@@ -12,7 +12,13 @@ public class ResponseBodyMatchers {
     return new ResponseBodyMatchers();
   }
 
-  public <T> ResultMatcher containsObjectAsJson(Object expectedObject) {
+  /**
+   * Method for easily checking the response in the controller unit-testing
+   *
+   * @param expectedObject, The object you expect to return from MockMvc.
+   * @return
+   */
+  public ResultMatcher containsObjectAsJson(Object expectedObject) {
     return mvcResult -> {
       String actualResponse = mvcResult.getResponse().getContentAsString();
       Assertions.assertEquals(objectMapper.writeValueAsString(expectedObject), actualResponse);
