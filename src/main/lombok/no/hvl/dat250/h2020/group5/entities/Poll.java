@@ -56,8 +56,8 @@ public class Poll {
         return this;
     }
 
-    public Poll pollOwner(User owner) {
-        this.setPollOwner(owner);
-        return this;
-    }
+  public Poll pollOwner(User owner) {
+    this.setPollOwner(owner);
+    return this;
+  }
 }
