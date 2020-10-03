@@ -29,4 +29,9 @@ public abstract class Voter {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
+
+  public void addVote(Vote vote) {
+    vote.setVoter(this);
+    votes.add(vote);
+  }
 }
