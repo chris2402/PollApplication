@@ -83,7 +83,7 @@ public class PollRepositoryTest {
 
   @Test
   public void shouldNotDeleteUserWhenDeletingPollTest() {
-    pollRepository.deleteById(poll.getId());
+    user.deletePoll(poll);
     Assertions.assertEquals(user.getId(), userRepository.findAll().get(0).getId());
   }
 
