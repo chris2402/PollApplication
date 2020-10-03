@@ -36,12 +36,10 @@ public class VoteRepositoryTest {
     this.poll = new Poll();
     this.voter = new Guest();
 
-    vote.setVoter(voter);
     vote.setAnswer(AnswerType.YES);
     poll.addVote(vote);
     voter.addVote(vote);
 
-    voteRepository.save(vote);
     pollRepository.save(poll);
     voterRepository.save(voter);
   }
