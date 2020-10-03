@@ -39,10 +39,10 @@ public class PollService {
     if (foundUser.isPresent()) {
       User user = foundUser.get();
       poll.setPollOwner(user);
-      return new PollResponse(pollRepository.save(poll));
-    } else {
-      return null;
+      pollRepository.save(poll);
+      return new PollResponse(poll);
     }
+    return null;
   }
 
   public boolean deletePoll(Long pollId, Long userId) {
