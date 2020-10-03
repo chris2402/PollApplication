@@ -53,6 +53,7 @@ public class Poll {
   private List<Vote> votes = new ArrayList<>();
 
   public void addVote(Vote vote) {
+    vote.setPoll(this);
     this.votes.add(vote);
   }
 
