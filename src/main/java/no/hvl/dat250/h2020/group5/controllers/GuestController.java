@@ -11,21 +11,19 @@ import java.util.List;
 @RequestMapping("/guests")
 public class GuestController {
 
-    private final GuestService guestService;
+  private final GuestService guestService;
 
-    public GuestController(GuestService guestService) {
-        this.guestService = guestService;
-    }
+  public GuestController(GuestService guestService) {
+    this.guestService = guestService;
+  }
 
-    @GetMapping()
-    public List<GuestResponse> getAllGuests(){
-        return guestService.getAllGuests();
-    }
+  @GetMapping
+  public List<GuestResponse> getAllGuests() {
+    return guestService.getAllGuests();
+  }
 
-    @PostMapping()
-    public GuestResponse createGuest(@RequestBody Guest guest){
-        return guestService.createGuest(guest);
-    }
-
-
+  @PostMapping
+  public GuestResponse createGuest(@RequestBody Guest guest) {
+    return guestService.createGuest(guest);
+  }
 }
