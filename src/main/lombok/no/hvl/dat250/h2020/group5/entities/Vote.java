@@ -15,9 +15,7 @@ public class Vote {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-  @ManyToOne(
-      fetch = FetchType.EAGER,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "voter_id")
   @EqualsAndHashCode.Exclude
   @JsonBackReference
@@ -49,6 +47,21 @@ public class Vote {
     }
     poll.addVote(this);
     this.poll = poll;
+    return true;
+  }
+
+  /**
+   * Check if voter already have the vote to avoid circular dependency.
+   *
+   * @param voter
+   * @return true if vote is added to this voter
+   */
+  public boolean setVoter(Voter voter) {
+    if (voter.getVotes().contains(this)) {
+      return false;
+    }
+    voter.addVote(this);
+    this.voter = voter;
     return true;
   }
 }

@@ -40,13 +40,13 @@ public class VoteRepositoryTest {
     this.voter = new Guest();
 
     pollRepository.save(poll);
+    voterRepository.save(voter);
 
     vote.setAnswer(AnswerType.YES);
     vote.setPoll(poll);
-    voter.addVote(vote);
+    vote.setVoter(voter);
 
     voteRepository.save(vote);
-    voterRepository.save(voter);
   }
 
   @Test
@@ -101,5 +101,10 @@ public class VoteRepositoryTest {
     voteRepository.saveAll(new ArrayList<>(Arrays.asList(newVote, newVote2)));
 
     Assertions.assertEquals(2, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
+  }
+
+  @Test
+  public void shouldAddVotesToVoterTest() {
+    Assertions.assertEquals(1, voterRepository.findAll().get(0).getVotes().size());
   }
 }
