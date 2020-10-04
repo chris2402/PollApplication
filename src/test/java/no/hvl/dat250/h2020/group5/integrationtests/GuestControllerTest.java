@@ -3,6 +3,7 @@ package no.hvl.dat250.h2020.group5.integrationtests;
 import no.hvl.dat250.h2020.group5.controllers.GuestController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ public class GuestControllerTest {
   @Autowired TestRestTemplate template;
   @Autowired GuestController guestcontroller;
   @Autowired GuestRepository guestRepository;
+  @Autowired VoteRepository voteRepository;
 
   @LocalServerPort private int port;
   private URL base;
@@ -34,6 +36,7 @@ public class GuestControllerTest {
 
   @BeforeEach
   public void setUp() throws Exception {
+    voteRepository.deleteAll();
     guestRepository.deleteAll();
 
     this.guest = new Guest();
