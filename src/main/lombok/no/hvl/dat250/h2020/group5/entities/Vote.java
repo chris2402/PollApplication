@@ -11,29 +11,61 @@ import javax.persistence.*;
 @Entity
 public class Vote {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    @ManyToOne(
-            fetch = FetchType.EAGER,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "voter_id")
-    @EqualsAndHashCode.Exclude
-    @JsonBackReference
-    private Voter voter;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "voter_id")
+  @EqualsAndHashCode.Exclude
+  @JsonBackReference
+  private Voter voter;
 
-    @JoinColumn(name = "poll_id")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @EqualsAndHashCode.Exclude
-    @JsonBackReference(value = "votes")
-    private Poll poll;
+  @JoinColumn(name = "poll_id")
+  @ManyToOne(fetch = FetchType.EAGER)
+  @EqualsAndHashCode.Exclude
+  @JsonBackReference(value = "votes")
+  private Poll poll;
 
-    @Enumerated(EnumType.STRING)
-    private AnswerType answer;
+  @Enumerated(EnumType.STRING)
+  private AnswerType answer;
 
-    public Vote answer(AnswerType answer) {
-        this.setAnswer(answer);
-        return this;
+  public Vote answer(AnswerType answer) {
+    this.setAnswer(answer);
+    return this;
+  }
+
+  /**
+   * Check if poll already have the vote to avoid circular dependency.
+   *
+   * @param poll
+   * @return true if vote is added to this poll
+   */
+  public boolean setPoll(Poll poll) {
+    if (poll.getVotes().contains(this)) {
+      return false;
     }
+    poll.addVote(this);
+    this.poll = poll;
+    return true;
+  }
+
+  /**
+   * Check if voter already have the vote to avoid circular dependency.
+   *
+   * @param voter
+   * @return true if vote is added to this voter or if voter is set to null
+   */
+  public boolean setVoter(Voter voter) {
+    if (voter == null) {
+      this.voter = null;
+      return true;
+    }
+    if (voter.getVotes().contains(this)) {
+      return false;
+    }
+    voter.addVote(this);
+    this.voter = voter;
+    return true;
+  }
 }

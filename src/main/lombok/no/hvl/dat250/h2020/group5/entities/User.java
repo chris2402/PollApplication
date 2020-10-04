@@ -15,32 +15,41 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
-    private String password;
+  private String password;
 
-    private Boolean isAdmin = false;
+  private Boolean isAdmin = false;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @JsonManagedReference(value = "pollOwner")
-    @OneToMany(
-            fetch = FetchType.LAZY,
-            mappedBy = "pollOwner",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private List<Poll> userPolls = new ArrayList<>();
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
+  @JsonManagedReference(value = "pollOwner")
+  @OneToMany(
+      fetch = FetchType.LAZY,
+      mappedBy = "pollOwner",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  private List<Poll> userPolls = new ArrayList<>();
 
-    public User userName(String username) {
-        setUsername(username);
-        return this;
-    }
+  public User userName(String username) {
+    setUsername(username);
+    return this;
+  }
 
-    public User password(String password) {
-        setPassword(password);
-        return this;
-    }
+  public User password(String password) {
+    setPassword(password);
+    return this;
+  }
 
-    public User admin(boolean isAdmin) {
-        setIsAdmin(isAdmin);
-        return this;
-    }
+  public User admin(boolean isAdmin) {
+    setIsAdmin(isAdmin);
+    return this;
+  }
+
+  public void addPoll(Poll poll) {
+    poll.setPollOwner(this);
+    this.userPolls.add(poll);
+  }
+
+  public boolean deletePoll(Poll poll) {
+    return userPolls.remove(poll);
+  }
 }
