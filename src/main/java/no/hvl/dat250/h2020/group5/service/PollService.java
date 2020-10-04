@@ -116,6 +116,10 @@ public class PollService {
             return false;
         }
 
+        if (poll.get().getStartTime() == null) {
+            return false;
+        }
+
         Instant startTime = poll.get().getStartTime().toInstant();
         Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
 
