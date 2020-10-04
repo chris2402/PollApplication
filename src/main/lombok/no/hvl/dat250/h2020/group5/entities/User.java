@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "APP_USER")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
   private String password;

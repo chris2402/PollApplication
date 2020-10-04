@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,9 +29,12 @@ public class UserControllerIT {
 
   @Test
   public void shouldSaveANewUserTest() {
-    User user = new User();
-    ResponseEntity<User> result = testRestTemplate.postForEntity(base.toString(), user, User.class);
-    User postedUser = result.getBody();
-    Assertions.assertEquals(user, postedUser);
+    User user = new User().userName("username").password("my password");
+    ResponseEntity<UserResponse> result =
+        testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
+    UserResponse postedUser = result.getBody();
+    Assertions.assertEquals(user.getUsername(), postedUser.getUsername());
+    Assertions.assertEquals(user.getPassword(), postedUser.getPassword());
+    Assertions.assertNotNull(postedUser.getId());
   }
 }
