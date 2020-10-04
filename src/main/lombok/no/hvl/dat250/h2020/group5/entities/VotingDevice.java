@@ -7,5 +7,5 @@ import javax.persistence.Entity;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity // (name = "VotingDevice")
-public class VotingDevice extends Device {}
+@Entity
+public class VotingDevice extends Voter {}

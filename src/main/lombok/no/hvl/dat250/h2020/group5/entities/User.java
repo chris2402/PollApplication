@@ -43,4 +43,13 @@ public class User extends Voter {
     setIsAdmin(isAdmin);
     return this;
   }
+
+  public void addPoll(Poll poll) {
+    poll.setPollOwner(this);
+    this.userPolls.add(poll);
+  }
+
+  public boolean deletePoll(Poll poll) {
+    return userPolls.remove(poll);
+  }
 }
