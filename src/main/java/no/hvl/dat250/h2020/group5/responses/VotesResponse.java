@@ -6,6 +6,16 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VotesResponse {
-    Integer yes;
-    Integer no;
+  Integer yes;
+  Integer no;
+
+  public VotesResponse yes(int numberOfYes) {
+    this.setYes(numberOfYes);
+    return this;
+  }
+
+  public VotesResponse no(int numberOfNo) {
+    this.setNo(numberOfNo);
+    return this;
+  }
 }

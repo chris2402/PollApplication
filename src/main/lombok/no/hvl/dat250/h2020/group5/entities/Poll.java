@@ -52,6 +52,7 @@ public class Poll {
   @JsonManagedReference(value = "votes")
   private List<Vote> votes = new ArrayList<>();
 
+
   /**
    * Do not add same vote twice and check that vote does not already have a poll to avoid circular
    * dependency.
@@ -66,6 +67,11 @@ public class Poll {
     this.votes.add(vote);
     vote.setPoll(this);
     return true;
+  }
+
+  public Poll question(String question) {
+    this.setQuestion(question);
+    return this;
   }
 
   public Poll visibilityType(PollVisibilityType type) {
