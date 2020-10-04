@@ -78,7 +78,6 @@ public class VoteRepositoryTest {
     Poll newPoll = new Poll();
     Poll savedPoll = pollRepository.save(newPoll);
     newVote.setPoll(newPoll);
-    System.out.println(newVote.getPoll());
     voteRepository.save(newVote);
     Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
   }
