@@ -11,6 +11,7 @@ import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,8 +60,16 @@ public class VoteControllerIT {
     this.savedGuest = guestRepository.save(guest);
   }
 
+  @AfterEach
+  public void tearDown() {
+    pollRepository.deleteAll();
+    voteRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
+  }
+
   @Test
-  public void shouldVoteTest() {
+  public void shouldVoteByUserTest() {
     CastVoteRequest voteRequest = new CastVoteRequest();
     voteRequest.setPollId(savedPoll.getId());
     voteRequest.setUserId(savedUser.getId());
@@ -68,9 +77,25 @@ public class VoteControllerIT {
     ResponseEntity<Vote> response =
         testRestTemplate.postForEntity(base.toString(), voteRequest, Vote.class);
     Vote savedVote = response.getBody();
-    Assertions.assertNotNull(savedVote);
+    Assertions.assertNotNull(savedVote.getId());
     Assertions.assertEquals(AnswerType.YES, savedVote.getAnswer());
     Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
     Assertions.assertEquals(1, userRepository.findById(savedUser.getId()).get().getVotes().size());
+  }
+
+  @Test
+  public void shouldVoteByGuestTest() {
+    CastVoteRequest voteRequest = new CastVoteRequest();
+    voteRequest.setPollId(savedPoll.getId());
+    voteRequest.setUserId(savedGuest.getId());
+    voteRequest.setVote("NO");
+    ResponseEntity<Vote> response =
+        testRestTemplate.postForEntity(base.toString(), voteRequest, Vote.class);
+    Vote savedVote = response.getBody();
+    Assertions.assertNotNull(savedVote.getId());
+    Assertions.assertEquals(AnswerType.NO, savedVote.getAnswer());
+    Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
+    Assertions.assertEquals(
+        1, guestRepository.findById(savedGuest.getId()).get().getVotes().size());
   }
 }
