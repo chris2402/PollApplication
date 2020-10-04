@@ -54,9 +54,13 @@ public class Vote {
    * Check if voter already have the vote to avoid circular dependency.
    *
    * @param voter
-   * @return true if vote is added to this voter
+   * @return true if vote is added to this voter or if voter is set to null
    */
   public boolean setVoter(Voter voter) {
+    if (voter == null) {
+      this.voter = null;
+      return true;
+    }
     if (voter.getVotes().contains(this)) {
       return false;
     }

@@ -47,7 +47,8 @@ public class VotingDeviceControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/votingDevice")
-                .content("{\"pollId\": \"1\", \"numberOfYes\":\"1\", \"numberOfNo\":\"0\"}")
+                .content(
+                    "{\"pollId\": \"1\", \"deviceId\": \"1\", \"numberOfYes\":\"1\", \"numberOfNo\":\"0\"}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -61,7 +62,8 @@ public class VotingDeviceControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/votingDevice")
-                .content("{\"pollId\": \"1\", \"numberOfYes\":\"2\", \"numberOfNo\":\"4\"}")
+                .content(
+                    "{\"pollId\": \"1\", \"deviceId\": \"1\", \"numberOfYes\":\"2\", \"numberOfNo\":\"4\"}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
