@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class GuestControllerTest {
+public class GuestControllerIT {
 
   @Autowired TestRestTemplate template;
   @Autowired GuestController guestcontroller;
