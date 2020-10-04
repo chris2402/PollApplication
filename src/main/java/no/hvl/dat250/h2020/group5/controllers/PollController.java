@@ -12,60 +12,60 @@ import java.util.List;
 @RequestMapping("/polls")
 public class PollController {
 
-    private final PollService pollService;
+  private final PollService pollService;
 
-    public PollController(PollService pollService) {
-        this.pollService = pollService;
-    }
+  public PollController(PollService pollService) {
+    this.pollService = pollService;
+  }
 
-    @GetMapping
-    public List<PollResponse> getAllPublicPolls() {
-        return pollService.getAllPublicPolls();
-    }
+  @GetMapping
+  public List<PollResponse> getAllPublicPolls() {
+    return pollService.getAllPublicPolls();
+  }
 
-    @GetMapping("/admin/{adminId}/polls/{ownerId}")
-    public List<PollResponse> getAllPollsToOwner(
-            @PathVariable Long adminId, @PathVariable Long ownerId) {
-        return pollService.getUserPollsAsAdmin(ownerId, adminId);
-    }
+  @GetMapping("/admin/{adminId}/polls/{ownerId}")
+  public List<PollResponse> getAllPollsToOwner(
+      @PathVariable Long adminId, @PathVariable Long ownerId) {
+    return pollService.getUserPollsAsAdmin(ownerId, adminId);
+  }
 
-    @GetMapping("polls/{ownerId}")
-    public List<PollResponse> getAllPollsAsOwner(@PathVariable Long ownerId) {
-        return pollService.getUserPollsAsOwner(ownerId);
-    }
+  @GetMapping("owner/{ownerId}")
+  public List<PollResponse> getAllPollsAsOwner(@PathVariable Long ownerId) {
+    return pollService.getUserPollsAsOwner(ownerId);
+  }
 
-    @GetMapping("/admin/{adminId}/polls")
-    public List<PollResponse> getAllPolls(@PathVariable Long adminId) {
-        return pollService.getAllPolls(adminId);
-    }
+  @GetMapping("/admin/{adminId}/polls")
+  public List<PollResponse> getAllPolls(@PathVariable Long adminId) {
+    return pollService.getAllPolls(adminId);
+  }
 
-    @PostMapping(path = "/{userId}")
-    public Poll createPoll(@RequestBody Poll body, @PathVariable Long userId) {
-        return pollService.createPoll(body, userId);
-    }
+  @PostMapping(path = "/{userId}")
+  public PollResponse createPoll(@RequestBody Poll body, @PathVariable Long userId) {
+    return pollService.createPoll(body, userId);
+  }
 
-    @DeleteMapping(path = "/{pollId}/{userId}")
-    public boolean deletePoll(@PathVariable Long pollId, @PathVariable Long userId) {
-        return pollService.deletePoll(pollId, userId);
-    }
+  @DeleteMapping(path = "/{pollId}/{userId}")
+  public boolean deletePoll(@PathVariable Long pollId, @PathVariable Long userId) {
+    return pollService.deletePoll(pollId, userId);
+  }
 
-    @GetMapping(path = "/{pollId}")
-    public PollResponse getPoll(@PathVariable Long pollId) {
-        return pollService.getPoll(pollId);
-    }
+  @GetMapping(path = "/{pollId}")
+  public PollResponse getPoll(@PathVariable Long pollId) {
+    return pollService.getPoll(pollId);
+  }
 
-    @PatchMapping(path = "/{pollId}")
-    public boolean activatePoll(@PathVariable Long pollId) {
-        return pollService.activatePoll(pollId);
-    }
+  @PatchMapping(path = "/{pollId}")
+  public boolean activatePoll(@PathVariable Long pollId) {
+    return pollService.activatePoll(pollId);
+  }
 
-    @GetMapping(path = "/{pollId}/active")
-    public boolean isPollActive(@PathVariable Long pollId) {
-        return pollService.isActivated(pollId);
-    }
+  @GetMapping(path = "/{pollId}/active")
+  public boolean isPollActive(@PathVariable Long pollId) {
+    return pollService.isActivated(pollId);
+  }
 
-    @GetMapping(path = "/{pollId}/votes")
-    public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
-        return pollService.getNumberOfVotes(pollId);
-    }
+  @GetMapping(path = "/{pollId}/votes")
+  public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
+    return pollService.getNumberOfVotes(pollId);
+  }
 }

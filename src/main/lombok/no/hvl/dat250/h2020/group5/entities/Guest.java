@@ -8,4 +8,10 @@ import javax.persistence.Entity;
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)
-public class Guest extends Voter {}
+public class Guest extends Voter {
+
+  public Guest username(String username) {
+    setUsername(username);
+    return this;
+  }
+}

@@ -78,6 +78,4 @@ public class Poll {
 
   public Poll pollDuration(Integer pollDuration) {
     this.pollDuration = pollDuration;
-    return this;
-  }
 }
