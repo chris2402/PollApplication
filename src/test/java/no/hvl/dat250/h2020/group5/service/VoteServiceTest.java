@@ -1,9 +1,6 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.entities.Poll;
-import no.hvl.dat250.h2020.group5.entities.User;
-import no.hvl.dat250.h2020.group5.entities.Vote;
-import no.hvl.dat250.h2020.group5.entities.Voter;
+import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
@@ -41,6 +38,7 @@ public class VoteServiceTest {
   private CastVoteRequest castVoteRequest;
   private Vote yesVote;
   private Vote noVote;
+  private VotingDevice device;
 
   @BeforeEach
   public void setUp() {
@@ -74,6 +72,7 @@ public class VoteServiceTest {
     when(voteRepository.save(any(Vote.class))).thenReturn(vote);
     when(voteRepository.findByVoterAndPoll(voter, poll)).thenReturn(Optional.ofNullable(vote));
     when(voteRepository.findByVoterAndPoll(voter2, poll)).thenReturn(Optional.empty());
+    device = new VotingDevice();
   }
 
   @Test
@@ -139,7 +138,8 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterOneYesVoteAndZeroNoVoteFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(poll.getId(), 1, 0);
+    VoteRequestFromDevice voteRequestFromDevice =
+        new VoteRequestFromDevice(device.getId(), poll.getId(), 1, 0);
     List<Vote> votes = Collections.singletonList(new Vote().answer(AnswerType.YES));
     when(voteRepository.saveAll(votes)).thenReturn(votes);
 
@@ -151,7 +151,9 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(poll.getId(), 2, 3);
+    VotingDevice device = new VotingDevice();
+    VoteRequestFromDevice voteRequestFromDevice =
+        new VoteRequestFromDevice(device.getId(), poll.getId(), 2, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, noVote, noVote, noVote);
 
     when(voteRepository.saveAll(votes)).thenReturn(votes);
@@ -168,7 +170,9 @@ public class VoteServiceTest {
 
   @Test
   public void shouldSaveAllVotesFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(poll.getId(), 4, 3);
+    VotingDevice device = new VotingDevice();
+    VoteRequestFromDevice voteRequestFromDevice =
+        new VoteRequestFromDevice(device.getId(), poll.getId(), 4, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
     voteService.saveVotesFromDevice(voteRequestFromDevice);
     verify(voteRepository, times(2)).saveAll(votes);
