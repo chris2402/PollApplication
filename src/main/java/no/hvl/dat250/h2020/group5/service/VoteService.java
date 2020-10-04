@@ -14,9 +14,9 @@ import no.hvl.dat250.h2020.group5.requests.VoteRequestFromDevice;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VoteService {
@@ -92,18 +92,22 @@ public class VoteService {
     return Instant.now().isAfter(startTimePlusDuration);
   }
 
+  /**
+   * Saves all the votes to the given poll in the request from the device. Needs to save the votes
+   * to repository before adding setting the poll because the vote needs an ID.
+   *
+   * @param voteRequestFromDevice
+   * @return the list of votes saved from device
+   */
   public List<Vote> saveVotesFromDevice(VoteRequestFromDevice voteRequestFromDevice) {
-    List<Vote> votes = new ArrayList<>();
-    for (int numberOfYesVotes = 0;
-        numberOfYesVotes < voteRequestFromDevice.getNumberOfYes();
-        numberOfYesVotes++) {
-      votes.add(new Vote().answer(AnswerType.YES));
+    Optional<Poll> poll = pollRepository.findById(voteRequestFromDevice.getPollId());
+
+    if (poll.isPresent()) {
+      List<Vote> votes = voteRequestFromDevice.getVotes();
+      voteRepository.saveAll(votes);
+      return voteRepository.saveAll(
+          votes.stream().peek(vote -> vote.setPoll(poll.get())).collect(Collectors.toList()));
     }
-    for (int numberOfNoVotes = 0;
-        numberOfNoVotes < voteRequestFromDevice.getNumberOfNo();
-        numberOfNoVotes++) {
-      votes.add(new Vote().answer(AnswerType.NO));
-    }
-    return voteRepository.saveAll(votes);
+    return null;
   }
 }

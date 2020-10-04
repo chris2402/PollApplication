@@ -171,6 +171,6 @@ public class VoteServiceTest {
     VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(poll.getId(), 4, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
     voteService.saveVotesFromDevice(voteRequestFromDevice);
-    verify(voteRepository, times(1)).saveAll(votes);
+    verify(voteRepository, times(2)).saveAll(votes);
   }
 }

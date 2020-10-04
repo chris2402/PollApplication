@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 @ContextConfiguration(classes = Main.class)
 @DataJpaTest
 public class VoteRepositoryTest {
@@ -73,12 +76,30 @@ public class VoteRepositoryTest {
   }
 
   @Test
-  public void shouldUpdatePollTest() {
+  public void shouldAddVoteToPollTest() {
     Vote newVote = new Vote();
     Poll newPoll = new Poll();
     Poll savedPoll = pollRepository.save(newPoll);
     newVote.setPoll(newPoll);
     voteRepository.save(newVote);
     Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
+  }
+
+  @Test
+  public void shouldAddAllVotesToPollTest() {
+    Poll newPoll = new Poll();
+    Poll savedPoll = pollRepository.save(newPoll);
+
+    Vote newVote = new Vote();
+    Vote newVote2 = new Vote();
+    // Need to save votes first in order to give an ID
+    voteRepository.saveAll(new ArrayList<>(Arrays.asList(newVote, newVote2)));
+
+    newVote.setPoll(newPoll);
+    newVote2.setPoll(newPoll);
+
+    voteRepository.saveAll(new ArrayList<>(Arrays.asList(newVote, newVote2)));
+
+    Assertions.assertEquals(2, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
   }
 }
