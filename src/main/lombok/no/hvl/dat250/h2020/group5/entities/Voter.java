@@ -20,7 +20,7 @@ public abstract class Voter {
   @Column(length = 20)
   protected String username;
 
-  @OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "voter", fetch = FetchType.EAGER)
   @JsonManagedReference
   @ToString.Exclude
   protected List<Vote> votes = new ArrayList<>();

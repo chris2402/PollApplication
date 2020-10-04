@@ -71,5 +71,6 @@ public class VoteControllerIT {
     Assertions.assertNotNull(savedVote);
     Assertions.assertEquals(AnswerType.YES, savedVote.getAnswer());
     Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
+    Assertions.assertEquals(1, userRepository.findById(savedUser.getId()).get().getVotes().size());
   }
 }
