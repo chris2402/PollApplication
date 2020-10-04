@@ -74,4 +74,23 @@ public class UserControllerIT {
     Assertions.assertEquals("my new password", userRepository.findById(userId).get().getPassword());
     Assertions.assertEquals(1, userRepository.count());
   }
+
+  @Test
+  public void shouldUpdateUsernameTest() {
+    UpdateUserRequest newUsernameRequest = new UpdateUserRequest();
+    newUsernameRequest.setUsername("my new username");
+
+    ResponseEntity<UserResponse> newUserResult =
+        testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
+    UserResponse newUser = newUserResult.getBody();
+    Long userId = newUser.getId();
+
+    String pathToEndpoint = base.toString() + "/" + userId.toString();
+    Boolean response =
+        testRestTemplate.patchForObject(pathToEndpoint, newUsernameRequest, Boolean.class);
+
+    Assertions.assertTrue(response);
+    Assertions.assertEquals("my new username", userRepository.findById(userId).get().getUsername());
+    Assertions.assertEquals(1, userRepository.count());
+  }
 }
