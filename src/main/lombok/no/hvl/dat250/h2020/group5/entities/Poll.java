@@ -17,47 +17,52 @@ import java.util.List;
 @Entity
 public class Poll {
 
-    private static final int LOWEST_4_DIGIT_BASE36 = 1679616;
+  private static final int LOWEST_4_DIGIT_BASE36 = 1679616;
 
-    @Id
-    @SequenceGenerator(name = "PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PollID_Sequence")
-    @Convert(converter = AlphaNumeric2Long.class)
-    private Long id;
+  @Id
+  @SequenceGenerator(name = "PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PollID_Sequence")
+  @Convert(converter = AlphaNumeric2Long.class)
+  private Long id;
 
-    private String name;
+  private String name;
 
-    private String question;
+  private String question;
 
-    private Date startTime;
-    private Integer pollDuration;
+  private Date startTime;
+  private Integer pollDuration;
 
-    @Enumerated(EnumType.STRING)
-    private PollVisibilityType visibilityType;
+  @Enumerated(EnumType.STRING)
+  private PollVisibilityType visibilityType;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @JsonBackReference(value = "pollOwner")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private User pollOwner;
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
+  @JsonBackReference(value = "pollOwner")
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+  private User pollOwner;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToMany(
-            fetch = FetchType.LAZY,
-            mappedBy = "poll",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "votes")
-    private List<Vote> votes = new ArrayList<>();
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
+  @OneToMany(
+      fetch = FetchType.LAZY,
+      mappedBy = "poll",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @JsonManagedReference(value = "votes")
+  private List<Vote> votes = new ArrayList<>();
 
-    public Poll visibilityType(PollVisibilityType type) {
-        this.setVisibilityType(type);
-        return this;
-    }
+  public Poll question(String question) {
+    this.setQuestion(question);
+    return this;
+  }
 
-    public Poll pollOwner(User owner) {
-        this.setPollOwner(owner);
-        return this;
-    }
+  public Poll visibilityType(PollVisibilityType type) {
+    this.setVisibilityType(type);
+    return this;
+  }
+
+  public Poll pollOwner(User owner) {
+    this.setPollOwner(owner);
+    return this;
+  }
 }
