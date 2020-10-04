@@ -24,7 +24,7 @@ public abstract class Voter {
   @EqualsAndHashCode.Include
   protected String username;
 
-  @OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "voter", fetch = FetchType.EAGER)
   @JsonManagedReference
   @ToString.Exclude
   @EqualsAndHashCode.Exclude

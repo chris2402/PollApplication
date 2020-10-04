@@ -45,7 +45,7 @@ public class Poll {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   @OneToMany(
-      fetch = FetchType.LAZY,
+      fetch = FetchType.EAGER,
       mappedBy = "poll",
       orphanRemoval = true,
       cascade = CascadeType.ALL)
