@@ -123,4 +123,10 @@ public class UserServiceTest {
     Assertions.assertFalse(userService.updateUser(3L, updateUserRequest));
     verify(userRepository, times(0)).save(user1);
   }
+
+  @Test
+  public void shouldNotDeleteVotesWhenUserIsDeletedTest() {
+    userService.deleteUser(user1.getId());
+    verify(voteRepository, times(1)).saveAll(user1.getVotes());
+  }
 }

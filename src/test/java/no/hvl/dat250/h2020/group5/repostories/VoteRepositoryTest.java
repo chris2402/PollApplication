@@ -70,12 +70,6 @@ public class VoteRepositoryTest {
   }
 
   @Test
-  public void shouldNotDeleteAVoteWhenVoterIsDeletedTest() {
-    voterRepository.deleteById(voter.getId());
-    Assertions.assertEquals(1, voteRepository.count());
-  }
-
-  @Test
   public void shouldAddVoteToPollTest() {
     Vote newVote = new Vote();
     Poll newPoll = new Poll();
