@@ -93,4 +93,18 @@ public class UserControllerIT {
     Assertions.assertEquals("my new username", userRepository.findById(userId).get().getUsername());
     Assertions.assertEquals(1, userRepository.count());
   }
+
+  @Test
+  public void shouldDeleteUserTest() {
+    ResponseEntity<UserResponse> newUserResult =
+        testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
+    UserResponse newUser = newUserResult.getBody();
+    Long userId = newUser.getId();
+
+    String pathToEndpoint = base.toString() + "/" + userId.toString();
+
+    testRestTemplate.delete(pathToEndpoint);
+
+    Assertions.assertEquals(0, userRepository.count());
+  }
 }
