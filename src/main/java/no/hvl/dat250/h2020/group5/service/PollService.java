@@ -111,12 +111,17 @@ public class PollService {
     if (poll.isEmpty()) {
       return false;
     }
+    
+    if (poll.get().getStartTime() == null) {
+        return false;
+    }
 
     Instant startTime = poll.get().getStartTime().toInstant();
     Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
-
+    
     return Instant.now().isBefore(startTimePlusDuration);
   }
+
 
   public VotesResponse getNumberOfVotes(Long pollId) {
     Optional<Poll> poll = pollRepository.findById(pollId);
