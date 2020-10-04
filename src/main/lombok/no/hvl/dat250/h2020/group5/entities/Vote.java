@@ -24,7 +24,7 @@ public class Vote {
   private Voter voter;
 
   @JoinColumn(name = "poll_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @ManyToOne(fetch = FetchType.EAGER)
   @EqualsAndHashCode.Exclude
   @JsonBackReference(value = "votes")
   private Poll poll;
