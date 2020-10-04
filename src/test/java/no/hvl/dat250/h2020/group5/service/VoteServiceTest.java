@@ -139,7 +139,7 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterOneYesVoteAndZeroNoVoteFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(1, 0);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(poll.getId(), 1, 0);
     List<Vote> votes = Collections.singletonList(new Vote().answer(AnswerType.YES));
     when(voteRepository.saveAll(votes)).thenReturn(votes);
 
@@ -151,7 +151,7 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(2, 3);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(poll.getId(), 2, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, noVote, noVote, noVote);
 
     when(voteRepository.saveAll(votes)).thenReturn(votes);
@@ -168,7 +168,7 @@ public class VoteServiceTest {
 
   @Test
   public void shouldSaveAllVotesFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(4, 3);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(poll.getId(), 4, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
     voteService.saveVotesFromDevice(voteRequestFromDevice);
     verify(voteRepository, times(1)).saveAll(votes);

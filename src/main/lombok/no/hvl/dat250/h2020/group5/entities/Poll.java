@@ -52,9 +52,20 @@ public class Poll {
   @JsonManagedReference(value = "votes")
   private List<Vote> votes = new ArrayList<>();
 
-  public void addVote(Vote vote) {
-    vote.setPoll(this);
+  /**
+   * Do not add same vote twice and check that vote does not already have a poll to avoid circular
+   * dependency.
+   *
+   * @param vote
+   * @return True if vote is added to this poll
+   */
+  public boolean addVote(Vote vote) {
+    if (votes.contains(vote) || vote.getPoll() != null) {
+      return false;
+    }
     this.votes.add(vote);
+    vote.setPoll(this);
+    return true;
   }
 
   public Poll visibilityType(PollVisibilityType type) {

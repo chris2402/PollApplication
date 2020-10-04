@@ -10,7 +10,7 @@ public class VoteRequestFromDevice {
   private int numberOfYes = 0;
   private int numberOfNo = 0;
 
-  public VoteRequestFromDevice(int numberOfYes, int numberOfNo) {
+  public VoteRequestFromDevice(Long id, int numberOfYes, int numberOfNo) {
     this.numberOfNo = numberOfNo;
     this.numberOfYes = numberOfYes;
   }

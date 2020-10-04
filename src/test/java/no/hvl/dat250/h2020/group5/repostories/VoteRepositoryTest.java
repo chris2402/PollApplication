@@ -69,4 +69,15 @@ public class VoteRepositoryTest {
     voterRepository.deleteById(voter.getId());
     Assertions.assertEquals(1, voteRepository.count());
   }
+
+  @Test
+  public void shouldUpdatePollTest() {
+    Vote newVote = new Vote();
+    Poll newPoll = new Poll();
+    Poll savedPoll = pollRepository.save(newPoll);
+    newVote.setPoll(newPoll);
+    System.out.println(newVote.getPoll());
+    voteRepository.save(newVote);
+    Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
+  }
 }

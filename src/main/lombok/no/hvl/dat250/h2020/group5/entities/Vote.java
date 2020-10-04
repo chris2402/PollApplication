@@ -24,7 +24,7 @@ public class Vote {
   private Voter voter;
 
   @JoinColumn(name = "poll_id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
   @EqualsAndHashCode.Exclude
   @JsonBackReference(value = "votes")
   private Poll poll;
@@ -35,5 +35,20 @@ public class Vote {
   public Vote answer(AnswerType answer) {
     this.setAnswer(answer);
     return this;
+  }
+
+  /**
+   * Check if poll already have the vote to avoid circular dependency.
+   *
+   * @param poll
+   * @return true if vote is added to this poll
+   */
+  public boolean setPoll(Poll poll) {
+    if (poll.getVotes().contains(this)) {
+      return false;
+    }
+    poll.addVote(this);
+    this.poll = poll;
+    return true;
   }
 }
