@@ -39,7 +39,7 @@ public class UserService {
       return false;
     }
 
-    List<Vote> votes = user.get().getVotes();
+    List<Vote> votes = new ArrayList<>(user.get().getVotes());
     for (Vote vote : votes) {
       vote.setVoterAndAddThisVoteToVoter(null);
     }
