@@ -12,12 +12,10 @@ public class UserResponse {
   private Long id;
   private String username;
   private Boolean isAdmin;
-  private String password;
 
   public UserResponse(User user) {
     this.id = user.getId();
     this.username = user.getUsername();
     this.isAdmin = user.getIsAdmin();
-    this.password = user.getPassword();
   }
 }

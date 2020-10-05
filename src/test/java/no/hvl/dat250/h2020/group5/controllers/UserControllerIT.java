@@ -49,10 +49,10 @@ public class UserControllerIT {
     ResponseEntity<UserResponse> result =
         testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
     UserResponse postedUser = result.getBody();
-    Assertions.assertEquals(user.getUsername(), postedUser.getUsername());
-    Assertions.assertEquals(user.getPassword(), postedUser.getPassword());
     Assertions.assertNotNull(postedUser.getId());
+    Assertions.assertEquals(user.getUsername(), postedUser.getUsername());
     Assertions.assertEquals(1, userRepository.count());
+    Assertions.assertNotNull(userRepository.findById(postedUser.getId()).get().getPassword());
   }
 
   @Test
