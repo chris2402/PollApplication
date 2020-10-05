@@ -52,7 +52,6 @@ public class Poll {
   @JsonManagedReference(value = "votes")
   private List<Vote> votes = new ArrayList<>();
 
-
   /**
    * Do not add same vote twice and check that vote does not already have a poll to avoid circular
    * dependency.
@@ -69,11 +68,6 @@ public class Poll {
     return true;
   }
 
-  public Poll question(String question) {
-    this.setQuestion(question);
-    return this;
-  }
-
   public Poll visibilityType(PollVisibilityType type) {
     this.setVisibilityType(type);
     return this;
@@ -81,6 +75,26 @@ public class Poll {
 
   public Poll pollOwner(User owner) {
     this.setPollOwner(owner);
+    return this;
+  }
+
+  public Poll name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  public Poll question(String question) {
+    this.question = question;
+    return this;
+  }
+
+  public Poll startTime(Date startTime) {
+    this.startTime = startTime;
+    return this;
+  }
+
+  public Poll pollDuration(Integer pollDuration) {
+    this.pollDuration = pollDuration;
     return this;
   }
 }
