@@ -56,6 +56,7 @@ public class Vote {
    */
   public boolean setVoterAndAddThisVoteToVoter(Voter voter) {
     if (voter == null) {
+      this.voter.getVotes().remove(this);
       this.voter = null;
       return true;
     }
