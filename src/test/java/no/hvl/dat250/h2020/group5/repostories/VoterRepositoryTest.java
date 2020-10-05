@@ -61,6 +61,11 @@ public class VoterRepositoryTest {
   }
 
   @Test
+  public void shouldSaveVote() {
+    Assertions.assertEquals(2, voteRepository.count());
+  }
+
+  @Test
   public void shouldSaveNewVoteToVoterWhenSavingVoter() {
     Vote vote = new Vote();
     savedVoterUser.addVoteAndSetThisVoterInVote(vote);
