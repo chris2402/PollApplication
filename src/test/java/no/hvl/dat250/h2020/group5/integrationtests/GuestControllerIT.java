@@ -3,6 +3,7 @@ package no.hvl.dat250.h2020.group5.integrationtests;
 import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.controllers.GuestController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
@@ -39,9 +40,6 @@ public class GuestControllerIT {
 
   @BeforeEach
   public void setUp() throws Exception {
-    voteRepository.deleteAll();
-    guestRepository.deleteAll();
-
     this.guest = new Guest();
     this.guest.setUsername("Guest 127348");
     this.guest.setId(20L);
@@ -67,6 +65,17 @@ public class GuestControllerIT {
     // make PATCH request
   }
 
+  @AfterEach
+  public void tearDown() {
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setPollOnlyOnVoteSide(null);
+      vote.setVoterOnlyOnVoteSide(null);
+      voteRepository.delete(vote);
+    }
+
+    guestRepository.deleteAll();
+  }
+
   @Test
   public void shouldGetAllGuests() {
     ResponseEntity<GuestResponse[]> response =
@@ -82,12 +91,6 @@ public class GuestControllerIT {
       Assertions.assertEquals(guestResponse.getUsername(), guests.get(i).getUsername());
       i++;
     }
-  }
-
-  @AfterEach
-  public void tearDown() {
-    voteRepository.deleteAll();
-    guestRepository.deleteAll();
   }
 
   @Test
