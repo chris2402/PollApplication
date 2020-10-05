@@ -36,7 +36,7 @@ public class Poll {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   @JsonBackReference(value = "pollOwner")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "pollId")
   @Setter(AccessLevel.PRIVATE)
   private User pollOwner;
