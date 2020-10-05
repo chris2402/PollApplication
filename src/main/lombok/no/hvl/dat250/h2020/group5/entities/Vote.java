@@ -1,8 +1,10 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Setter;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 
 import javax.persistence.*;
@@ -19,12 +21,14 @@ public class Vote {
   @JoinColumn(name = "voter_id")
   @EqualsAndHashCode.Exclude
   @JsonBackReference
+  @Setter(AccessLevel.PRIVATE)
   private Voter voter;
 
   @JoinColumn(name = "poll_id")
   @ManyToOne(fetch = FetchType.EAGER)
   @EqualsAndHashCode.Exclude
   @JsonBackReference(value = "votes")
+  @Setter(AccessLevel.PRIVATE)
   private Poll poll;
 
   @Enumerated(EnumType.STRING)
@@ -36,36 +40,34 @@ public class Vote {
   }
 
   /**
-   * Check if poll already have the vote to avoid circular dependency.
-   *
    * @param poll
    * @return true if vote is added to this poll
    */
-  public boolean setPoll(Poll poll) {
-    if (poll.getVotes().contains(this)) {
-      return false;
-    }
-    poll.addVote(this);
+  public boolean setPollAndAddThisVoteToPoll(Poll poll) {
     this.poll = poll;
+    poll.getVotes().add(this);
     return true;
   }
 
   /**
-   * Check if voter already have the vote to avoid circular dependency.
-   *
-   * @param voter
-   * @return true if vote is added to this voter or if voter is set to null
+   * @param voter if vote is to be deleted it will set voter to null.
+   * @return true if voter is set.
    */
-  public boolean setVoter(Voter voter) {
+  public boolean setVoterAndAddThisVoteToVoter(Voter voter) {
     if (voter == null) {
       this.voter = null;
       return true;
     }
-    if (voter.getVotes().contains(this)) {
-      return false;
-    }
-    voter.addVote(this);
     this.voter = voter;
+    voter.getVotes().add(this);
     return true;
+  }
+
+  public void setPollOnlyOnVoteSide(Poll poll) {
+    setPoll(poll);
+  }
+
+  public void setVoterOnlyOnVoteSide(Voter voter) {
+    setVoter(voter);
   }
 }

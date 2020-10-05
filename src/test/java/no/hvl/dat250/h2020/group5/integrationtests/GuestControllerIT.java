@@ -1,10 +1,12 @@
 package no.hvl.dat250.h2020.group5.integrationtests;
 
+import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.controllers.GuestController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+@NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class GuestControllerTest {
+public class GuestControllerIT {
 
   @Autowired TestRestTemplate template;
   @Autowired GuestController guestcontroller;
@@ -70,6 +73,7 @@ public class GuestControllerTest {
         template.getForEntity(base.toString(), GuestResponse[].class);
     GuestResponse[] guestsResponses = response.getBody();
 
+    System.out.println(guestsResponses.toString());
     Assertions.assertNotNull(guests);
     Assertions.assertEquals(3, guestsResponses.length);
 
@@ -78,6 +82,12 @@ public class GuestControllerTest {
       Assertions.assertEquals(guestResponse.getUsername(), guests.get(i).getUsername());
       i++;
     }
+  }
+
+  @AfterEach
+  public void tearDown() {
+    voteRepository.deleteAll();
+    guestRepository.deleteAll();
   }
 
   @Test

@@ -1,5 +1,6 @@
-package no.hvl.dat250.h2020.group5.controllers;
+package no.hvl.dat250.h2020.group5.integrationtests;
 
+import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -11,6 +12,7 @@ import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,11 +27,12 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
+@NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PollControllerIT {
 
   @Autowired TestRestTemplate template;
-  @Autowired PollController PollController;
+  @Autowired no.hvl.dat250.h2020.group5.controllers.PollController PollController;
   @Autowired PollRepository pollRepository;
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
@@ -71,26 +74,26 @@ public class PollControllerIT {
     guestRepository.save(guest1);
 
     Vote vote1 = new Vote();
-    vote1.setVoter(user1);
-    vote1.setPoll(poll1);
+    vote1.setVoterAndAddThisVoteToVoter(user1);
+    vote1.setPollAndAddThisVoteToPoll(poll1);
     vote1.setAnswer(AnswerType.NO);
     vote1.setId((long) 123123);
 
     Vote vote2 = new Vote();
-    vote2.setVoter(user2);
-    vote2.setPoll(poll1);
+    vote2.setVoterAndAddThisVoteToVoter(user2);
+    vote2.setPollAndAddThisVoteToPoll(poll1);
     vote2.setId((long) 321423412);
     vote2.setAnswer(AnswerType.YES);
 
     Vote vote3 = new Vote();
-    vote3.setVoter(guest1);
-    vote3.setPoll(poll1);
+    vote3.setVoterAndAddThisVoteToVoter(guest1);
+    vote3.setPollAndAddThisVoteToPoll(poll1);
     vote3.setId((long) 5644);
     vote3.setAnswer(AnswerType.NO);
 
     Vote vote4 = new Vote();
-    vote4.setVoter(guest1);
-    vote4.setPoll(poll1);
+    vote4.setVoterAndAddThisVoteToVoter(guest1);
+    vote4.setPollAndAddThisVoteToPoll(poll1);
     vote4.setId((long) 12352);
     vote4.setAnswer(AnswerType.NO);
 
@@ -104,6 +107,13 @@ public class PollControllerIT {
         .getRestTemplate()
         .setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
     // make PATCH request
+  }
+
+  @AfterEach
+  public void tearDown() {
+    pollRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
   }
 
   @Test

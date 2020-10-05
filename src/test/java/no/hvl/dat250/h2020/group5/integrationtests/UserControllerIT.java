@@ -1,5 +1,7 @@
-package no.hvl.dat250.h2020.group5.controllers;
+package no.hvl.dat250.h2020.group5.integrationtests;
 
+import net.jcip.annotations.NotThreadSafe;
+import no.hvl.dat250.h2020.group5.controllers.UserController;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
@@ -18,6 +20,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+@NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerIT {
 
@@ -30,6 +33,7 @@ public class UserControllerIT {
 
   @BeforeEach
   public void setUp() throws MalformedURLException {
+    userRepository.deleteAll();
     this.base = new URL("http://localhost:" + port + "/users");
     user = new User().userName("username").password("my password");
     testRestTemplate

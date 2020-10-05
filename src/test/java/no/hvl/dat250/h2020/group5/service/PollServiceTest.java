@@ -25,144 +25,138 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 public class PollServiceTest {
 
-    @InjectMocks PollService pollService;
+  @InjectMocks PollService pollService;
 
-    @Mock PollRepository pollRepository;
+  @Mock PollRepository pollRepository;
 
-    @Mock UserRepository userRepository;
+  @Mock UserRepository userRepository;
 
-    private User user;
-    private Poll poll;
-    private List<Poll> polls;
+  private User user;
+  private Poll poll;
+  private List<Poll> polls;
 
-    @BeforeEach
-    public void setUp() {
-        this.user = new User();
-        this.poll = new Poll();
-        user.setId(1L);
-        poll.setId(2L);
+  @BeforeEach
+  public void setUp() {
+    this.user = new User();
+    this.poll = new Poll();
+    user.setId(1L);
+    poll.setId(2L);
 
-        this.polls =
-                Arrays.asList(
-                        poll.pollOwner(user),
-                        new Poll().pollOwner(user),
-                        new Poll().pollOwner(user));
+    this.polls =
+        Arrays.asList(poll.pollOwner(user), new Poll().pollOwner(user), new Poll().pollOwner(user));
 
-        when(pollRepository.findAllByPollOwner(user)).thenReturn(polls);
-    }
+    when(pollRepository.findAllByPollOwner(user)).thenReturn(polls);
+  }
 
-    @Test
-    public void shouldCreateANewPollTest() {
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-        pollService.createPoll(poll, user.getId());
-        verify(pollRepository, times(1)).save(poll);
-    }
+  @Test
+  public void shouldCreateANewPollTest() {
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    pollService.createPoll(poll, user.getId());
+    verify(pollRepository, times(1)).save(poll);
+  }
 
-    @Test
-    public void shouldNotCreateANewPollIfUserIsNotPresentTest() {
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.empty());
-        pollService.createPoll(poll, user.getId());
-        verify(pollRepository, times(0)).save(poll);
-    }
+  @Test
+  public void shouldNotCreateANewPollIfUserIsNotPresentTest() {
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.empty());
+    pollService.createPoll(poll, user.getId());
+    verify(pollRepository, times(0)).save(poll);
+  }
 
-    @Test
-    public void shouldDeleteAPollWhenUserIsOwnerTest() {
-        poll.setPollOwner(user);
-        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-        pollService.deletePoll(poll.getId(), user.getId());
-        verify(pollRepository, times(1)).delete(poll);
-    }
+  @Test
+  public void shouldDeleteAPollWhenUserIsOwnerTest() {
+    poll.setPollOwner(user);
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    pollService.deletePoll(poll.getId(), user.getId());
+    verify(pollRepository, times(1)).delete(poll);
+  }
 
-    @Test
-    public void shouldDeleteAPollWhenUserIsAdminTest() {
-        User pollOwner = new User();
-        pollOwner.setId(3L);
-        poll.setPollOwner(pollOwner);
-        user.setIsAdmin(true);
+  @Test
+  public void shouldDeleteAPollWhenUserIsAdminTest() {
+    User pollOwner = new User();
+    pollOwner.setId(3L);
+    poll.setPollOwner(pollOwner);
+    user.setIsAdmin(true);
 
-        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
 
-        pollService.deletePoll(poll.getId(), user.getId());
+    pollService.deletePoll(poll.getId(), user.getId());
 
-        verify(pollRepository, times(1)).delete(poll);
-    }
+    verify(pollRepository, times(1)).delete(poll);
+  }
 
-    @Test
-    public void shouldNotDeletePollWhenUserIsNotOwnerOrAdminTest() {
-        User pollOwner = new User();
-        pollOwner.setId(3L);
-        poll.setPollOwner(pollOwner);
+  @Test
+  public void shouldNotDeletePollWhenUserIsNotOwnerOrAdminTest() {
+    User pollOwner = new User();
+    pollOwner.setId(3L);
+    poll.setPollOwner(pollOwner);
 
-        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-        pollService.deletePoll(poll.getId(), user.getId());
-        verify(pollRepository, times(0)).delete(poll);
-    }
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    pollService.deletePoll(poll.getId(), user.getId());
+    verify(pollRepository, times(0)).delete(poll);
+  }
 
-    @Test
-    public void shouldReturnAllPublicPollsTest() {
-        when(pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC))
-                .thenReturn(
-                        Arrays.asList(
-                                new Poll().visibilityType(PollVisibilityType.PUBLIC),
-                                new Poll().visibilityType(PollVisibilityType.PUBLIC),
-                                new Poll().visibilityType(PollVisibilityType.PUBLIC)));
-        Assertions.assertEquals(3, pollService.getAllPublicPolls().size());
-        Assertions.assertEquals(
-                PollVisibilityType.PUBLIC,
-                pollService.getAllPublicPolls().get(0).getVisibilityType());
-    }
+  @Test
+  public void shouldReturnAllPublicPollsTest() {
+    when(pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC))
+        .thenReturn(
+            Arrays.asList(
+                new Poll().visibilityType(PollVisibilityType.PUBLIC),
+                new Poll().visibilityType(PollVisibilityType.PUBLIC),
+                new Poll().visibilityType(PollVisibilityType.PUBLIC)));
+    Assertions.assertEquals(3, pollService.getAllPublicPolls().size());
+    Assertions.assertEquals(
+        PollVisibilityType.PUBLIC, pollService.getAllPublicPolls().get(0).getVisibilityType());
+  }
 
-    @Test
-    public void shouldGetPollResultTest() {
-        poll.setVotes(
-                Arrays.asList(
-                        new Vote().answer(AnswerType.YES),
-                        new Vote().answer(AnswerType.YES),
-                        new Vote().answer(AnswerType.NO)));
-        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
-        VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
-        Assertions.assertEquals(1, votes.getNo());
-        Assertions.assertEquals(2, votes.getYes());
-    }
+  @Test
+  public void shouldGetPollResultTest() {
+    poll.addVoteAndSetThisPollInVote(new Vote().answer(AnswerType.YES));
+    poll.addVoteAndSetThisPollInVote(new Vote().answer(AnswerType.YES));
+    poll.addVoteAndSetThisPollInVote(new Vote().answer(AnswerType.NO));
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+    VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
+    Assertions.assertEquals(1, votes.getNo());
+    Assertions.assertEquals(2, votes.getYes());
+  }
 
-    @Test
-    public void shouldActivateAPollTest() {
-        poll.setPollDuration(10000000);
-        when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
-        pollService.activatePoll(poll.getId());
-        Assertions.assertNotNull(poll.getStartTime());
-        Assertions.assertTrue(pollService.isActivated(poll.getId()));
-    }
+  @Test
+  public void shouldActivateAPollTest() {
+    poll.setPollDuration(10000000);
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+    pollService.activatePoll(poll.getId());
+    Assertions.assertNotNull(poll.getStartTime());
+    Assertions.assertTrue(pollService.isActivated(poll.getId()));
+  }
 
-    @Test
-    public void shouldGetAllPollsByOwnerTest() {
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
+  @Test
+  public void shouldGetAllPollsByOwnerTest() {
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
 
-        List<PollResponse> pollsFromService = pollService.getUserPollsAsOwner(user.getId());
+    List<PollResponse> pollsFromService = pollService.getUserPollsAsOwner(user.getId());
 
-        Assertions.assertEquals(3, pollsFromService.size());
-    }
+    Assertions.assertEquals(3, pollsFromService.size());
+  }
 
-    @Test
-    public void shouldOnlyGetAllPollsToUserWhenAdminTest() {
-        User admin = new User();
-        User notAdmin = new User();
-        notAdmin.setId(6L);
-        admin.setId(5L);
-        admin.setIsAdmin(true);
-        when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
-        when(userRepository.findById(notAdmin.getId())).thenReturn(java.util.Optional.of(notAdmin));
+  @Test
+  public void shouldOnlyGetAllPollsToUserWhenAdminTest() {
+    User admin = new User();
+    User notAdmin = new User();
+    notAdmin.setId(6L);
+    admin.setId(5L);
+    admin.setIsAdmin(true);
+    when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
+    when(userRepository.findById(notAdmin.getId())).thenReturn(java.util.Optional.of(notAdmin));
 
-        List<PollResponse> pollsFromServiceAsAdmin =
-                pollService.getUserPollsAsAdmin(user.getId(), admin.getId());
-        List<PollResponse> pollsFromServiceNotAdmin =
-                pollService.getUserPollsAsAdmin(user.getId(), notAdmin.getId());
+    List<PollResponse> pollsFromServiceAsAdmin =
+        pollService.getUserPollsAsAdmin(user.getId(), admin.getId());
+    List<PollResponse> pollsFromServiceNotAdmin =
+        pollService.getUserPollsAsAdmin(user.getId(), notAdmin.getId());
 
-        Assertions.assertEquals(3, pollsFromServiceAsAdmin.size());
-        Assertions.assertNull(pollsFromServiceNotAdmin);
-    }
+    Assertions.assertEquals(3, pollsFromServiceAsAdmin.size());
+    Assertions.assertNull(pollsFromServiceNotAdmin);
+  }
 }

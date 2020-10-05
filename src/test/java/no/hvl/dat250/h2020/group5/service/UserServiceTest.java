@@ -43,7 +43,7 @@ public class UserServiceTest {
     user2.setId(2L);
 
     vote = new Vote();
-    vote.setVoter(user1);
+    vote.setVoterAndAddThisVoteToVoter(user1);
 
     when(userRepository.save(any(User.class))).thenReturn(new User());
     when(userRepository.findById(user1.getId())).thenReturn(Optional.ofNullable(user1));
