@@ -44,7 +44,7 @@ public class VoteRepositoryTest {
 
     vote.setAnswer(AnswerType.YES);
     vote.setPollAndAddThisVoteToPoll(poll);
-    vote.setVoter(voter);
+    vote.setVoterAndAddThisVoteToVoter(voter);
 
     voteRepository.save(vote);
   }

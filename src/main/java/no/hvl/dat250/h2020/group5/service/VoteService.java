@@ -63,7 +63,7 @@ public class VoteService {
 
     Vote v = new Vote();
     v.setPollAndAddThisVoteToPoll(p.get());
-    v.setVoter(u.get());
+    v.setVoterAndAddThisVoteToVoter(u.get());
     v.setAnswer(answer);
 
     return voteRepository.save(v);

@@ -29,19 +29,9 @@ public abstract class Voter {
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
 
-  /**
-   * Do not add same vote twice and check that vote does not already have a voter to avoid circular
-   * dependency.
-   *
-   * @param vote
-   * @return True if vote is added to this voter
-   */
-  public boolean addVote(Vote vote) {
-    if (votes.contains(vote) || vote.getVoter() != null) {
-      return false;
-    }
+  public boolean addVoteAndSetThisVoterInVote(Vote vote) {
     this.votes.add(vote);
-    vote.setVoter(this);
+    vote.setVoterOnlyOnVoteSide(this);
     return true;
   }
 }

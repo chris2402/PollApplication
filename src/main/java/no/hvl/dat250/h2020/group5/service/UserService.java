@@ -41,7 +41,7 @@ public class UserService {
 
     List<Vote> votes = user.get().getVotes();
     for (Vote vote : votes) {
-      vote.setVoter(null);
+      vote.setVoterAndAddThisVoteToVoter(null);
     }
     voteRepository.saveAll(votes);
     userRepository.delete(user.get());
