@@ -117,5 +117,6 @@ public class PollRepositoryTest {
     Assertions.assertEquals(4, voteRepository.count());
     Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
     Assertions.assertEquals(1, voteRepository.findByPoll(savedPoll).size());
+    Assertions.assertNotNull(voteRepository.findByPoll(savedPoll).get(0).getId());
   }
 }
