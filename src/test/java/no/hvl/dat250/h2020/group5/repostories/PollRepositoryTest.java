@@ -99,4 +99,20 @@ public class PollRepositoryTest {
     Assertions.assertEquals(
         1, pollRepository.findAllByVisibilityType(PollVisibilityType.PRIVATE).size());
   }
+
+  @Test
+  public void shouldSaveUserWhenSavingPoll() {
+    User user = new User().userName("Test");
+    Poll poll = new Poll();
+    poll.addOwner(user);
+
+    Poll savedPoll = pollRepository.save(poll);
+
+    Optional<User> findSavedUser = userRepository.findByUsername("Test");
+
+    Assertions.assertTrue(findSavedUser.isPresent());
+    Assertions.assertNotNull(findSavedUser.get().getId());
+    Assertions.assertEquals(savedPoll, findSavedUser.get().getUserPolls().get(0));
+    Assertions.assertEquals(savedPoll.getPollOwner(), findSavedUser.get());
+  }
 }
