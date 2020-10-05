@@ -23,7 +23,10 @@ public abstract class Voter {
   @EqualsAndHashCode.Include
   protected String username;
 
-  @OneToMany(mappedBy = "voter", fetch = FetchType.EAGER)
+  @OneToMany(
+      mappedBy = "voter",
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JsonManagedReference
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
