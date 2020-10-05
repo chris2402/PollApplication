@@ -59,13 +59,9 @@ public class Poll {
    * @param vote
    * @return True if vote is added to this poll
    */
-  public boolean addVote(Vote vote) {
-    if (votes.contains(vote)) {
-      return false;
-    }
+  public void addVote(Vote vote) {
     this.votes.add(vote);
     vote.setPoll(this);
-    return true;
   }
 
   public Poll visibilityType(PollVisibilityType type) {

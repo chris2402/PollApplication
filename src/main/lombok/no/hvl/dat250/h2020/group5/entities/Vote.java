@@ -41,13 +41,9 @@ public class Vote {
    * @param poll
    * @return true if vote is added to this poll
    */
-  public boolean setPoll(Poll poll) {
-    if (this.poll == poll) {
-      return false;
-    }
+  public void addPoll(Poll poll) {
     this.poll = poll;
-    poll.addVote(this);
-    return true;
+    poll.getVotes().add(this);
   }
 
   /**

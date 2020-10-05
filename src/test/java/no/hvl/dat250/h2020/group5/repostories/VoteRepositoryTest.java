@@ -43,7 +43,7 @@ public class VoteRepositoryTest {
     voterRepository.save(voter);
 
     vote.setAnswer(AnswerType.YES);
-    vote.setPoll(poll);
+    vote.addPoll(poll);
     vote.setVoter(voter);
 
     voteRepository.save(vote);
@@ -74,7 +74,7 @@ public class VoteRepositoryTest {
     Vote newVote = new Vote();
     Poll newPoll = new Poll();
     Poll savedPoll = pollRepository.save(newPoll);
-    newVote.setPoll(newPoll);
+    newVote.addPoll(newPoll);
     voteRepository.save(newVote);
     Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
   }
@@ -89,8 +89,8 @@ public class VoteRepositoryTest {
     // Need to save votes first in order to give an ID
     voteRepository.saveAll(new ArrayList<>(Arrays.asList(newVote, newVote2)));
 
-    newVote.setPoll(newPoll);
-    newVote2.setPoll(newPoll);
+    newVote.addPoll(newPoll);
+    newVote2.addPoll(newPoll);
 
     voteRepository.saveAll(new ArrayList<>(Arrays.asList(newVote, newVote2)));
 
