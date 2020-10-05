@@ -53,4 +53,13 @@ public class User extends Voter {
     userPolls.remove(poll);
     poll.setOwnerOnlyOnPollSide(null);
   }
+
+  public void deleteAllPolls() {
+    userPolls.stream()
+        .peek(
+            poll -> {
+              poll.setOwnerOnlyOnPollSide(null);
+            });
+    userPolls = new ArrayList<>();
+  }
 }

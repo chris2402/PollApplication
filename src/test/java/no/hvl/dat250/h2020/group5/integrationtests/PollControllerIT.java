@@ -41,21 +41,24 @@ public class PollControllerIT {
   private URL base;
   private User user1;
   private Poll poll1;
+  private User user2;
+  private Guest guest1;
+  private Poll poll2;
+  private Vote vote1;
+  private Vote vote2;
+  private Vote vote3;
+  private Vote vote4;
 
   @BeforeEach
   public void setUp() throws Exception {
-    pollRepository.deleteAll();
-    userRepository.deleteAll();
-    guestRepository.deleteAll();
-
     user1 = new User();
     user1.setUsername("Admin");
     user1.setIsAdmin(true);
 
-    User user2 = new User();
+    user2 = new User();
     user2.setUsername("Not admin");
 
-    Guest guest1 = new Guest();
+    guest1 = new Guest();
     guest1.setUsername("guest1");
 
     user1 = userRepository.save(user1);
@@ -67,7 +70,7 @@ public class PollControllerIT {
     poll1.setOwnerAndAddThisPollToOwner(user1);
     poll1.setVisibilityType(PollVisibilityType.PUBLIC);
 
-    Poll poll2 = new Poll();
+    poll2 = new Poll();
     poll2.setQuestion("Question");
     poll2.setOwnerAndAddThisPollToOwner(user2);
     poll2.setVisibilityType(PollVisibilityType.PRIVATE);
@@ -75,25 +78,25 @@ public class PollControllerIT {
     poll1 = pollRepository.save(poll1);
     pollRepository.save(poll2);
 
-    Vote vote1 = new Vote();
+    vote1 = new Vote();
     vote1.setVoterAndAddThisVoteToVoter(user1);
     vote1.setPollAndAddThisVoteToPoll(poll1);
     vote1.setAnswer(AnswerType.NO);
     vote1.setId((long) 123123);
 
-    Vote vote2 = new Vote();
+    vote2 = new Vote();
     vote2.setVoterAndAddThisVoteToVoter(user2);
     vote2.setPollAndAddThisVoteToPoll(poll1);
     vote2.setId((long) 321423412);
     vote2.setAnswer(AnswerType.YES);
 
-    Vote vote3 = new Vote();
+    vote3 = new Vote();
     vote3.setVoterAndAddThisVoteToVoter(guest1);
     vote3.setPollAndAddThisVoteToPoll(poll1);
     vote3.setId((long) 5644);
     vote3.setAnswer(AnswerType.NO);
 
-    Vote vote4 = new Vote();
+    vote4 = new Vote();
     vote4.setVoterAndAddThisVoteToVoter(guest1);
     vote4.setPollAndAddThisVoteToPoll(poll1);
     vote4.setId((long) 12352);
@@ -113,9 +116,17 @@ public class PollControllerIT {
 
   @AfterEach
   public void tearDown() {
+    user1.deleteAllVotes();
+    user1.deleteAllPolls();
+    user2.deleteAllVotes();
+    user2.deleteAllPolls();
+    guest1.deleteAllVotes();
+    poll1.deleteAllVotes();
+    poll2.deleteAllVotes();
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
+    voteRepository.deleteAll();
   }
 
   @Test
@@ -142,7 +153,7 @@ public class PollControllerIT {
     template.delete(
         base.toString() + "/" + poll1.getId().toString() + "/" + user1.getId().toString());
     List<Vote> votes = voteRepository.findByPoll(poll1);
-    Assertions.assertEquals(votes.size(), 0);
+    Assertions.assertEquals(0, votes.size());
     Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
   }
 

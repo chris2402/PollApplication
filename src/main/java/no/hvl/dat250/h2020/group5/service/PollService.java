@@ -51,8 +51,14 @@ public class PollService {
       return false;
     }
     if (isOwnerOrAdmin(poll.get(), userId)) {
-      pollRepository.delete(poll.get());
-      return true;
+      Optional<User> user = userRepository.findById(userId);
+      if (user.isPresent()) {
+        user.get().deletePoll(poll.get());
+        poll.get().deleteAllVotes();
+        pollRepository.delete(poll.get());
+        return true;
+      }
+      return false;
     }
     return false;
   }
