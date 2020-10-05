@@ -37,7 +37,9 @@ public class PollRepositoryTest {
     this.poll = new Poll();
     this.votes = Arrays.asList(new Vote(), new Vote(), new Vote());
 
-    poll.setVotes(votes);
+    poll.addVoteAndSetThisPollInVote(new Vote());
+    poll.addVoteAndSetThisPollInVote(new Vote());
+    poll.addVoteAndSetThisPollInVote(new Vote());
     user.addPoll(poll);
 
     userRepository.save(user);
@@ -108,7 +110,7 @@ public class PollRepositoryTest {
     Vote newVote = new Vote();
     Poll savedPoll = pollRepository.save(newPoll);
 
-    savedPoll.addVote(newVote);
+    savedPoll.addVoteAndSetThisPollInVote(newVote);
 
     pollRepository.save(savedPoll);
 

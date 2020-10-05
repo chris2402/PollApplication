@@ -37,8 +37,8 @@ public class VotingDeviceControllerTest {
     this.noVote = new Vote().answer(AnswerType.NO);
     this.poll = new Poll();
 
-    yesVote.setPoll(poll);
-    noVote.setPoll(poll);
+    yesVote.setPollAndAddThisVoteToPoll(poll);
+    noVote.setPollAndAddThisVoteToPoll(poll);
   }
 
   @Test

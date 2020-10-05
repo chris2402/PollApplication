@@ -1,8 +1,10 @@
 package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Setter;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 
 import javax.persistence.*;
@@ -25,6 +27,7 @@ public class Vote {
   @ManyToOne(fetch = FetchType.EAGER)
   @EqualsAndHashCode.Exclude
   @JsonBackReference(value = "votes")
+  @Setter(AccessLevel.PRIVATE)
   private Poll poll;
 
   @Enumerated(EnumType.STRING)
@@ -36,17 +39,12 @@ public class Vote {
   }
 
   /**
-   * Check if poll already have the vote to avoid circular dependency.
-   *
    * @param poll
    * @return true if vote is added to this poll
    */
-  public boolean setPoll(Poll poll) {
-    if (this.poll == poll) {
-      return false;
-    }
+  public boolean setPollAndAddThisVoteToPoll(Poll poll) {
     this.poll = poll;
-    poll.addVote(this);
+    poll.getVotes().add(this);
     return true;
   }
 
@@ -67,5 +65,9 @@ public class Vote {
     voter.addVote(this);
     this.voter = voter;
     return true;
+  }
+
+  public void setPollOnlyOnVoteSide(Poll poll) {
+    setPoll(poll);
   }
 }

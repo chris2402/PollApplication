@@ -54,7 +54,7 @@ public class VoteServiceTest {
 
     vote = new Vote();
     vote.setVoter(voter);
-    vote.setPoll(poll);
+    vote.setPollAndAddThisVoteToPoll(poll);
 
     castVoteRequest = new CastVoteRequest();
     castVoteRequest.setPollId(poll.getId());

@@ -2,9 +2,7 @@ package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 
@@ -50,21 +48,16 @@ public class Poll {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @JsonManagedReference(value = "votes")
+  @Setter(AccessLevel.PRIVATE)
   private List<Vote> votes = new ArrayList<>();
 
   /**
-   * Do not add same vote twice and check that vote does not already have a poll to avoid circular
-   * dependency.
-   *
    * @param vote
    * @return True if vote is added to this poll
    */
-  public boolean addVote(Vote vote) {
-    if (votes.contains(vote)) {
-      return false;
-    }
+  public boolean addVoteAndSetThisPollInVote(Vote vote) {
     this.votes.add(vote);
-    vote.setPoll(this);
+    vote.setPollOnlyOnVoteSide(this);
     return true;
   }
 

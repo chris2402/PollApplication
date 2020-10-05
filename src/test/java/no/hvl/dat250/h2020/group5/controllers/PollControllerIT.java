@@ -72,25 +72,25 @@ public class PollControllerIT {
 
     Vote vote1 = new Vote();
     vote1.setVoter(user1);
-    vote1.setPoll(poll1);
+    vote1.setPollAndAddThisVoteToPoll(poll1);
     vote1.setAnswer(AnswerType.NO);
     vote1.setId((long) 123123);
 
     Vote vote2 = new Vote();
     vote2.setVoter(user2);
-    vote2.setPoll(poll1);
+    vote2.setPollAndAddThisVoteToPoll(poll1);
     vote2.setId((long) 321423412);
     vote2.setAnswer(AnswerType.YES);
 
     Vote vote3 = new Vote();
     vote3.setVoter(guest1);
-    vote3.setPoll(poll1);
+    vote3.setPollAndAddThisVoteToPoll(poll1);
     vote3.setId((long) 5644);
     vote3.setAnswer(AnswerType.NO);
 
     Vote vote4 = new Vote();
     vote4.setVoter(guest1);
-    vote4.setPoll(poll1);
+    vote4.setPollAndAddThisVoteToPoll(poll1);
     vote4.setId((long) 12352);
     vote4.setAnswer(AnswerType.NO);
 
