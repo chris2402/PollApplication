@@ -72,7 +72,6 @@ public class VoteControllerIT {
     }
 
     pollRepository.deleteAll();
-    voteRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
   }
