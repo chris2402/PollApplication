@@ -1,5 +1,7 @@
-package no.hvl.dat250.h2020.group5.controllers;
+package no.hvl.dat250.h2020.group5.integrationtests;
 
+import net.jcip.annotations.NotThreadSafe;
+import no.hvl.dat250.h2020.group5.controllers.VoteController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -26,6 +28,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.Date;
 
+@NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class VoteControllerIT {
 
@@ -62,8 +65,13 @@ public class VoteControllerIT {
 
   @AfterEach
   public void tearDown() {
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setVoterOnlyOnVoteSide(null);
+      vote.setPollOnlyOnVoteSide(null);
+      voteRepository.delete(vote);
+    }
+
     pollRepository.deleteAll();
-    voteRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
   }

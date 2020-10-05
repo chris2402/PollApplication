@@ -1,5 +1,6 @@
-package no.hvl.dat250.h2020.group5.controllers;
+package no.hvl.dat250.h2020.group5.integrationtests;
 
+import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -11,6 +12,7 @@ import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,25 +27,24 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
+@NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PollControllerIT {
 
   @Autowired TestRestTemplate template;
-  @Autowired PollController PollController;
+  @Autowired no.hvl.dat250.h2020.group5.controllers.PollController PollController;
   @Autowired PollRepository pollRepository;
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
   @Autowired VoteRepository voteRepository;
   @LocalServerPort private int port;
+
   private URL base;
   private User user1;
   private Poll poll1;
 
   @BeforeEach
   public void setUp() throws Exception {
-    pollRepository.deleteAll();
-    userRepository.deleteAll();
-    guestRepository.deleteAll();
 
     user1 = new User();
     user1.setUsername("Admin");
@@ -71,26 +72,26 @@ public class PollControllerIT {
     guestRepository.save(guest1);
 
     Vote vote1 = new Vote();
-    vote1.setVoter(user1);
-    vote1.setPoll(poll1);
+    vote1.setVoterAndAddThisVoteToVoter(user1);
+    vote1.setPollAndAddThisVoteToPoll(poll1);
     vote1.setAnswer(AnswerType.NO);
     vote1.setId((long) 123123);
 
     Vote vote2 = new Vote();
-    vote2.setVoter(user2);
-    vote2.setPoll(poll1);
+    vote2.setVoterAndAddThisVoteToVoter(user2);
+    vote2.setPollAndAddThisVoteToPoll(poll1);
     vote2.setId((long) 321423412);
     vote2.setAnswer(AnswerType.YES);
 
     Vote vote3 = new Vote();
-    vote3.setVoter(guest1);
-    vote3.setPoll(poll1);
+    vote3.setVoterAndAddThisVoteToVoter(guest1);
+    vote3.setPollAndAddThisVoteToPoll(poll1);
     vote3.setId((long) 5644);
     vote3.setAnswer(AnswerType.NO);
 
     Vote vote4 = new Vote();
-    vote4.setVoter(guest1);
-    vote4.setPoll(poll1);
+    vote4.setVoterAndAddThisVoteToVoter(guest1);
+    vote4.setPollAndAddThisVoteToPoll(poll1);
     vote4.setId((long) 12352);
     vote4.setAnswer(AnswerType.NO);
 
@@ -104,6 +105,19 @@ public class PollControllerIT {
         .getRestTemplate()
         .setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
     // make PATCH request
+  }
+
+  @AfterEach
+  public void tearDown() {
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setPollOnlyOnVoteSide(null);
+      vote.setVoterOnlyOnVoteSide(null);
+      voteRepository.delete(vote);
+    }
+
+    pollRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
   }
 
   @Test
@@ -130,7 +144,8 @@ public class PollControllerIT {
     template.delete(
         base.toString() + "/" + poll1.getId().toString() + "/" + user1.getId().toString());
     List<Vote> votes = voteRepository.findByPoll(poll1);
-    Assertions.assertEquals(votes.size(), 0);
+    Assertions.assertEquals(0, votes.size());
+    Assertions.assertEquals(0, voteRepository.count());
     Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
   }
 

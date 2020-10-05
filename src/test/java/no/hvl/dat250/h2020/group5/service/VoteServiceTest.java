@@ -53,8 +53,8 @@ public class VoteServiceTest {
     voter2.setId(5L);
 
     vote = new Vote();
-    vote.setVoter(voter);
-    vote.setPoll(poll);
+    vote.setVoterAndAddThisVoteToVoter(voter);
+    vote.setPollAndAddThisVoteToPoll(poll);
 
     castVoteRequest = new CastVoteRequest();
     castVoteRequest.setPollId(poll.getId());
