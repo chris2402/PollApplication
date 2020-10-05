@@ -73,7 +73,7 @@ public class Poll {
   }
 
   public Poll pollOwner(User owner) {
-    this.setPollOwner(owner);
+    setOwnerAndAddThisPollToOwner(owner);
     return this;
   }
 
