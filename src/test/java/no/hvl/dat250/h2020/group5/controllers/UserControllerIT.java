@@ -53,6 +53,8 @@ public class UserControllerIT {
     Assertions.assertEquals(user.getUsername(), postedUser.getUsername());
     Assertions.assertEquals(1, userRepository.count());
     Assertions.assertNotNull(userRepository.findById(postedUser.getId()).get().getPassword());
+    Assertions.assertEquals(
+        "my password", userRepository.findById(postedUser.getId()).get().getPassword());
   }
 
   @Test
