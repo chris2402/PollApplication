@@ -38,7 +38,7 @@ public class PollService {
     Optional<User> foundUser = userRepository.findById(userId);
     if (foundUser.isPresent()) {
       User user = foundUser.get();
-      poll.setPollOwner(user);
+      poll.setOwnerAndAddThisPollToOwner(user);
       pollRepository.save(poll);
       return new PollResponse(poll);
     }
@@ -111,17 +111,16 @@ public class PollService {
     if (poll.isEmpty()) {
       return false;
     }
-    
+
     if (poll.get().getStartTime() == null) {
-        return false;
+      return false;
     }
 
     Instant startTime = poll.get().getStartTime().toInstant();
     Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
-    
+
     return Instant.now().isBefore(startTimePlusDuration);
   }
-
 
   public VotesResponse getNumberOfVotes(Long pollId) {
     Optional<Poll> poll = pollRepository.findById(pollId);

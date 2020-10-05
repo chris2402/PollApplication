@@ -60,12 +60,12 @@ public class PollControllerIT {
 
     poll1 = new Poll();
     poll1.setQuestion("Question");
-    poll1.setPollOwner(user1);
+    poll1.setOwnerAndAddThisPollToOwner(user1);
     poll1.setVisibilityType(PollVisibilityType.PUBLIC);
 
     Poll poll2 = new Poll();
     poll2.setQuestion("Question");
-    poll2.setPollOwner(user2);
+    poll2.setOwnerAndAddThisPollToOwner(user2);
     poll2.setVisibilityType(PollVisibilityType.PRIVATE);
 
     poll1 = pollRepository.save(poll1);

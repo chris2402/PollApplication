@@ -59,7 +59,7 @@ public class PollControllerUnitTest {
             .question("my_awesome_question2")
             .visibilityType(PollVisibilityType.PUBLIC)
             .pollOwner(user);
-    poll2.setPollOwner(user);
+    poll2.setOwnerAndAddThisPollToOwner(user);
 
     response1 = new PollResponse(poll1);
     response2 = new PollResponse(poll2);

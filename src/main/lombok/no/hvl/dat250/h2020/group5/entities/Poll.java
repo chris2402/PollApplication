@@ -38,6 +38,7 @@ public class Poll {
   @JsonBackReference(value = "pollOwner")
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "pollId")
+  @Setter(AccessLevel.PRIVATE)
   private User pollOwner;
 
   @ToString.Exclude
@@ -59,6 +60,11 @@ public class Poll {
     this.votes.add(vote);
     vote.setPollOnlyOnVoteSide(this);
     return true;
+  }
+
+  public void setOwnerAndAddThisPollToOwner(User user) {
+    this.pollOwner = user;
+    user.getUserPolls().add(this);
   }
 
   public Poll visibilityType(PollVisibilityType type) {
@@ -89,5 +95,9 @@ public class Poll {
   public Poll pollDuration(Integer pollDuration) {
     this.pollDuration = pollDuration;
     return this;
+  }
+
+  public void setOwnerOnlyOnPollSide(User user) {
+    setPollOwner(user);
   }
 }
