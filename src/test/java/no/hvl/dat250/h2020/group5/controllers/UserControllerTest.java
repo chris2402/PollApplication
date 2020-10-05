@@ -97,6 +97,6 @@ public class UserControllerTest {
         .andExpect(
             content()
                 .string(
-                    "[{\"id\":null,\"username\":\"user1\",\"isAdmin\":true,\"password\":\"abcde\"},{\"id\":null,\"username\":\"user2\",\"isAdmin\":false,\"password\":\"1234\"},{\"id\":null,\"username\":\"user3\",\"isAdmin\":false,\"password\":\"my_cool_password\"}]"));
+                    "[{\"id\":null,\"username\":\"user1\",\"isAdmin\":true},{\"id\":null,\"username\":\"user2\",\"isAdmin\":false},{\"id\":null,\"username\":\"user3\",\"isAdmin\":false}]"));
   }
 }
