@@ -40,7 +40,7 @@ public class PollRepositoryTest {
     poll.addVoteAndSetThisPollInVote(new Vote());
     poll.addVoteAndSetThisPollInVote(new Vote());
     poll.addVoteAndSetThisPollInVote(new Vote());
-    user.addPoll(poll);
+    user.setPollOwnerAndAddToUserPoll(poll);
 
     userRepository.save(user);
   }
