@@ -32,9 +32,8 @@ public abstract class Voter {
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
 
-  public boolean addVoteAndSetThisVoterInVote(Vote vote) {
+  public void addVoteAndSetThisVoterInVote(Vote vote) {
     this.votes.add(vote);
     vote.setVoterOnlyOnVoteSide(this);
-    return true;
   }
 }
