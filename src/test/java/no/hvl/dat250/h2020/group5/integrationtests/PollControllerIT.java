@@ -144,7 +144,8 @@ public class PollControllerIT {
     template.delete(
         base.toString() + "/" + poll1.getId().toString() + "/" + user1.getId().toString());
     List<Vote> votes = voteRepository.findByPoll(poll1);
-    Assertions.assertEquals(votes.size(), 0);
+    Assertions.assertEquals(0, votes.size());
+    Assertions.assertEquals(0, voteRepository.count());
     Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
   }
 
