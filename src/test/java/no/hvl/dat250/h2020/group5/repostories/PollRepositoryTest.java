@@ -38,7 +38,7 @@ public class PollRepositoryTest {
     this.votes = Arrays.asList(new Vote(), new Vote(), new Vote());
 
     poll.setVotes(votes);
-    user.addPoll(poll);
+    user.setPollOwnerAndAddToUserPoll(poll);
 
     userRepository.save(user);
   }
@@ -104,7 +104,7 @@ public class PollRepositoryTest {
   public void shouldSaveUserWhenSavingPoll() {
     User user = new User().userName("Test");
     Poll poll = new Poll();
-    poll.addOwner(user);
+    poll.setOwnerAndAddThisPollToOwner(user);
 
     Poll savedPoll = pollRepository.save(poll);
 

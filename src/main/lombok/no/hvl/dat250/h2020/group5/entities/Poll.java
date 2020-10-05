@@ -69,9 +69,10 @@ public class Poll {
   }
 
   public void setOwnerAndAddThisPollToOwner(User user) {
-    this.owner = user;
+    this.pollOwner = user;
     user.getUserPolls().add(this);
   }
+
   public Poll visibilityType(PollVisibilityType type) {
     this.setVisibilityType(type);
     return this;
