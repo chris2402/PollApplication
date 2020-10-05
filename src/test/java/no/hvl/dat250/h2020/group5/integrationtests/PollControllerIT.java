@@ -38,15 +38,13 @@ public class PollControllerIT {
   @Autowired GuestRepository guestRepository;
   @Autowired VoteRepository voteRepository;
   @LocalServerPort private int port;
+
   private URL base;
   private User user1;
   private Poll poll1;
 
   @BeforeEach
   public void setUp() throws Exception {
-    pollRepository.deleteAll();
-    userRepository.deleteAll();
-    guestRepository.deleteAll();
 
     user1 = new User();
     user1.setUsername("Admin");
@@ -111,6 +109,12 @@ public class PollControllerIT {
 
   @AfterEach
   public void tearDown() {
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setPollOnlyOnVoteSide(null);
+      vote.setVoterOnlyOnVoteSide(null);
+      voteRepository.delete(vote);
+    }
+
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();

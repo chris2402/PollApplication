@@ -65,6 +65,12 @@ public class VoteControllerIT {
 
   @AfterEach
   public void tearDown() {
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setVoterOnlyOnVoteSide(null);
+      vote.setPollOnlyOnVoteSide(null);
+      voteRepository.delete(vote);
+    }
+
     pollRepository.deleteAll();
     voteRepository.deleteAll();
     userRepository.deleteAll();
