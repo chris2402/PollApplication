@@ -60,7 +60,7 @@ public class Poll {
    * @return True if vote is added to this poll
    */
   public boolean addVote(Vote vote) {
-    if (votes.contains(vote) || vote.getPoll() != null) {
+    if (votes.contains(vote)) {
       return false;
     }
     this.votes.add(vote);

@@ -42,11 +42,11 @@ public class Vote {
    * @return true if vote is added to this poll
    */
   public boolean setPoll(Poll poll) {
-    if (poll.getVotes().contains(this)) {
+    if (this.poll == poll) {
       return false;
     }
-    poll.addVote(this);
     this.poll = poll;
+    poll.addVote(this);
     return true;
   }
 

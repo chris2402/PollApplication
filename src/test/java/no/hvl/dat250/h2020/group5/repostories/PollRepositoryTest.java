@@ -64,6 +64,8 @@ public class PollRepositoryTest {
   @Test
   public void shouldPersistVotesWhenAddedToPollTest() {
     Assertions.assertEquals(3, voteRepository.count());
+    Assertions.assertNotNull(voteRepository.findAll().get(0).getId());
+    Assertions.assertNotNull(poll.getVotes().get(0).getId());
   }
 
   @Test
@@ -98,5 +100,20 @@ public class PollRepositoryTest {
         2, pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC).size());
     Assertions.assertEquals(
         1, pollRepository.findAllByVisibilityType(PollVisibilityType.PRIVATE).size());
+  }
+
+  @Test
+  public void shouldGiveIdToVote() {
+    Poll newPoll = new Poll();
+    Vote newVote = new Vote();
+    Poll savedPoll = pollRepository.save(newPoll);
+
+    savedPoll.addVote(newVote);
+
+    pollRepository.save(savedPoll);
+
+    Assertions.assertEquals(4, voteRepository.count());
+    Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
+    Assertions.assertEquals(1, voteRepository.findByPoll(savedPoll).size());
   }
 }
