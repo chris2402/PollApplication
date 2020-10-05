@@ -39,14 +39,15 @@ public class Vote {
     return this;
   }
 
-  /**
-   * @param poll
-   * @return true if vote is added to this poll
-   */
-  public boolean setPollAndAddThisVoteToPoll(Poll poll) {
+  /** @param poll if poll is to be deleted it will set poll to null */
+  public void setPollAndAddThisVoteToPoll(Poll poll) {
+    if (poll == null) {
+      this.poll.getVotes().remove(this);
+      this.poll = null;
+      return;
+    }
     this.poll = poll;
     poll.getVotes().add(this);
-    return true;
   }
 
   /**
