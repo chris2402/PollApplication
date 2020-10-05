@@ -105,4 +105,13 @@ public class Poll {
     votes.remove(vote);
     vote.setPollOnlyOnVoteSide(null);
   }
+
+  public void deleteAllVotes() {
+    votes.stream()
+        .peek(
+            vote -> {
+              vote.setVoterOnlyOnVoteSide(null);
+            });
+    votes = new ArrayList<>();
+  }
 }

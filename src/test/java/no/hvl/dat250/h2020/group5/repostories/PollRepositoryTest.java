@@ -61,9 +61,10 @@ public class PollRepositoryTest {
 
   @Test
   public void shouldDeletePollTest() {
+    user.deletePoll(poll);
     pollRepository.delete(poll);
     Assertions.assertEquals(0, pollRepository.count());
-    // Assertions.assertEquals(0, user.getUserPolls().size());
+    Assertions.assertEquals(0, user.getUserPolls().size());
   }
 
   @Test

@@ -40,7 +40,6 @@ public class VoteControllerIT {
   @Autowired TestRestTemplate testRestTemplate;
   @LocalServerPort private int port;
   private URL base;
-  private User user;
 
   private Poll savedPoll;
   private User savedUser;
@@ -48,6 +47,11 @@ public class VoteControllerIT {
 
   @BeforeEach
   public void setUp() throws MalformedURLException {
+    pollRepository.deleteAll();
+    voteRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
+
     this.base = new URL("http://localhost:" + port + "/votes");
 
     Poll poll =
@@ -65,6 +69,9 @@ public class VoteControllerIT {
 
   @AfterEach
   public void tearDown() {
+    savedGuest.deleteAllVotes();
+    savedUser.deleteAllVotes();
+    savedPoll.deleteAllVotes();
     pollRepository.deleteAll();
     voteRepository.deleteAll();
     userRepository.deleteAll();

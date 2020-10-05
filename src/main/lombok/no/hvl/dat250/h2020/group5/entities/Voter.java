@@ -23,10 +23,7 @@ public abstract class Voter {
   @EqualsAndHashCode.Include
   protected String username;
 
-  @OneToMany(
-      mappedBy = "voter",
-      fetch = FetchType.EAGER,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OneToMany(mappedBy = "voter", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
   @JsonManagedReference
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
@@ -41,5 +38,14 @@ public abstract class Voter {
   public void deleteVote(Vote vote) {
     votes.remove(vote);
     vote.setVoterOnlyOnVoteSide(null);
+  }
+
+  public void deleteAllVotes() {
+    votes.stream()
+        .peek(
+            vote -> {
+              vote.setVoterOnlyOnVoteSide(null);
+            });
+    votes = new ArrayList<>();
   }
 }
