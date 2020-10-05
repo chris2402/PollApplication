@@ -87,6 +87,13 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.stephenc.jcip</groupId>
+            <artifactId>jcip-annotations</artifactId>
+            <version>1.0-1</version>
+            <scope>test</scope>
+        </dependency>
+
 
     </dependencies>
 

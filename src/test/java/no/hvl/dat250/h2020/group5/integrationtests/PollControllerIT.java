@@ -1,5 +1,6 @@
-package no.hvl.dat250.h2020.group5.controllers;
+package no.hvl.dat250.h2020.group5.integrationtests;
 
+import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -11,6 +12,7 @@ import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,11 +27,12 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
+@NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PollControllerIT {
 
   @Autowired TestRestTemplate template;
-  @Autowired PollController PollController;
+  @Autowired no.hvl.dat250.h2020.group5.controllers.PollController PollController;
   @Autowired PollRepository pollRepository;
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
@@ -104,6 +107,13 @@ public class PollControllerIT {
         .getRestTemplate()
         .setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
     // make PATCH request
+  }
+
+  @AfterEach
+  public void tearDown() {
+    pollRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
   }
 
   @Test
