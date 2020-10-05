@@ -76,6 +76,7 @@ public class PollRepositoryTest {
 
   @Test
   public void shouldDeleteVotesWhenDeletingPollTest() {
+    user.deletePoll(poll);
     pollRepository.delete(poll);
     Assertions.assertEquals(0, voteRepository.count());
   }
@@ -84,6 +85,7 @@ public class PollRepositoryTest {
   public void shouldOnlyDeleteVotesLinkedToPollWhenDeletingPollTest() {
     Vote voteNotLinkedToPoll = new Vote();
     voteRepository.save(voteNotLinkedToPoll);
+    user.deletePoll(poll);
     pollRepository.delete(poll);
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(voteNotLinkedToPoll.getId(), voteRepository.findAll().get(0).getId());
@@ -125,12 +127,13 @@ public class PollRepositoryTest {
   }
 
   @Test
-  public void shouldSaveUserWhenSavingPoll() {
-    User user = new User().userName("Test");
-    Poll poll = new Poll();
-    poll.setOwnerAndAddThisPollToOwner(user);
+  public void shouldUpdateUserWhenSavingPoll() {
+    User newUser = new User().userName("Test");
+    userRepository.save(newUser);
+    Poll newPoll = new Poll();
+    newPoll.setOwnerAndAddThisPollToOwner(newUser);
 
-    Poll savedPoll = pollRepository.save(poll);
+    Poll savedPoll = pollRepository.save(newPoll);
 
     Optional<User> findSavedUser = userRepository.findByUsername("Test");
 
