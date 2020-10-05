@@ -4,11 +4,10 @@ import no.hvl.dat250.h2020.group5.Main;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.Vote;
-import no.hvl.dat250.h2020.group5.entities.Voter;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.repositories.VoterRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,11 +26,11 @@ public class VoteRepositoryTest {
 
   @Autowired PollRepository pollRepository;
 
-  @Autowired VoterRepository voterRepository;
+  @Autowired GuestRepository guestRepository;
 
   private Vote vote;
   private Poll poll;
-  private Voter voter;
+  private Guest voter;
 
   @BeforeEach
   public void setUp() {
@@ -40,13 +39,13 @@ public class VoteRepositoryTest {
     this.voter = new Guest();
 
     pollRepository.save(poll);
-    voterRepository.save(voter);
+    guestRepository.save(voter);
 
     vote.setAnswer(AnswerType.YES);
     vote.setPollAndAddThisVoteToPoll(poll);
     vote.setVoterAndAddThisVoteToVoter(voter);
 
-    voteRepository.save(vote);
+    this.vote = voteRepository.save(vote);
   }
 
   @Test
@@ -99,6 +98,16 @@ public class VoteRepositoryTest {
 
   @Test
   public void shouldAddVotesToVoterTest() {
-    Assertions.assertEquals(1, voterRepository.findAll().get(0).getVotes().size());
+    Assertions.assertEquals(1, guestRepository.findAll().get(0).getVotes().size());
+  }
+
+  @Test
+  public void shouldDeleteVoteTest() {
+    poll.deleteVote(vote);
+    voter.deleteVote(vote);
+    pollRepository.save(poll);
+    guestRepository.save(voter);
+    voteRepository.delete(vote);
+    Assertions.assertEquals(0, voteRepository.count());
   }
 }

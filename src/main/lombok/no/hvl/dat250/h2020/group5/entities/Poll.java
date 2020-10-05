@@ -100,4 +100,9 @@ public class Poll {
   public void setOwnerOnlyOnPollSide(User user) {
     setPollOwner(user);
   }
+
+  public void deleteVote(Vote vote) {
+    votes.remove(vote);
+    vote.setPollOnlyOnVoteSide(null);
+  }
 }
