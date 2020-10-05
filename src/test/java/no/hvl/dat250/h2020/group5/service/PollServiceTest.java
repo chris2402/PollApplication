@@ -7,6 +7,7 @@ import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.Assertions;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -31,16 +33,23 @@ public class PollServiceTest {
 
   @Mock UserRepository userRepository;
 
+  @Mock VoteRepository voteRepository;
+
   private User user;
   private Poll poll;
+  private Vote vote;
   private List<Poll> polls;
 
   @BeforeEach
   public void setUp() {
     this.user = new User();
     this.poll = new Poll();
+    this.vote = new Vote().answer(AnswerType.YES);
+
     user.setId(1L);
     poll.setId(2L);
+    vote.setPollAndAddThisVoteToPoll(poll);
+    vote.setVoterAndAddThisVoteToVoter(user);
 
     this.polls =
         Arrays.asList(poll.pollOwner(user), new Poll().pollOwner(user), new Poll().pollOwner(user));
@@ -67,8 +76,14 @@ public class PollServiceTest {
     poll.setPollOwner(user);
     when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
     when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    when(voteRepository.findByPoll(poll)).thenReturn(Collections.singletonList(vote));
+
     pollService.deletePoll(poll.getId(), user.getId());
+
     verify(pollRepository, times(1)).delete(poll);
+    verify(voteRepository, times(1)).delete(vote);
+    Assertions.assertNull(vote.getPoll());
+    Assertions.assertNull(vote.getVoter());
   }
 
   @Test
@@ -80,6 +95,7 @@ public class PollServiceTest {
 
     when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
     when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    when(voteRepository.findByPoll(poll)).thenReturn(Collections.singletonList(vote));
 
     pollService.deletePoll(poll.getId(), user.getId());
 
@@ -116,10 +132,11 @@ public class PollServiceTest {
     poll.addVoteAndSetThisPollInVote(new Vote().answer(AnswerType.YES));
     poll.addVoteAndSetThisPollInVote(new Vote().answer(AnswerType.YES));
     poll.addVoteAndSetThisPollInVote(new Vote().answer(AnswerType.NO));
+
     when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
     VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
     Assertions.assertEquals(1, votes.getNo());
-    Assertions.assertEquals(2, votes.getYes());
+    Assertions.assertEquals(3, votes.getYes());
   }
 
   @Test
