@@ -37,6 +37,8 @@ public class PollRepositoryTest {
     this.poll = new Poll();
     this.votes = Arrays.asList(new Vote(), new Vote(), new Vote());
 
+    userRepository.save(user);
+
     poll.addVoteAndSetThisPollInVote(new Vote());
     poll.addVoteAndSetThisPollInVote(new Vote());
     poll.addVoteAndSetThisPollInVote(new Vote());
