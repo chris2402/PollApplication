@@ -14,9 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -43,7 +41,7 @@ public class UserServiceTest {
     user2.setId(2L);
 
     vote = new Vote();
-    vote.setVoter(user1);
+    vote.setVoterAndAddThisVoteToVoter(user1);
 
     when(userRepository.save(any(User.class))).thenReturn(new User());
     when(userRepository.findById(user1.getId())).thenReturn(Optional.ofNullable(user1));
@@ -126,7 +124,8 @@ public class UserServiceTest {
 
   @Test
   public void shouldNotDeleteVotesWhenUserIsDeletedTest() {
+    List<Vote> userVotes = new ArrayList<>(user1.getVotes());
     userService.deleteUser(user1.getId());
-    verify(voteRepository, times(1)).saveAll(user1.getVotes());
+    verify(voteRepository, times(1)).saveAll(userVotes);
   }
 }

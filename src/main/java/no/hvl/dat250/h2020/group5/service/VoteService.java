@@ -62,8 +62,8 @@ public class VoteService {
     }
 
     Vote v = new Vote();
-    v.setPoll(p.get());
-    v.setVoter(u.get());
+    v.setPollAndAddThisVoteToPoll(p.get());
+    v.setVoterAndAddThisVoteToVoter(u.get());
     v.setAnswer(answer);
 
     return voteRepository.save(v);
@@ -106,7 +106,9 @@ public class VoteService {
       List<Vote> votes = voteRequestFromDevice.getVotes();
       voteRepository.saveAll(votes);
       return voteRepository.saveAll(
-          votes.stream().peek(vote -> vote.setPoll(poll.get())).collect(Collectors.toList()));
+          votes.stream()
+              .peek(vote -> vote.setPollAndAddThisVoteToPoll(poll.get()))
+              .collect(Collectors.toList()));
     }
     return null;
   }

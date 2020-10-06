@@ -12,7 +12,6 @@ import java.util.List;
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class Voter {
 
   @Id
@@ -24,25 +23,17 @@ public abstract class Voter {
   @EqualsAndHashCode.Include
   protected String username;
 
-  @OneToMany(mappedBy = "voter", fetch = FetchType.EAGER)
+  @OneToMany(
+      mappedBy = "voter",
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JsonManagedReference
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
 
-  /**
-   * Do not add same vote twice and check that vote does not already have a voter to avoid circular
-   * dependency.
-   *
-   * @param vote
-   * @return True if vote is added to this voter
-   */
-  public boolean addVote(Vote vote) {
-    if (votes.contains(vote) || vote.getVoter() != null) {
-      return false;
-    }
+  public void addVoteAndSetThisVoterInVote(Vote vote) {
     this.votes.add(vote);
-    vote.setVoter(this);
-    return true;
+    vote.setVoterOnlyOnVoteSide(this);
   }
 }

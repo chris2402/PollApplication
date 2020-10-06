@@ -2,9 +2,7 @@ package no.hvl.dat250.h2020.group5.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 import no.hvl.dat250.h2020.group5.converters.AlphaNumeric2Long;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 
@@ -50,28 +48,22 @@ public class Poll {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @JsonManagedReference(value = "votes")
+  @Setter(AccessLevel.PRIVATE)
   private List<Vote> votes = new ArrayList<>();
 
-
   /**
-   * Do not add same vote twice and check that vote does not already have a poll to avoid circular
-   * dependency.
-   *
    * @param vote
    * @return True if vote is added to this poll
    */
-  public boolean addVote(Vote vote) {
-    if (votes.contains(vote) || vote.getPoll() != null) {
-      return false;
-    }
+  public boolean addVoteAndSetThisPollInVote(Vote vote) {
     this.votes.add(vote);
-    vote.setPoll(this);
+    vote.setPollOnlyOnVoteSide(this);
     return true;
   }
 
-  public Poll question(String question) {
-    this.setQuestion(question);
-    return this;
+  public void setOwnerAndAddThisPollToOwner(User user) {
+    this.pollOwner = user;
+    user.getUserPolls().add(this);
   }
 
   public Poll visibilityType(PollVisibilityType type) {
@@ -81,6 +73,26 @@ public class Poll {
 
   public Poll pollOwner(User owner) {
     this.setPollOwner(owner);
+    return this;
+  }
+
+  public Poll name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  public Poll question(String question) {
+    this.question = question;
+    return this;
+  }
+
+  public Poll startTime(Date startTime) {
+    this.startTime = startTime;
+    return this;
+  }
+
+  public Poll pollDuration(Integer pollDuration) {
+    this.pollDuration = pollDuration;
     return this;
   }
 }

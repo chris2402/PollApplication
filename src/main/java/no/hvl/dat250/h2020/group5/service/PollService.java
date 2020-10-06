@@ -47,14 +47,18 @@ public class PollService {
 
   public boolean deletePoll(Long pollId, Long userId) {
     Optional<Poll> poll = pollRepository.findById(pollId);
-    if (poll.isEmpty()) {
+    if (poll.isEmpty() || !isOwnerOrAdmin(poll.get(), userId)) {
       return false;
     }
-    if (isOwnerOrAdmin(poll.get(), userId)) {
-      pollRepository.delete(poll.get());
-      return true;
+
+    for (Vote vote : voteRepository.findByPoll(poll.get())) {
+      vote.setVoterAndAddThisVoteToVoter(null);
+      vote.setPollAndAddThisVoteToPoll(null);
+      voteRepository.delete(vote);
     }
-    return false;
+
+    pollRepository.delete(poll.get());
+    return true;
   }
 
   public List<PollResponse> getAllPublicPolls() {
@@ -111,17 +115,16 @@ public class PollService {
     if (poll.isEmpty()) {
       return false;
     }
-    
+
     if (poll.get().getStartTime() == null) {
-        return false;
+      return false;
     }
 
     Instant startTime = poll.get().getStartTime().toInstant();
     Instant startTimePlusDuration = startTime.plusSeconds(poll.get().getPollDuration());
-    
+
     return Instant.now().isBefore(startTimePlusDuration);
   }
-
 
   public VotesResponse getNumberOfVotes(Long pollId) {
     Optional<Poll> poll = pollRepository.findById(pollId);

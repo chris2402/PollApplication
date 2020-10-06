@@ -10,6 +10,7 @@ import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,9 +40,9 @@ public class UserService {
       return false;
     }
 
-    List<Vote> votes = user.get().getVotes();
+    List<Vote> votes = new ArrayList<>(user.get().getVotes());
     for (Vote vote : votes) {
-      vote.setVoter(null);
+      vote.setVoterAndAddThisVoteToVoter(null);
     }
     voteRepository.saveAll(votes);
     userRepository.delete(user.get());
