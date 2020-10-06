@@ -52,6 +52,10 @@ public class Poll {
   @Setter(AccessLevel.PRIVATE)
   private List<Vote> votes = new ArrayList<>();
 
+  public void setPollOwnerOnlyOnPollSide(User owner) {
+    setPollOwner(owner);
+  }
+
   /**
    * @param vote
    * @return True if vote is added to this poll
@@ -73,7 +77,7 @@ public class Poll {
   }
 
   public Poll pollOwner(User owner) {
-    this.setPollOwner(owner);
+    setOwnerAndAddThisPollToOwner(owner);
     return this;
   }
 
