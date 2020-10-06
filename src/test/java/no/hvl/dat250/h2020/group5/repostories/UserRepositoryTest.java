@@ -96,8 +96,9 @@ public class UserRepositoryTest {
 
   @Test
   public void shouldDeletePollTest() {
-    Poll poll = pollRepository.findAllByPollOwner(savedUser).get(0);
-    savedUser.deletePoll(poll);
+    Poll savedPoll = pollRepository.findAllByPollOwner(savedUser).get(0);
+    savedUser.detachPoll(savedPoll);
+    pollRepository.delete(savedPoll);
     Assertions.assertEquals(0, pollRepository.count());
   }
 

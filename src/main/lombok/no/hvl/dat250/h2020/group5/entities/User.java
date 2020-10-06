@@ -49,7 +49,8 @@ public class User extends Voter {
     this.userPolls.add(poll);
   }
 
-  public boolean deletePoll(Poll poll) {
+  public boolean detachPoll(Poll poll) {
+    poll.setPollOwnerOnlyOnPollSide(null);
     return userPolls.remove(poll);
   }
 }
