@@ -58,8 +58,9 @@ public class PollService {
     }
 
     Optional<User> user = userRepository.findById(userId);
+    user.get().detachPoll(poll.get());
+
     pollRepository.delete(poll.get());
-    System.out.println(user.get().getUserPolls());
     return true;
   }
 

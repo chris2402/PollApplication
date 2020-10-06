@@ -165,6 +165,7 @@ public class PollControllerIT {
     Assertions.assertEquals(0, votes.size());
     Assertions.assertEquals(0, voteRepository.count());
     Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
+    Assertions.assertTrue(userRepository.findById(user1.getId()).get().getUserPolls().isEmpty());
   }
 
   @Test
