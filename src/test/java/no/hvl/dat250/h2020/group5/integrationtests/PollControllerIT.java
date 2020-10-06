@@ -72,6 +72,10 @@ public class PollControllerIT {
     guest1 = new Guest();
     guest1.setUsername("guest1");
 
+    user1 = userRepository.save(user1);
+    user2 = userRepository.save(user2);
+    guestRepository.save(guest1);
+
     poll1 = new Poll();
     poll1.setQuestion("Question");
     poll1.setOwnerAndAddThisPollToOwner(user1);
@@ -84,8 +88,6 @@ public class PollControllerIT {
 
     poll1 = pollRepository.save(poll1);
     pollRepository.save(poll2);
-    user1 = userRepository.save(user1);
-    guestRepository.save(guest1);
 
     vote1 = new Vote();
     vote1.setVoterAndAddThisVoteToVoter(user1);
