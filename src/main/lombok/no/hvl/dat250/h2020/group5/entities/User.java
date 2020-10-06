@@ -45,7 +45,7 @@ public class User extends Voter {
   }
 
   public void setPollOwnerAndAddToUserPoll(Poll poll) {
-    poll.setPollOwner(this);
+    poll.setOwnerAndAddThisPollToOwner(this);
     this.userPolls.add(poll);
   }
 
