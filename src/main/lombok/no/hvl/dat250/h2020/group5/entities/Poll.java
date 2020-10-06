@@ -38,6 +38,7 @@ public class Poll {
   @JsonBackReference(value = "pollOwner")
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "pollId")
+  @Setter(AccessLevel.PRIVATE)
   private User pollOwner;
 
   @ToString.Exclude
