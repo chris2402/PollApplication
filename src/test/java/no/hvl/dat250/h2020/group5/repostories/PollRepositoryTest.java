@@ -59,7 +59,6 @@ public class PollRepositoryTest {
 
   @Test
   public void shouldDeletePollTest() {
-    // poll.detachAllVotesFromVoter();
     user.detachPoll(poll);
     pollRepository.delete(poll);
     Assertions.assertEquals(0, pollRepository.count());
@@ -85,6 +84,7 @@ public class PollRepositoryTest {
     Vote voteNotLinkedToPoll = new Vote();
     voteRepository.save(voteNotLinkedToPoll);
     user.detachPoll(poll);
+    pollRepository.delete(poll);
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(voteNotLinkedToPoll.getId(), voteRepository.findAll().get(0).getId());
   }
@@ -92,6 +92,7 @@ public class PollRepositoryTest {
   @Test
   public void shouldNotDeleteUserWhenDeletingPollTest() {
     user.detachPoll(poll);
+    pollRepository.delete(poll);
     Assertions.assertEquals(user.getId(), userRepository.findAll().get(0).getId());
   }
 
