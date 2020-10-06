@@ -46,6 +46,15 @@ public class PollControllerIT {
   @BeforeEach
   public void setUp() throws Exception {
 
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setPollOnlyOnVoteSide(null);
+      vote.setVoterOnlyOnVoteSide(null);
+      voteRepository.delete(vote);
+    }
+    pollRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
+
     user1 = new User();
     user1.setUsername("Admin");
     user1.setIsAdmin(true);
