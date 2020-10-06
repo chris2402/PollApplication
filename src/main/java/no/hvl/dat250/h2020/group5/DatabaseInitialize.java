@@ -35,7 +35,7 @@ public class DatabaseInitialize {
         this.pollRepository = pollRepository;
     }
 
-//    @PostConstruct
+    //    @PostConstruct
     public void setupUser(){
         this.user = new User();
         this.user.setId(1L);
@@ -54,7 +54,7 @@ public class DatabaseInitialize {
 
     }
 
-//    @PostConstruct
+    //    @PostConstruct
     public void setupGuest(){
         Guest guest = new Guest();
         guest.setUsername("Guest 100");
@@ -68,13 +68,13 @@ public class DatabaseInitialize {
         guestRepository.saveAndFlush(guest2);
     }
 
-//    @PostConstruct
+    //    @PostConstruct
     public void setupPoll(){
         Poll poll = new Poll();
         poll.setName("pinapple");
         poll.setQuestion("pinapple on pizza?");
         poll.setVisibilityType(PollVisibilityType.PUBLIC);
-        poll.setPollOwner(user);
+        poll.setOwnerAndAddThisPollToOwner(user);
         poll.setPollDuration(10000);
         poll.setStartTime(Date.from(Instant.now()));
         poll.setId(1679616L);
@@ -83,7 +83,7 @@ public class DatabaseInitialize {
         poll2.setName("Cats vs dogs");
         poll2.setQuestion("Cats better than dogs?");
         poll2.setVisibilityType(PollVisibilityType.PRIVATE);
-        poll2.setPollOwner(user2);
+        poll2.setOwnerAndAddThisPollToOwner(user2);
         poll2.setPollDuration(1000);
         poll2.setStartTime(Date.from(Instant.parse("2018-11-30T18:35:24Z")));
         poll2.setId(1679617L);
@@ -92,7 +92,7 @@ public class DatabaseInitialize {
         poll3.setName("Vue > React");
         poll3.setQuestion("Vue > React");
         poll3.setVisibilityType(PollVisibilityType.PUBLIC);
-        poll3.setPollOwner(user);
+        poll3.setOwnerAndAddThisPollToOwner(user);
         poll3.setPollDuration(1000);
         poll3.setStartTime(Date.from(Instant.now()));
         poll3.setId(1679618L);

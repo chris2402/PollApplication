@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 public class Poll {
 
-  private static final int LOWEST_4_DIGIT_BASE36 = 1679616;
+  private static final int LOWEST_4_DIGIT_BASE36 = 1679620;
 
   @Id
   @SequenceGenerator(name = "PollID_Sequence", initialValue = LOWEST_4_DIGIT_BASE36)
