@@ -128,10 +128,12 @@ public class PollRepositoryTest {
   }
 
   @Test
-  public void shouldSaveUserWhenSavingPoll() {
+  public void shouldUpdateUserWhenSavingPoll() {
     User user = new User().userName("Test");
+    User savedUser = userRepository.save(user);
+
     Poll poll = new Poll();
-    poll.setOwnerAndAddThisPollToOwner(user);
+    poll.setOwnerAndAddThisPollToOwner(savedUser);
 
     Poll savedPoll = pollRepository.save(poll);
 
