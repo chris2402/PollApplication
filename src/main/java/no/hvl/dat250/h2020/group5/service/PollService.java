@@ -57,10 +57,10 @@ public class PollService {
       voteRepository.delete(vote);
     }
 
-    Optional<User> user = userRepository.findById(userId);
-    user.get().detachPoll(poll.get());
-
+    User user = poll.get().getPollOwner();
+    user.detachPoll(poll.get());
     pollRepository.delete(poll.get());
+
     return true;
   }
 

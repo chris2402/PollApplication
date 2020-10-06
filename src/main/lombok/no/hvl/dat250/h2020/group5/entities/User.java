@@ -23,7 +23,7 @@ public class User extends Voter {
   @EqualsAndHashCode.Exclude
   @JsonManagedReference(value = "pollOwner")
   @OneToMany(
-      fetch = FetchType.EAGER,
+      fetch = FetchType.LAZY,
       mappedBy = "pollOwner",
       cascade = CascadeType.ALL,
       orphanRemoval = true)
