@@ -59,6 +59,7 @@ public class PollService {
 
     User user = poll.get().getPollOwner();
     user.detachPoll(poll.get());
+    userRepository.save(user);
     pollRepository.delete(poll.get());
 
     return true;
