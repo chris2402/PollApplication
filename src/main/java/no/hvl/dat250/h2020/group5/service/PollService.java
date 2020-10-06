@@ -38,7 +38,7 @@ public class PollService {
     Optional<User> foundUser = userRepository.findById(userId);
     if (foundUser.isPresent()) {
       User user = foundUser.get();
-      poll.setPollOwner(user);
+      poll.setOwnerAndAddThisPollToOwner(user);
       pollRepository.save(poll);
       return new PollResponse(poll);
     }

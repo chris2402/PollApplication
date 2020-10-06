@@ -89,15 +89,16 @@ public class UserRepositoryTest {
     userRepository.save(user.get());
 
     Assertions.assertEquals(2, pollRepository.count());
-    Assertions.assertEquals(2, pollRepository.findAllByPollOwner(savedUser).size());
+    Assertions.assertEquals(2, pollRepository.findAllByPollOwner(user.get()).size());
     Assertions.assertEquals(
-        2, userRepository.findById(savedUser.getId()).get().getUserPolls().size());
+        2, userRepository.findById(user.get().getId()).get().getUserPolls().size());
   }
 
   @Test
   public void shouldDeletePollTest() {
-    Poll poll = pollRepository.findAllByPollOwner(savedUser).get(0);
-    savedUser.deletePoll(poll);
+    Poll savedPoll = pollRepository.findAllByPollOwner(savedUser).get(0);
+    savedUser.detachPoll(savedPoll);
+    pollRepository.delete(savedPoll);
     Assertions.assertEquals(0, pollRepository.count());
   }
 

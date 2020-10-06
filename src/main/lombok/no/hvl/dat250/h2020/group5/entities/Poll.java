@@ -38,6 +38,7 @@ public class Poll {
   @JsonBackReference(value = "pollOwner")
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "pollId")
+  @Setter(AccessLevel.PRIVATE)
   private User pollOwner;
 
   @ToString.Exclude
@@ -50,6 +51,10 @@ public class Poll {
   @JsonManagedReference(value = "votes")
   @Setter(AccessLevel.PRIVATE)
   private List<Vote> votes = new ArrayList<>();
+
+  public void setPollOwnerOnlyOnPollSide(User owner) {
+    setPollOwner(owner);
+  }
 
   /**
    * @param vote
@@ -72,7 +77,7 @@ public class Poll {
   }
 
   public Poll pollOwner(User owner) {
-    this.setPollOwner(owner);
+    setOwnerAndAddThisPollToOwner(owner);
     return this;
   }
 
@@ -94,5 +99,12 @@ public class Poll {
   public Poll pollDuration(Integer pollDuration) {
     this.pollDuration = pollDuration;
     return this;
+  }
+
+  public void detachAllVotesFromVoter() {
+    for (Vote vote : new ArrayList<>(votes)) {
+      // vote.setPollAndAddThisVoteToPoll(null);
+      vote.setVoterAndAddThisVoteToVoter(null);
+    }
   }
 }

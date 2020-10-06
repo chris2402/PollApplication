@@ -46,6 +46,15 @@ public class PollControllerIT {
   @BeforeEach
   public void setUp() throws Exception {
 
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setPollOnlyOnVoteSide(null);
+      vote.setVoterOnlyOnVoteSide(null);
+      voteRepository.delete(vote);
+    }
+    pollRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
+
     user1 = new User();
     user1.setUsername("Admin");
     user1.setIsAdmin(true);
@@ -58,12 +67,12 @@ public class PollControllerIT {
 
     poll1 = new Poll();
     poll1.setQuestion("Question");
-    poll1.setPollOwner(user1);
+    poll1.setOwnerAndAddThisPollToOwner(user1);
     poll1.setVisibilityType(PollVisibilityType.PUBLIC);
 
     Poll poll2 = new Poll();
     poll2.setQuestion("Question");
-    poll2.setPollOwner(user2);
+    poll2.setOwnerAndAddThisPollToOwner(user2);
     poll2.setVisibilityType(PollVisibilityType.PRIVATE);
 
     poll1 = pollRepository.save(poll1);
