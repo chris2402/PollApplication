@@ -57,7 +57,9 @@ public class PollService {
       voteRepository.delete(vote);
     }
 
+    Optional<User> user = userRepository.findById(userId);
     pollRepository.delete(poll.get());
+    System.out.println(user.get().getUserPolls());
     return true;
   }
 
