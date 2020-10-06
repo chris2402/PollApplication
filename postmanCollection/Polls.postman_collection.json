@@ -1,0 +1,413 @@
+{
+	"info": {
+		"_postman_id": "2f13a30c-3601-4803-99a0-9ace3ff32a6a",
+		"name": "Polls",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get all public polls",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get users polls as admin",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/admin/1/polls/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"admin",
+						"1",
+						"polls",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get polls as owner",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/owner/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"owner",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all polls as admin",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/admin/1/polls",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"admin",
+						"1",
+						"polls"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create poll with user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c50dc5b4-8094-435c-9a67-8a06f7d6f88b",
+						"exec": [
+							"pm.test(\"Status code to be 200\", function (){\r",
+							"    pm.response.to.have.status(200);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Poll recieved is the same as sent\", function(){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.pollName).to.eql(\"pinapple\")\r",
+							"    pm.expect(jsonData.question).to.eql(\"pinapple on pizza?\")\r",
+							"    pm.expect(jsonData.visibilityType).to.eql(\"PUBLIC\")\r",
+							"    pm.expect(jsonData.pollDuration).to.eql(1)\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Poll contains id\", function(){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.id).to.not.eql(\"\" || null)\r",
+							"})\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"pinapple\",\r\n    \"question\": \"pinapple on pizza?\",\r\n    \"userId\": 1234,\r\n    \"pollDuration\": 1,\r\n    \"visibilityType\": \"PUBLIC\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/polls/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get poll by poll-Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b02840d1-cbf3-4f73-8902-eccc45f61460",
+						"exec": [
+							"pm.test(\"Status code to be 200\", function (){\r",
+							"    pm.response.to.have.status(200);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Poll recieved is the same as sent\", function(){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.pollName).to.eql(\"pinapple\");\r",
+							"    pm.expect(jsonData.question).to.eql(\"pinapple on pizza?\")\r",
+							"    pm.expect(jsonData.visibilityType).to.eql(\"PUBLIC\");\r",
+							"    pm.expect(jsonData.pollDuration).to.eql(10000);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Poll contains id\", function(){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.id).to.not.eql(\"\" || null)\r",
+							"})\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/1679616",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"1679616"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start Poll",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "54b5520e-90d3-4044-9460-f24095886332",
+						"exec": [
+							"pm.test(\"Status code to be 200\", function (){\r",
+							"    pm.response.to.have.status(200);\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/1689567",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"1689567"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is Poll active?",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/1689567/active",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"1689567",
+						"active"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Count votes",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2632a4ad-e37e-4429-8905-e18b5dfca628",
+						"exec": [
+							"const josnData ={\r",
+							"    \"pollId\": 1679616,\r",
+							"    \"userId\": 101,\r",
+							"    \"vote\": \"YES\"\r",
+							"};\r",
+							"\r",
+							"const postRequest1 = {\r",
+							"  url: 'http://localhost:8080/votes',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json',\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: {\r",
+							"    pollId: 1679616,\r",
+							"    userId: 100,\r",
+							"    vote: \"YES\"\r",
+							"}\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"\r",
+							"const postRequest2 = {\r",
+							"  url: 'http://localhost:8080/votes',\r",
+							"  method: 'POST',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json',\r",
+							"  },\r",
+							"  body: {\r",
+							"    mode: 'raw',\r",
+							"    raw: {\r",
+							"    pollId: 1679616,\r",
+							"    userId: 106,\r",
+							"    vote: \"YES\"\r",
+							"}\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"const activateRequest = {\r",
+							"  url: 'http://localhost:8080/polls/1679616',\r",
+							"  method: 'PATCH',\r",
+							"  header: {\r",
+							"    'Content-Type': 'application/json',\r",
+							"  }\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest(activateRequest, (error, response) => {\r",
+							"  if (error) {\r",
+							"    console.log(error);\r",
+							"  } else {\r",
+							"  console.log(response);\r",
+							"  }\r",
+							"});\r",
+							"\r",
+							"setTimeout(function() {\r",
+							"    pm.sendRequest(postRequest1, (error, response) => {\r",
+							"        console.log(error ? error : response.json());\r",
+							"});\r",
+							"    pm.sendRequest(postRequest2, (error, response) => {\r",
+							"        console.log(error ? error : response.json());\r",
+							"});\r",
+							"}, 4000);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "856d1b13-62d7-4e73-8f42-67b92b9bedd1",
+						"exec": [
+							"pm.test(\"Status code to be 200\", function (){\r",
+							"    pm.response.to.have.status(200);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"If it contains yes votes\", function(){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.yes).to.eql(4)\r",
+							"    pm.expect(jsonData.no).to.eql(0)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/1679616/votes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"1679616",
+						"votes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete poll",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "efe73622-0875-44a4-8089-acfaf555a278",
+						"exec": [
+							"pm.test(\"Status code to be 200\", function (){\r",
+							"    pm.response.to.have.status(200);\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/polls/1679616/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"polls",
+						"1679616",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
