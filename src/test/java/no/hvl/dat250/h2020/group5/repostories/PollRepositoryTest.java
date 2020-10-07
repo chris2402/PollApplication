@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 @ContextConfiguration(classes = Main.class)
@@ -27,40 +26,40 @@ public class PollRepositoryTest {
   @Autowired VoteRepository voteRepository;
   @Autowired UserRepository userRepository;
 
-  private Poll poll;
-  private List<Vote> votes;
-  private User user;
+  private Poll savedPoll;
+  private User savedUser;
 
   @BeforeEach
   public void setUp() {
-    this.user = new User();
-    this.poll = new Poll();
-    this.votes = Arrays.asList(new Vote(), new Vote(), new Vote());
+    User user = new User();
+    Poll poll = new Poll();
+
+    this.savedUser = userRepository.save(user);
 
     poll.addVoteAndSetThisPollInVote(new Vote());
     poll.addVoteAndSetThisPollInVote(new Vote());
     poll.addVoteAndSetThisPollInVote(new Vote());
-    poll.setOwnerAndAddThisPollToOwner(user);
+    poll.setOwnerAndAddThisPollToOwner(savedUser);
 
-    pollRepository.save(poll);
+    this.savedPoll = pollRepository.save(poll);
   }
 
   @Test
   public void shouldPersistOnePollTest() {
     Assertions.assertEquals(1, pollRepository.count());
-    Assertions.assertEquals(poll.getId(), pollRepository.findAll().get(0).getId());
+    Assertions.assertEquals(savedPoll.getId(), pollRepository.findAll().get(0).getId());
   }
 
   @Test
   public void shouldHaveThreeVotesWhenThreeVotesAreAddedTest() {
-    Optional<Poll> pollWithVotes = pollRepository.findById(poll.getId());
+    Optional<Poll> pollWithVotes = pollRepository.findById(savedPoll.getId());
     Assertions.assertEquals(3, pollWithVotes.get().getVotes().size());
   }
 
   @Test
   public void shouldDeletePollTest() {
-    user.detachPoll(poll);
-    pollRepository.delete(poll);
+    savedUser.detachPoll(savedPoll);
+    pollRepository.delete(savedPoll);
     Assertions.assertEquals(0, pollRepository.count());
   }
 
@@ -68,13 +67,13 @@ public class PollRepositoryTest {
   public void shouldPersistVotesWhenAddedToPollTest() {
     Assertions.assertEquals(3, voteRepository.count());
     Assertions.assertNotNull(voteRepository.findAll().get(0).getId());
-    Assertions.assertNotNull(poll.getVotes().get(0).getId());
+    Assertions.assertNotNull(savedPoll.getVotes().get(0).getId());
   }
 
   @Test
   public void shouldDeleteVotesWhenDeletingPollTest() {
-    user.detachPoll(poll);
-    pollRepository.delete(poll);
+    savedUser.detachPoll(savedPoll);
+    pollRepository.delete(savedPoll);
     Assertions.assertEquals(0, pollRepository.count());
     Assertions.assertEquals(0, voteRepository.count());
   }
@@ -83,17 +82,25 @@ public class PollRepositoryTest {
   public void shouldOnlyDeleteVotesLinkedToPollWhenDeletingPollTest() {
     Vote voteNotLinkedToPoll = new Vote();
     voteRepository.save(voteNotLinkedToPoll);
-    user.detachPoll(poll);
-    pollRepository.delete(poll);
+    savedUser.detachPoll(savedPoll);
+    pollRepository.delete(savedPoll);
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(voteNotLinkedToPoll.getId(), voteRepository.findAll().get(0).getId());
   }
 
   @Test
   public void shouldNotDeleteUserWhenDeletingPollTest() {
-    user.detachPoll(poll);
-    pollRepository.delete(poll);
-    Assertions.assertEquals(user.getId(), userRepository.findAll().get(0).getId());
+    savedUser.detachPoll(savedPoll);
+    pollRepository.delete(savedPoll);
+    Assertions.assertEquals(savedUser.getId(), userRepository.findAll().get(0).getId());
+  }
+
+  @Test
+  public void shouldDeleteReferenceToPollInUserWhenDeletingPollTest() {
+    savedUser.detachPoll(savedPoll);
+    pollRepository.delete(savedPoll);
+    Assertions.assertEquals(0, pollRepository.count());
+    Assertions.assertTrue(userRepository.findAll().get(0).getUserPolls().isEmpty());
   }
 
   @Test
@@ -113,8 +120,8 @@ public class PollRepositoryTest {
   public void shouldGiveIdToVote() {
     Poll newPoll = new Poll();
     Vote newVote = new Vote();
-    Poll savedPoll = pollRepository.save(newPoll);
 
+    Poll savedPoll = pollRepository.save(newPoll);
     savedPoll.addVoteAndSetThisPollInVote(newVote);
 
     pollRepository.save(savedPoll);
@@ -123,21 +130,5 @@ public class PollRepositoryTest {
     Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
     Assertions.assertEquals(1, voteRepository.findByPoll(savedPoll).size());
     Assertions.assertNotNull(voteRepository.findByPoll(savedPoll).get(0).getId());
-  }
-
-  @Test
-  public void shouldSaveUserWhenSavingPoll() {
-    User user = new User().userName("Test");
-    Poll poll = new Poll();
-    poll.setOwnerAndAddThisPollToOwner(user);
-
-    Poll savedPoll = pollRepository.save(poll);
-
-    Optional<User> findSavedUser = userRepository.findByUsername("Test");
-
-    Assertions.assertTrue(findSavedUser.isPresent());
-    Assertions.assertNotNull(findSavedUser.get().getId());
-    Assertions.assertEquals(savedPoll, findSavedUser.get().getUserPolls().get(0));
-    Assertions.assertEquals(savedPoll.getPollOwner(), findSavedUser.get());
   }
 }
