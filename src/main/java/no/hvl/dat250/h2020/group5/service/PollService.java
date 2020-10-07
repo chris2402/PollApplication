@@ -54,8 +54,12 @@ public class PollService {
     for (Vote vote : voteRepository.findByPoll(poll.get())) {
       vote.setVoterAndAddThisVoteToVoter(null);
       vote.setPollAndAddThisVoteToPoll(null);
+      voteRepository.save(vote);
       voteRepository.delete(vote);
     }
+
+    User user = poll.get().getPollOwner();
+    user.detachPoll(poll.get());
 
     pollRepository.delete(poll.get());
     return true;
