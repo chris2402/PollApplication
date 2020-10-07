@@ -48,6 +48,17 @@ public class VoteControllerIT {
 
   @BeforeEach
   public void setUp() throws MalformedURLException {
+    for (Vote vote : voteRepository.findAll()) {
+      vote.setVoterOnlyOnVoteSide(null);
+      vote.setPollOnlyOnVoteSide(null);
+      voteRepository.save(vote);
+    }
+
+    voteRepository.deleteAll();
+    pollRepository.deleteAll();
+    userRepository.deleteAll();
+    guestRepository.deleteAll();
+
     this.base = new URL("http://localhost:" + port + "/votes");
 
     Poll poll =
