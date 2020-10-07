@@ -11,6 +11,7 @@ import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -24,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,8 +43,11 @@ public class PollControllerIT {
   @LocalServerPort private int port;
 
   private URL base;
-  private User user1;
-  private Poll poll1;
+  private User savedUser1;
+  private User savedUser2;
+  private Guest savedGuest1;
+  private Poll savedPoll1;
+  private Poll savedPoll2;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -49,60 +55,50 @@ public class PollControllerIT {
     for (Vote vote : voteRepository.findAll()) {
       vote.setPollOnlyOnVoteSide(null);
       vote.setVoterOnlyOnVoteSide(null);
-      voteRepository.delete(vote);
+      voteRepository.save(vote);
     }
+    voteRepository.deleteAll();
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
 
-    user1 = new User();
-    user1.setUsername("Admin");
-    user1.setIsAdmin(true);
+    User user1 = new User().userName("Admin").admin(true);
+    User user2 = new User().userName("Not admin");
+    Guest guest1 = new Guest().username("guest1");
 
-    User user2 = new User();
-    user2.setUsername("Not admin");
+    savedUser1 = userRepository.save(user1);
+    savedUser2 = userRepository.save(user2);
+    savedGuest1 = guestRepository.save(guest1);
 
-    Guest guest1 = new Guest();
-    guest1.setUsername("guest1");
+    Poll poll1 = new Poll().question("Question").visibilityType(PollVisibilityType.PUBLIC);
+    poll1.setOwnerAndAddThisPollToOwner(savedUser1);
 
-    poll1 = new Poll();
-    poll1.setQuestion("Question");
-    poll1.setOwnerAndAddThisPollToOwner(user1);
-    poll1.setVisibilityType(PollVisibilityType.PUBLIC);
+    Poll poll2 =
+        new Poll()
+            .question("Question")
+            .visibilityType(PollVisibilityType.PRIVATE)
+            .startTime(new Date())
+            .pollDuration(1000);
+    poll2.setOwnerAndAddThisPollToOwner(savedUser2);
 
-    Poll poll2 = new Poll();
-    poll2.setQuestion("Question");
-    poll2.setOwnerAndAddThisPollToOwner(user2);
-    poll2.setVisibilityType(PollVisibilityType.PRIVATE);
+    savedPoll1 = pollRepository.save(poll1);
+    savedPoll2 = pollRepository.save(poll2);
 
-    poll1 = pollRepository.save(poll1);
-    pollRepository.save(poll2);
-    user1 = userRepository.save(user1);
-    guestRepository.save(guest1);
+    Vote vote1 = new Vote().answer(AnswerType.NO);
+    vote1.setVoterAndAddThisVoteToVoter(savedUser1);
+    vote1.setPollAndAddThisVoteToPoll(savedPoll1);
 
-    Vote vote1 = new Vote();
-    vote1.setVoterAndAddThisVoteToVoter(user1);
-    vote1.setPollAndAddThisVoteToPoll(poll1);
-    vote1.setAnswer(AnswerType.NO);
-    vote1.setId((long) 123123);
+    Vote vote2 = new Vote().answer(AnswerType.YES);
+    vote2.setVoterAndAddThisVoteToVoter(savedUser2);
+    vote2.setPollAndAddThisVoteToPoll(savedPoll1);
 
-    Vote vote2 = new Vote();
-    vote2.setVoterAndAddThisVoteToVoter(user2);
-    vote2.setPollAndAddThisVoteToPoll(poll1);
-    vote2.setId((long) 321423412);
-    vote2.setAnswer(AnswerType.YES);
+    Vote vote3 = new Vote().answer(AnswerType.NO);
+    vote3.setVoterAndAddThisVoteToVoter(savedGuest1);
+    vote3.setPollAndAddThisVoteToPoll(savedPoll1);
 
-    Vote vote3 = new Vote();
-    vote3.setVoterAndAddThisVoteToVoter(guest1);
-    vote3.setPollAndAddThisVoteToPoll(poll1);
-    vote3.setId((long) 5644);
-    vote3.setAnswer(AnswerType.NO);
-
-    Vote vote4 = new Vote();
-    vote4.setVoterAndAddThisVoteToVoter(guest1);
-    vote4.setPollAndAddThisVoteToPoll(poll1);
-    vote4.setId((long) 12352);
-    vote4.setAnswer(AnswerType.NO);
+    Vote vote4 = new Vote().answer(AnswerType.NO);
+    vote4.setVoterAndAddThisVoteToVoter(savedGuest1);
+    vote4.setPollAndAddThisVoteToPoll(savedPoll2);
 
     voteRepository.save(vote1);
     voteRepository.save(vote2);
@@ -131,37 +127,49 @@ public class PollControllerIT {
 
   @Test
   public void shouldGetAllPolls() {
-    ResponseEntity<Poll[]> response =
+    ResponseEntity<PollResponse[]> response =
         template.getForEntity(
-            base.toString() + "/admin/" + this.user1.getId().toString() + "/polls", Poll[].class);
-    Poll[] polls = response.getBody();
+            base.toString() + "/admin/" + this.savedUser1.getId().toString() + "/polls",
+            PollResponse[].class);
+    PollResponse[] polls = response.getBody();
     Assertions.assertNotNull(polls);
     Assertions.assertEquals(2, polls.length);
+    Assertions.assertTrue(
+        Arrays.stream(polls).anyMatch(poll -> savedPoll1.getId().equals(poll.getId())));
+    Assertions.assertTrue(
+        Arrays.stream(polls).anyMatch(poll -> savedPoll2.getId().equals(poll.getId())));
   }
 
   @Test
   public void shouldGetPollByPollId() {
-    ResponseEntity<Poll> response =
-        template.getForEntity(base.toString() + "/" + this.poll1.getId(), Poll.class);
-    Poll poll = response.getBody();
+    ResponseEntity<PollResponse> response =
+        template.getForEntity(base.toString() + "/" + this.savedPoll1.getId(), PollResponse.class);
+    PollResponse poll = response.getBody();
 
-    Assertions.assertEquals(poll1, poll);
+    Assertions.assertNotNull(poll);
+    Assertions.assertEquals(savedPoll1.getId(), poll.getId());
   }
 
   @Test
   public void shouldDeletePollByPollId() {
     template.delete(
-        base.toString() + "/" + poll1.getId().toString() + "/" + user1.getId().toString());
-    List<Vote> votes = voteRepository.findByPoll(poll1);
+        base.toString()
+            + "/"
+            + savedPoll1.getId().toString()
+            + "/"
+            + savedUser1.getId().toString());
+    List<Vote> votes = voteRepository.findByPoll(savedPoll1);
     Assertions.assertEquals(0, votes.size());
-    Assertions.assertEquals(0, voteRepository.count());
-    Assertions.assertTrue(pollRepository.findById(poll1.getId()).isEmpty());
+    Assertions.assertEquals(1, voteRepository.count());
+    Assertions.assertTrue(pollRepository.findById(savedPoll1.getId()).isEmpty());
+    Assertions.assertEquals(2, userRepository.count());
   }
 
   @Test
   public void shouldGetAllPublicPolls() {
-    ResponseEntity<Poll[]> response = template.getForEntity(base.toString(), Poll[].class);
-    Poll[] polls = response.getBody();
+    ResponseEntity<PollResponse[]> response =
+        template.getForEntity(base.toString(), PollResponse[].class);
+    PollResponse[] polls = response.getBody();
     Assertions.assertNotNull(polls);
     Assertions.assertEquals(1, polls.length);
   }
@@ -171,12 +179,14 @@ public class PollControllerIT {
     Poll poll = new Poll();
     poll.setQuestion("Banana pizza?");
     poll.setName("Poll name");
-    ResponseEntity<Poll> response =
+
+    ResponseEntity<PollResponse> response =
         template.postForEntity(
-            base.toString() + "/" + this.user1.getId().toString(), poll, Poll.class);
-    Poll postedPoll = response.getBody();
-    Assertions.assertNotNull(poll);
-    assert postedPoll != null;
+            base.toString() + "/" + this.savedUser1.getId(), poll, PollResponse.class);
+    PollResponse postedPoll = response.getBody();
+
+    Assertions.assertNotNull(postedPoll);
+    Assertions.assertNotNull(postedPoll.getId());
     Assertions.assertEquals(postedPoll.getQuestion(), "Banana pizza?");
   }
 
@@ -184,24 +194,32 @@ public class PollControllerIT {
   public void shouldActivatePoll() {
     Boolean response =
         template.patchForObject(
-            base.toString() + "/" + poll1.getId().toString(), poll1, Boolean.class);
+            base.toString() + "/" + savedPoll1.getId(), savedPoll1, Boolean.class);
     Assertions.assertEquals(response, true);
+    Assertions.assertNotNull(pollRepository.findById(savedPoll1.getId()).get().getStartTime());
   }
 
   @Test
   public void shouldGetIfPollIsActive() {
     ResponseEntity<Boolean> response =
         template.getForEntity(
-            base.toString() + "/" + this.poll1.getId() + "/active", Boolean.class);
-    Assertions.assertEquals(response.getBody(), false);
+            base.toString() + "/" + this.savedPoll1.getId() + "/active", Boolean.class);
+    Assertions.assertNotNull(response.getBody());
+    Assertions.assertFalse(response.getBody());
+
+    ResponseEntity<Boolean> response2 =
+        template.getForEntity(
+            base.toString() + "/" + this.savedPoll2.getId() + "/active", Boolean.class);
+    Assertions.assertNotNull(response2.getBody());
+    Assertions.assertTrue(response2.getBody());
   }
 
   @Test
   public void shouldGetNumberOfYesAndNoVotes() {
     ResponseEntity<VotesResponse> response =
         template.getForEntity(
-            base.toString() + "/" + this.poll1.getId() + "/votes", VotesResponse.class);
+            base.toString() + "/" + this.savedPoll1.getId() + "/votes", VotesResponse.class);
     Assertions.assertEquals(Objects.requireNonNull(response.getBody()).getYes(), 1);
-    Assertions.assertEquals(Objects.requireNonNull(response.getBody()).getNo(), 3);
+    Assertions.assertEquals(Objects.requireNonNull(response.getBody()).getNo(), 2);
   }
 }
