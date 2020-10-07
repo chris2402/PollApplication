@@ -68,9 +68,10 @@ public class VoteControllerIT {
     for (Vote vote : voteRepository.findAll()) {
       vote.setVoterOnlyOnVoteSide(null);
       vote.setPollOnlyOnVoteSide(null);
-      voteRepository.delete(vote);
+      voteRepository.save(vote);
     }
 
+    voteRepository.deleteAll();
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
@@ -87,8 +88,9 @@ public class VoteControllerIT {
     Vote savedVote = response.getBody();
     Assertions.assertNotNull(savedVote.getId());
     Assertions.assertEquals(AnswerType.YES, savedVote.getAnswer());
-    Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
-    Assertions.assertEquals(1, userRepository.findById(savedUser.getId()).get().getVotes().size());
+    Assertions.assertEquals(1, voteRepository.count());
+    Assertions.assertEquals(savedPoll.getId(), voteRepository.findAll().get(0).getPoll().getId());
+    Assertions.assertEquals(savedUser.getId(), voteRepository.findAll().get(0).getVoter().getId());
   }
 
   @Test
@@ -102,8 +104,8 @@ public class VoteControllerIT {
     Vote savedVote = response.getBody();
     Assertions.assertNotNull(savedVote.getId());
     Assertions.assertEquals(AnswerType.NO, savedVote.getAnswer());
-    Assertions.assertEquals(1, pollRepository.findById(savedPoll.getId()).get().getVotes().size());
-    Assertions.assertEquals(
-        1, guestRepository.findById(savedGuest.getId()).get().getVotes().size());
+    Assertions.assertEquals(1, voteRepository.count());
+    Assertions.assertEquals(savedPoll.getId(), voteRepository.findAll().get(0).getPoll().getId());
+    Assertions.assertEquals(savedGuest.getId(), voteRepository.findAll().get(0).getVoter().getId());
   }
 }
