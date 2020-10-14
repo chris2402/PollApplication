@@ -70,6 +70,6 @@ Download [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) if you d
 
 Commit you changes. If deploying from another branch (like dev) use `git push heroku your-branch:master`. If pushing directly from master use `git push heroku master`    
 
-The deployment is [here](https://morning-stream-74314.herokuapp.com)!
+The deployment is [here](https://pollapplication-group5.herokuapp.com)!
 
 
