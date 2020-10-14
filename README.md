@@ -60,3 +60,16 @@ Eksempel
 
 ### Om merges også blir lagt labels på så er det litt enklere å lete etter konkrete merges senere ;) 
 
+
+#### Deployment
+
+We use Heroku for deployment. 
+
+*How to deploy*   
+Download [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) if you dont have it.    
+
+Commit you changes. If deploying from another branch (like dev) use `git push heroku your-branch:master`. If pushing directly from master use `git push heroku master`    
+
+The deployment is at [application](https://morning-stream-74314.herokuapp.com)
+
+
