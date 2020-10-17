@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.integrationtests;
 
 import net.jcip.annotations.NotThreadSafe;
+import no.hvl.dat250.h2020.group5.controllers.PollController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -21,8 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -35,7 +40,7 @@ import java.util.Objects;
 public class PollControllerIT {
 
   @Autowired TestRestTemplate template;
-  @Autowired no.hvl.dat250.h2020.group5.controllers.PollController PollController;
+  @Autowired PollController pollController;
   @Autowired PollRepository pollRepository;
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
@@ -123,6 +128,29 @@ public class PollControllerIT {
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
+  }
+
+  @Test
+  public void test(){
+    String loginUrl = "http://localhost:" + port +"/auth/signin";
+    String username = "username";
+    String password = "password";
+
+    MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.set("username", username);
+    form.set("password", password);
+    ResponseEntity<String> loginResponse = template.postForEntity(
+            loginUrl,
+            new HttpEntity<>(form, new HttpHeaders()),
+            String.class);
+    String cookie = loginResponse.getHeaders().get("Set-Cookie").get(0);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Cookie", cookie);
+    ResponseEntity<String> responseFromSecuredEndPoint = testRestTemplate.exchange(securedUrl, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+
+    assertEquals(responseFromSecuredEndPoint.getStatusCode(), HttpStatus.OK);
+    assertTrue(responseFromSecuredEndPoint.getBody().contains("Hello World!"));
   }
 
   @Test
