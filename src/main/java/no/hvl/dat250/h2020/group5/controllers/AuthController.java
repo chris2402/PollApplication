@@ -7,6 +7,8 @@ import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.security.jwt.JwtUtils;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.springframework.boot.web.servlet.server.Session;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,14 +52,14 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        final Cookie cookie = new Cookie("auth", jwt);
+        Cookie cookie = new Cookie("auth", jwt);
         cookie.setSecure(false);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true);
         cookie.setMaxAge(Integer.MAX_VALUE);
-        cookie.setPath("/api");
+        cookie.setPath("/");
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(new JwtResponse(jwt));
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PostMapping("/signup")

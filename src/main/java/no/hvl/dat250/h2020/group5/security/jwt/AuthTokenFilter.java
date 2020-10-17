@@ -1,9 +1,12 @@
 package no.hvl.dat250.h2020.group5.security.jwt;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,13 +53,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader("Authorization");
-    System.out.println(headerAuth);
-    System.out.println(request.getCookies());
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7, headerAuth.length());
+        if (request.getCookies() == null){
+            return null;
         }
-
-        return null;
+        Optional<Cookie> maybeCookie = Arrays.stream(request.getCookies()).filter(cookie -> cookie.getName().equals("auth")).findFirst();
+        return maybeCookie.map(Cookie::getValue).orElse(null);
     }
 }
