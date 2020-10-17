@@ -7,6 +7,7 @@ import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +23,17 @@ public class UserService {
 
   final VoteRepository voteRepository;
 
+  final PasswordEncoder encoder;
+
   public UserService(
-      UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository) {
+          UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository, PasswordEncoder encoder) {
     this.userRepository = userRepository;
     this.voteRepository = voteRepository;
+    this.encoder = encoder;
   }
 
   public UserResponse createUser(User user) {
+    user.setPassword(encoder.encode(user.getPassword()));
     return new UserResponse(userRepository.save(user));
   }
 
