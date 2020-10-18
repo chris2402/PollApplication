@@ -1,6 +1,9 @@
 package no.hvl.dat250.h2020.group5.integrationtests;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
+import net.minidev.json.JSONObject;
 import no.hvl.dat250.h2020.group5.controllers.PollController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
@@ -12,6 +15,7 @@ import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -22,9 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -131,26 +133,42 @@ public class PollControllerIT {
   }
 
   @Test
-  public void test(){
+  public void test() throws JsonProcessingException {
     String loginUrl = "http://localhost:" + port +"/auth/signin";
-    String username = "username";
-    String password = "password";
+    String registerUrl = "http://localhost:" + port +"/auth/signup";
 
-    MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-    form.set("username", username);
-    form.set("password", password);
+    JSONObject personJsonObject = new JSONObject();
+    personJsonObject.put("username", "oddhus");
+    personJsonObject.put("password", "12341234");
+
+    HttpHeaders headers1 = new HttpHeaders();
+    headers1.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request = new HttpEntity<>(personJsonObject.toString(), headers1);
+
+    ResponseEntity<String> registerResponse = template.postForEntity(
+            registerUrl,
+            request,
+            String.class);
+
+    System.out.println(registerResponse.toString());
+
     ResponseEntity<String> loginResponse = template.postForEntity(
             loginUrl,
-            new HttpEntity<>(form, new HttpHeaders()),
+            request,
             String.class);
+
     String cookie = loginResponse.getHeaders().get("Set-Cookie").get(0);
 
     HttpHeaders headers = new HttpHeaders();
     headers.add("Cookie", cookie);
-    ResponseEntity<String> responseFromSecuredEndPoint = testRestTemplate.exchange(securedUrl, HttpMethod.GET, new HttpEntity<>(headers), String.class);
 
-    assertEquals(responseFromSecuredEndPoint.getStatusCode(), HttpStatus.OK);
-    assertTrue(responseFromSecuredEndPoint.getBody().contains("Hello World!"));
+    ResponseEntity<PollResponse[]> response =
+            template.exchange(
+                    base.toString() + "/admin/" + this.savedUser1.getId().toString() + "/polls", HttpMethod.GET, new HttpEntity<>(headers),
+                    PollResponse[].class);
+    PollResponse[] polls = response.getBody();
+    Assertions.assertNotNull(polls);
+    Assertions.assertEquals(2, polls.length);
   }
 
   @Test
