@@ -4,6 +4,16 @@ import lombok.Data;
 
 @Data
 public class LoginRequest {
-    String username;
-    String password;
+  String username;
+  String password;
+
+  public LoginRequest username(String username) {
+    setUsername(username);
+    return this;
+  }
+
+  public LoginRequest password(String password) {
+    setPassword(password);
+    return this;
+  }
 }
