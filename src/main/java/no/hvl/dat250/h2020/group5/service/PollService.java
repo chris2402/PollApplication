@@ -71,12 +71,8 @@ public class PollService {
         .collect(Collectors.toList());
   }
 
-  public List<PollResponse> getAllPolls(Long adminId) {
-    Optional<User> maybeUser = userRepository.findById(adminId);
-    if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
-      return pollRepository.findAll().stream().map(PollResponse::new).collect(Collectors.toList());
-    }
-    return null;
+  public List<PollResponse> getAllPolls() {
+    return pollRepository.findAll().stream().map(PollResponse::new).collect(Collectors.toList());
   }
 
   public List<PollResponse> getUserPollsAsAdmin(Long userId, Long adminId) {
