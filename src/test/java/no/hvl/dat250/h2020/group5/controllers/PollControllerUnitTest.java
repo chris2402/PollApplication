@@ -110,7 +110,7 @@ public class PollControllerUnitTest {
   @Test
   public void shouldReturnAllPollsAsAdminTest() throws Exception {
     List<PollResponse> resultList = Arrays.asList(response1, response2);
-    when(pollService.getAllPolls(4L)).thenReturn(resultList);
+    when(pollService.getAllPolls()).thenReturn(resultList);
 
     mockMvc
         .perform(
