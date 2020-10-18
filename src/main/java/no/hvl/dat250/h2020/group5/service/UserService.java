@@ -26,7 +26,10 @@ public class UserService {
   final PasswordEncoder encoder;
 
   public UserService(
-          UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository, PasswordEncoder encoder) {
+      UserRepository userRepository,
+      VoteRepository voteRepository,
+      PollRepository pollRepository,
+      PasswordEncoder encoder) {
     this.userRepository = userRepository;
     this.voteRepository = voteRepository;
     this.encoder = encoder;
@@ -34,6 +37,7 @@ public class UserService {
 
   public UserResponse createUser(User user) {
     user.setPassword(encoder.encode(user.getPassword()));
+    // user.setIsAdmin(true);
     return new UserResponse(userRepository.save(user));
   }
 
