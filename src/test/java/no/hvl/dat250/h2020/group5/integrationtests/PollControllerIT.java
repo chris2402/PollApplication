@@ -3,8 +3,6 @@ package no.hvl.dat250.h2020.group5.integrationtests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
-import net.minidev.json.JSONObject;
-import no.hvl.dat250.h2020.group5.controllers.PollController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -26,10 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -42,11 +42,12 @@ import java.util.Objects;
 public class PollControllerIT {
 
   @Autowired TestRestTemplate template;
-  @Autowired PollController pollController;
   @Autowired PollRepository pollRepository;
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
   @Autowired VoteRepository voteRepository;
+  @Autowired ObjectMapper objectMapper;
+  @Autowired PasswordEncoder encoder;
   @LocalServerPort private int port;
 
   private URL base;
@@ -69,16 +70,19 @@ public class PollControllerIT {
     userRepository.deleteAll();
     guestRepository.deleteAll();
 
-    User user1 = new User().userName("Admin").admin(true);
+    User admin =
+        new User().admin(true).userName("mynameisadmin").password(encoder.encode("password"));
+    User user1 = new User().userName("oddhus").password(encoder.encode("12341234"));
     User user2 = new User().userName("Not admin");
     Guest guest1 = new Guest().username("guest1");
 
+    userRepository.save(admin);
     savedUser1 = userRepository.save(user1);
     savedUser2 = userRepository.save(user2);
     savedGuest1 = guestRepository.save(guest1);
 
     Poll poll1 = new Poll().question("Question").visibilityType(PollVisibilityType.PUBLIC);
-    poll1.setOwnerAndAddThisPollToOwner(savedUser1);
+    poll1.setPollOwnerOnlyOnPollSide(savedUser1);
 
     Poll poll2 =
         new Poll()
@@ -117,6 +121,20 @@ public class PollControllerIT {
         .getRestTemplate()
         .setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
     // make PATCH request
+
+    login("oddhus", "12341234");
+  }
+
+  private void login(String username, String password) throws JsonProcessingException {
+    String loginUrl = "http://localhost:" + port + "/auth/signin";
+    LoginRequest loginRequest = new LoginRequest().username(username).password(password);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request =
+        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
+
+    template.postForEntity(loginUrl, request, String.class);
   }
 
   @AfterEach
@@ -133,50 +151,12 @@ public class PollControllerIT {
   }
 
   @Test
-  public void test() throws JsonProcessingException {
-    String loginUrl = "http://localhost:" + port +"/auth/signin";
-    String registerUrl = "http://localhost:" + port +"/auth/signup";
-
-    JSONObject personJsonObject = new JSONObject();
-    personJsonObject.put("username", "oddhus");
-    personJsonObject.put("password", "12341234");
-
-    HttpHeaders headers1 = new HttpHeaders();
-    headers1.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request = new HttpEntity<>(personJsonObject.toString(), headers1);
-
-    ResponseEntity<String> registerResponse = template.postForEntity(
-            registerUrl,
-            request,
-            String.class);
-
-    System.out.println(registerResponse.toString());
-
-    ResponseEntity<String> loginResponse = template.postForEntity(
-            loginUrl,
-            request,
-            String.class);
-
-    String cookie = loginResponse.getHeaders().get("Set-Cookie").get(0);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Cookie", cookie);
+  public void shouldGetAllPollsAsAdmin() throws JsonProcessingException {
+    login("mynameisadmin", "password");
 
     ResponseEntity<PollResponse[]> response =
-            template.exchange(
-                    base.toString() + "/admin/" + this.savedUser1.getId().toString() + "/polls", HttpMethod.GET, new HttpEntity<>(headers),
-                    PollResponse[].class);
-    PollResponse[] polls = response.getBody();
-    Assertions.assertNotNull(polls);
-    Assertions.assertEquals(2, polls.length);
-  }
+        template.getForEntity(base.toString() + "/admin", PollResponse[].class);
 
-  @Test
-  public void shouldGetAllPolls() {
-    ResponseEntity<PollResponse[]> response =
-        template.getForEntity(
-            base.toString() + "/admin/" + this.savedUser1.getId().toString() + "/polls",
-            PollResponse[].class);
     PollResponse[] polls = response.getBody();
     Assertions.assertNotNull(polls);
     Assertions.assertEquals(2, polls.length);
@@ -187,7 +167,7 @@ public class PollControllerIT {
   }
 
   @Test
-  public void shouldGetPollByPollId() {
+  public void shouldGetPollByPollId() throws JsonProcessingException {
     ResponseEntity<PollResponse> response =
         template.getForEntity(base.toString() + "/" + this.savedPoll1.getId(), PollResponse.class);
     PollResponse poll = response.getBody();
@@ -208,7 +188,7 @@ public class PollControllerIT {
     Assertions.assertEquals(0, votes.size());
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertTrue(pollRepository.findById(savedPoll1.getId()).isEmpty());
-    Assertions.assertEquals(2, userRepository.count());
+    Assertions.assertEquals(3, userRepository.count());
   }
 
   @Test
@@ -221,14 +201,35 @@ public class PollControllerIT {
   }
 
   @Test
+  public void shouldGetAllUsersPollsAsOwner() {
+    ResponseEntity<PollResponse[]> response =
+        template.getForEntity(
+            base.toString() + "/owner/" + savedUser1.getId(), PollResponse[].class);
+    PollResponse[] polls = response.getBody();
+    Assertions.assertNotNull(polls);
+    Assertions.assertEquals(1, polls.length);
+  }
+
+  @Test
+  public void shouldGetAllUsersPollsAsAdmin() throws JsonProcessingException {
+    login("mynameisadmin", "password");
+
+    ResponseEntity<PollResponse[]> response =
+        template.getForEntity(
+            base.toString() + "/owner/" + savedUser2.getId(), PollResponse[].class);
+    PollResponse[] polls = response.getBody();
+    Assertions.assertNotNull(polls);
+    Assertions.assertEquals(1, polls.length);
+  }
+
+  @Test
   public void shouldCreateNewPoll() {
     Poll poll = new Poll();
     poll.setQuestion("Banana pizza?");
     poll.setName("Poll name");
 
     ResponseEntity<PollResponse> response =
-        template.postForEntity(
-            base.toString() + "/" + this.savedUser1.getId(), poll, PollResponse.class);
+        template.postForEntity(base.toString(), poll, PollResponse.class);
     PollResponse postedPoll = response.getBody();
 
     Assertions.assertNotNull(postedPoll);
