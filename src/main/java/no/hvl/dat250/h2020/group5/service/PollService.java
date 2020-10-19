@@ -98,10 +98,10 @@ public class PollService {
     return poll.map(PollResponse::new).orElse(null);
   }
 
-  public Boolean activatePoll(Long pollId) {
+  public Boolean activatePoll(Long pollId, Long userId) {
 
     Optional<Poll> poll = pollRepository.findById(pollId);
-    if (poll.isEmpty()) {
+    if (poll.isEmpty() || !isOwnerOrAdmin(poll.get(), userId)) {
       return false;
     }
 
