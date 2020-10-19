@@ -90,7 +90,7 @@ public class UserControllerTest {
 
   @Test
   public void shouldGiveAllUsersTest() throws Exception {
-    when(userService.getAllUsers(any()))
+    when(userService.getAllUsers())
         .thenReturn(
             Arrays.asList(
                 new UserResponse(new User().userName("user1").admin(true).password("abcde")),
