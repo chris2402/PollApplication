@@ -1,48 +1,58 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.security.services.UserDetailsImpl;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
+@PreAuthorize("hasAuthority('USER')")
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+  public UserController(UserService userService) {
+    this.userService = userService;
+  }
 
-    @GetMapping("/admin/{adminId}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public List<UserResponse> getUsers(@PathVariable Long adminId) {
-        return userService.getAllUsers(adminId);
-    }
+  @PreAuthorize("hasAuthority('ADMIN')")
+  @GetMapping
+  public List<UserResponse> getUsers() {
+    return userService.getAllUsers();
+  }
 
-    @GetMapping("/{id}")
-    public UserResponse getUser(@PathVariable Long id , Principal principal, Authentication authentication) {
-        return userService.getUser(id);
-    }
+  @PreAuthorize("authentication.principal.id == #id or hasAuthority('ADMIN')")
+  @GetMapping("/{id}")
+  public UserResponse getUser(@PathVariable Long id) {
+    return userService.getUser(id);
+  }
 
-    @PatchMapping("/{id}")
-    public Boolean updateUser(
-            @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
-        return userService.updateUser(id, updateUserRequest);
-    }
+  @GetMapping("/info/me")
+  public UserResponse getMe(Authentication authentication) {
+    return userService.getUser(getIdFromAuth(authentication));
+  }
 
-    @DeleteMapping("/{id}")
-    public Boolean deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id);
-    }
+  @PreAuthorize("authentication.principal.id == #id or hasAuthority('ADMIN')")
+  @PatchMapping("/{id}")
+  public Boolean updateUser(
+      @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
+    return userService.updateUser(id, updateUserRequest);
+  }
+
+  @PreAuthorize("authentication.principal.id == #id or hasAuthority('ADMIN')")
+  @DeleteMapping("/{id}")
+  public Boolean deleteUser(@PathVariable Long id) {
+    return userService.deleteUser(id);
+  }
+
+  private long getIdFromAuth(Authentication authentication) {
+    UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
+    return principal.getId();
+  }
 }
