@@ -22,7 +22,6 @@ public abstract class Voter {
   @Column(length = 20)
   @EqualsAndHashCode.Include
   protected String username;
-
   @OneToMany(
       mappedBy = "voter",
       fetch = FetchType.EAGER,
@@ -31,6 +30,7 @@ public abstract class Voter {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
+  private String password;
 
   public void addVoteAndSetThisVoterInVote(Vote vote) {
     this.votes.add(vote);
