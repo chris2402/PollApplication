@@ -37,7 +37,6 @@ public class UserService {
 
   public UserResponse createUser(User user) {
     user.setPassword(encoder.encode(user.getPassword()));
-    // user.setIsAdmin(true);
     return new UserResponse(userRepository.save(user));
   }
 
@@ -58,12 +57,8 @@ public class UserService {
     return true;
   }
 
-  public List<UserResponse> getAllUsers(Long adminId) {
-    Optional<User> maybeUser = userRepository.findById(adminId);
-    if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
-      return userRepository.findAll().stream().map(UserResponse::new).collect(Collectors.toList());
-    }
-    return null;
+  public List<UserResponse> getAllUsers() {
+    return userRepository.findAll().stream().map(UserResponse::new).collect(Collectors.toList());
   }
 
   public UserResponse getUser(Long userId) {
@@ -89,8 +84,8 @@ public class UserService {
 
     if (updateUserRequest.getOldPassword() != null
         && updateUserRequest.getNewPassword() != null
-        && updateUserRequest.getOldPassword().equals(user.get().getPassword())) {
-      user.get().setPassword(updateUserRequest.getNewPassword());
+        && encoder.matches(updateUserRequest.getOldPassword(), user.get().getPassword())) {
+      user.get().setPassword(encoder.encode(updateUserRequest.getNewPassword()));
       changesMade = true;
     }
 
