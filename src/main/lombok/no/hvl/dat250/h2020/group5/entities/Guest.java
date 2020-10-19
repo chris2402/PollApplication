@@ -14,4 +14,9 @@ public class Guest extends Voter {
     setUsername(username);
     return this;
   }
+
+  public Guest password(String password) {
+    setPassword(password);
+    return this;
+  }
 }
