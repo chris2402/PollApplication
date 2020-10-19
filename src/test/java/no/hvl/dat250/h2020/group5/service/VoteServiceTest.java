@@ -42,10 +42,8 @@ public class VoteServiceTest {
 
   @BeforeEach
   public void setUp() {
-    poll = new Poll();
+    poll = new Poll().startTime(new Date()).pollDuration(100);
     poll.setId(1L);
-    poll.setStartTime(new Date());
-    poll.setPollDuration(100);
 
     voter = new User();
     voter.setId(2L);

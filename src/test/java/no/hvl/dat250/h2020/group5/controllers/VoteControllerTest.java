@@ -2,6 +2,7 @@ package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.security.services.UserDetailsImpl;
 import no.hvl.dat250.h2020.group5.service.VoteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,14 +22,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = {VoteController.class})
 @WebMvcTest(VoteController.class)
 @WithMockUser
 public class VoteControllerTest {
 
   @Autowired private MockMvc mockMvc;
-
+  @MockBean private UserDetailsImpl userDetails;
+  @MockBean private VoteController voteController;
   @MockBean private VoteService voteService;
 
   private Vote vote;
@@ -43,10 +45,12 @@ public class VoteControllerTest {
   @Test
   public void shouldCreateNewVoteTest() throws Exception {
     when(voteService.vote(anyLong(), anyLong(), any())).thenReturn(vote);
+    when(userDetails.getId()).thenReturn(1L);
+    when(voteController.getIdFromAuth(any())).thenReturn(1L);
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/votes")
-                .content("{\"pollId\": \"1\", \"userId\":\"1\", \"vote\":\"YES\"}")
+            MockMvcRequestBuilders.post("/votes/1")
+                .content("{\"vote\":\"YES\"}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())

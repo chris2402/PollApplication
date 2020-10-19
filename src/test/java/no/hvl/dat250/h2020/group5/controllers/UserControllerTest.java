@@ -19,10 +19,11 @@ import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = {UserController.class})
 @WebMvcTest(UserController.class)
 @WithMockUser
@@ -52,24 +53,14 @@ public class UserControllerTest {
   }
 
   @Test
-  public void shouldCreateUserTest() throws Exception {
-    when(userService.createUser(any())).thenReturn(userResponse);
+  public void shouldDeleteUserTest() throws Exception {
+    when(userService.deleteUser(1L)).thenReturn(true);
+
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/users")
-                .content(
-                    "{\"username\":\"my_awesome_name\", \"password\":\"my_password\", \"isAdmin\":\"false\"}")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().json("{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
-  }
-
-  @Test
-  public void shouldDeleteUserTest() throws Exception {
-    when(userService.deleteUser(any())).thenReturn(true);
-    mockMvc
-        .perform(MockMvcRequestBuilders.delete("/users/1").accept(MediaType.APPLICATION_JSON))
+            MockMvcRequestBuilders.delete("/users/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(content().string("true"));
   }
@@ -98,7 +89,7 @@ public class UserControllerTest {
                 new UserResponse(
                     new User().userName("user3").admin(false).password("my_cool_password"))));
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/users/admin/1").accept(MediaType.APPLICATION_JSON))
+        .perform(MockMvcRequestBuilders.get("/users").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(
             content()

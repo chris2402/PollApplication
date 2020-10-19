@@ -35,7 +35,7 @@ public class VoteController {
     return voteService.findVote(pollId, userId);
   }
 
-  private long getIdFromAuth(Authentication authentication) {
+  public long getIdFromAuth(Authentication authentication) {
     UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
     return principal.getId();
   }
