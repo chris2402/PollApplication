@@ -2,7 +2,10 @@ package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
+import no.hvl.dat250.h2020.group5.security.services.UserDetailsImpl;
 import no.hvl.dat250.h2020.group5.service.VoteService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -11,19 +14,29 @@ import javax.validation.Valid;
 @RequestMapping("/votes")
 public class VoteController {
 
-    final VoteService voteService;
+  final VoteService voteService;
 
-    public VoteController(VoteService voteService) {
-        this.voteService = voteService;
-    }
+  public VoteController(VoteService voteService) {
+    this.voteService = voteService;
+  }
 
-    @PostMapping
-    public Vote castVote(@Valid @RequestBody CastVoteRequest castVoteRequest) {
-        return voteService.vote(castVoteRequest);
-    }
+  @PreAuthorize("hasAuthority('USER') or hasAuthority('GUEST')")
+  @PostMapping("/{pollId}")
+  public Vote castVote(
+      @PathVariable Long pollId,
+      Authentication authentication,
+      @Valid @RequestBody CastVoteRequest castVoteRequest) {
+    return voteService.vote(pollId, getIdFromAuth(authentication), castVoteRequest);
+  }
 
-    @GetMapping
-    public Vote findVote(@RequestParam Long userId, @RequestParam Long pollId) {
-        return voteService.findVote(pollId, userId);
-    }
+  @PreAuthorize("authentication.principal.id = #userId or hasAuthority('ADMIN')")
+  @GetMapping
+  public Vote findVote(@RequestParam Long userId, @RequestParam Long pollId) {
+    return voteService.findVote(pollId, userId);
+  }
+
+  private long getIdFromAuth(Authentication authentication) {
+    UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
+    return principal.getId();
+  }
 }
