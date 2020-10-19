@@ -70,12 +70,12 @@ public class UserServiceTest {
   @Test
   public void shouldGiveAllUsersToAdminTest() {
     user1.setIsAdmin(true);
-    Assertions.assertEquals(2, userService.getAllUsers(user1.getId()).size());
+    Assertions.assertEquals(2, userService.getAllUsers().size());
   }
 
   @Test
   public void shouldNotGiveAllUsersNoAdminTest() {
-    Assertions.assertNull(userService.getAllUsers(user1.getId()));
+    Assertions.assertNull(userService.getAllUsers());
   }
 
   @Test
