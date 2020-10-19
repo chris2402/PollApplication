@@ -1,9 +1,12 @@
 package no.hvl.dat250.h2020.group5.integrationtests;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.controllers.UserController;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -14,8 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,20 +34,41 @@ public class UserControllerIT {
   @Autowired UserController userController;
   @Autowired UserRepository userRepository;
   @Autowired TestRestTemplate testRestTemplate;
+  @Autowired ObjectMapper objectMapper;
+  @Autowired PasswordEncoder encoder;
   @LocalServerPort private int port;
   private URL base;
-  private User user;
+  private User savedUser;
 
   @BeforeEach
-  public void setUp() throws MalformedURLException {
+  public void setUp() throws MalformedURLException, JsonProcessingException {
     userRepository.deleteAll();
     this.base = new URL("http://localhost:" + port + "/users");
-    user = new User().userName("username").password("my password");
+
+    User user = new User().userName("username").password(encoder.encode("my password"));
+    User admin = new User().userName("admin").password(encoder.encode("my password")).admin(true);
+
+    savedUser = userRepository.save(user);
+    userRepository.save(admin);
+
     testRestTemplate
         .getRestTemplate()
         .setRequestFactory(
             new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to make PATCH
     // request
+    login("username", "my password");
+  }
+
+  private void login(String username, String password) throws JsonProcessingException {
+    String loginUrl = "http://localhost:" + port + "/auth/signin";
+    LoginRequest loginRequest = new LoginRequest().username(username).password(password);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request =
+        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
+
+    testRestTemplate.postForEntity(loginUrl, request, String.class);
   }
 
   @AfterEach
@@ -49,16 +77,49 @@ public class UserControllerIT {
   }
 
   @Test
-  public void shouldSaveANewUserTest() {
-    ResponseEntity<UserResponse> result =
-        testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
-    UserResponse postedUser = result.getBody();
-    Assertions.assertNotNull(postedUser.getId());
-    Assertions.assertEquals(user.getUsername(), postedUser.getUsername());
-    Assertions.assertEquals(1, userRepository.count());
-    Assertions.assertNotNull(userRepository.findById(postedUser.getId()).get().getPassword());
-    Assertions.assertEquals(
-        "my password", userRepository.findById(postedUser.getId()).get().getPassword());
+  public void shouldGetUsersAsAdmin() throws JsonProcessingException {
+    login("admin", "my password");
+
+    ResponseEntity<UserResponse[]> response =
+        testRestTemplate.getForEntity(base.toString(), UserResponse[].class);
+
+    UserResponse[] userResponses = response.getBody();
+    Assertions.assertNotNull(userResponses);
+    Assertions.assertEquals(2, userResponses.length);
+  }
+
+  @Test
+  public void shouldGetUserAsAdmin() throws JsonProcessingException {
+    login("admin", "my password");
+
+    ResponseEntity<UserResponse> response =
+        testRestTemplate.getForEntity(
+            base.toString() + "/" + savedUser.getId(), UserResponse.class);
+
+    UserResponse userResponse = response.getBody();
+    Assertions.assertNotNull(userResponse);
+    Assertions.assertEquals(savedUser.getId(), userResponse.getId());
+  }
+
+  @Test
+  public void shouldGetUserAsUser() {
+    ResponseEntity<UserResponse> response =
+        testRestTemplate.getForEntity(
+            base.toString() + "/" + savedUser.getId(), UserResponse.class);
+
+    UserResponse userResponse = response.getBody();
+    Assertions.assertNotNull(userResponse);
+    Assertions.assertEquals(savedUser.getId(), userResponse.getId());
+  }
+
+  @Test
+  public void shouldGetInfoAboutCurrentlyLoggedInUser() {
+    ResponseEntity<UserResponse> response =
+        testRestTemplate.getForEntity(base.toString() + "/info/me", UserResponse.class);
+
+    UserResponse userResponse = response.getBody();
+    Assertions.assertNotNull(userResponse);
+    Assertions.assertEquals(savedUser.getId(), userResponse.getId());
   }
 
   @Test
@@ -66,19 +127,14 @@ public class UserControllerIT {
     UpdateUserRequest newPasswordRequest = new UpdateUserRequest();
     newPasswordRequest.setOldPassword("my password");
     newPasswordRequest.setNewPassword("my new password");
-
-    ResponseEntity<UserResponse> newUserResult =
-        testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
-    UserResponse newUser = newUserResult.getBody();
-    Long userId = newUser.getId();
-
-    String pathToEndpoint = base.toString() + "/" + userId.toString();
+    System.out.println(savedUser.getId());
+    String pathToEndpoint = base.toString() + "/" + savedUser.getId();
     Boolean response =
         testRestTemplate.patchForObject(pathToEndpoint, newPasswordRequest, Boolean.class);
 
     Assertions.assertTrue(response);
-    Assertions.assertEquals("my new password", userRepository.findById(userId).get().getPassword());
-    Assertions.assertEquals(1, userRepository.count());
+    Assertions.assertNotNull(userRepository.findById(savedUser.getId()).get().getPassword());
+    Assertions.assertEquals(2, userRepository.count());
   }
 
   @Test
@@ -86,31 +142,21 @@ public class UserControllerIT {
     UpdateUserRequest newUsernameRequest = new UpdateUserRequest();
     newUsernameRequest.setUsername("my new username");
 
-    ResponseEntity<UserResponse> newUserResult =
-        testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
-    UserResponse newUser = newUserResult.getBody();
-    Long userId = newUser.getId();
-
-    String pathToEndpoint = base.toString() + "/" + userId.toString();
+    String pathToEndpoint = base.toString() + "/" + savedUser.getId().toString();
     Boolean response =
         testRestTemplate.patchForObject(pathToEndpoint, newUsernameRequest, Boolean.class);
 
     Assertions.assertTrue(response);
-    Assertions.assertEquals("my new username", userRepository.findById(userId).get().getUsername());
-    Assertions.assertEquals(1, userRepository.count());
+    Assertions.assertEquals(
+        "my new username", userRepository.findById(savedUser.getId()).get().getUsername());
+    Assertions.assertEquals(2, userRepository.count());
   }
 
   @Test
   public void shouldDeleteUserTest() {
-    ResponseEntity<UserResponse> newUserResult =
-        testRestTemplate.postForEntity(base.toString(), user, UserResponse.class);
-    UserResponse newUser = newUserResult.getBody();
-    Long userId = newUser.getId();
-
-    String pathToEndpoint = base.toString() + "/" + userId.toString();
-
+    String pathToEndpoint = base.toString() + "/" + savedUser.getId().toString();
     testRestTemplate.delete(pathToEndpoint);
 
-    Assertions.assertEquals(0, userRepository.count());
+    Assertions.assertEquals(1, userRepository.count());
   }
 }
