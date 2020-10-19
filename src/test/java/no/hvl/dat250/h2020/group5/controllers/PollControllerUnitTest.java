@@ -147,7 +147,7 @@ public class PollControllerUnitTest {
 
   @Test
   public void shouldActivatePollTest() throws Exception {
-    when(pollService.activatePoll(poll1.getId())).thenReturn(true);
+    when(pollService.activatePoll(poll1.getId(), user.getId())).thenReturn(true);
 
     mockMvc
         .perform(
