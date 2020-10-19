@@ -42,15 +42,13 @@ public class VoteService {
     this.userRepository = userRepository;
   }
 
-  public Vote vote(CastVoteRequest castVoteRequest) {
-    if (castVoteRequest.getPollId() == null
-        || castVoteRequest.getUserId() == null
-        || castVoteRequest.getVote() == null) {
+  public Vote vote(Long pollId, Long userId, CastVoteRequest castVoteRequest) {
+    if (castVoteRequest.getVote() == null) {
       return null;
     }
 
-    Optional<Poll> p = pollRepository.findById(castVoteRequest.getPollId());
-    Optional<Voter> u = voterRepository.findById(castVoteRequest.getUserId());
+    Optional<Poll> p = pollRepository.findById(pollId);
+    Optional<Voter> u = voterRepository.findById(userId);
     AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
 
     if (p.isEmpty()
