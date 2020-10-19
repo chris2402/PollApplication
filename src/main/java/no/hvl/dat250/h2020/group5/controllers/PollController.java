@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@PreAuthorize("hasAuthority('USER')")
 @RestController
 @RequestMapping("/polls")
 public class PollController {
@@ -40,25 +41,22 @@ public class PollController {
 
   @PostMapping
   public PollResponse createPoll(@RequestBody Poll body, Authentication authentication) {
-    UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-    return pollService.createPoll(body, principal.getId());
+    return pollService.createPoll(body, getIdFromAuth(authentication));
   }
 
-  @PreAuthorize("authentication.principal.id == #ownerId or hasAuthority('ADMIN')")
-  @DeleteMapping(path = "/{pollId}/{ownerId}")
-  public boolean deletePoll(@PathVariable Long pollId, @PathVariable Long ownerId) {
-    return pollService.deletePoll(pollId, ownerId);
+  @DeleteMapping(path = "/{pollId}")
+  public boolean deletePoll(@PathVariable Long pollId, Authentication authentication) {
+    return pollService.deletePoll(pollId, getIdFromAuth(authentication));
   }
 
-  @PreAuthorize("hasAuthority('ADMIN')")
   @GetMapping(path = "/{pollId}")
   public PollResponse getPoll(@PathVariable Long pollId) {
     return pollService.getPoll(pollId);
   }
 
   @PatchMapping(path = "/{pollId}")
-  public boolean activatePoll(@PathVariable Long pollId) {
-    return pollService.activatePoll(pollId);
+  public boolean activatePoll(@PathVariable Long pollId, Authentication authentication) {
+    return pollService.activatePoll(pollId, getIdFromAuth(authentication));
   }
 
   @GetMapping(path = "/{pollId}/active")
@@ -69,5 +67,10 @@ public class PollController {
   @GetMapping(path = "/{pollId}/votes")
   public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
     return pollService.getNumberOfVotes(pollId);
+  }
+
+  private long getIdFromAuth(Authentication authentication) {
+    UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
+    return principal.getId();
   }
 }
