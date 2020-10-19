@@ -178,12 +178,7 @@ public class PollControllerIT {
 
   @Test
   public void shouldDeletePollByPollId() {
-    template.delete(
-        base.toString()
-            + "/"
-            + savedPoll1.getId().toString()
-            + "/"
-            + savedUser1.getId().toString());
+    template.delete(base.toString() + "/" + savedPoll1.getId().toString());
     List<Vote> votes = voteRepository.findByPoll(savedPoll1);
     Assertions.assertEquals(0, votes.size());
     Assertions.assertEquals(1, voteRepository.count());
