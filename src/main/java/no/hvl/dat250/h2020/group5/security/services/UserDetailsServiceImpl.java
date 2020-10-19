@@ -1,7 +1,7 @@
 package no.hvl.dat250.h2020.group5.security.services;
 
-import no.hvl.dat250.h2020.group5.entities.User;
-import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.entities.Voter;
+import no.hvl.dat250.h2020.group5.repositories.VoterRepository;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -12,21 +12,21 @@ import java.util.Optional;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-  final UserRepository userRepository;
+  final VoterRepository voterRepository;
 
-  public UserDetailsServiceImpl(UserRepository userRepository) {
-    this.userRepository = userRepository;
+  public UserDetailsServiceImpl(VoterRepository voterRepository) {
+    this.voterRepository = voterRepository;
   }
 
   @Override
   @Transactional
   public UserDetailsImpl loadUserByUsername(String username) throws UsernameNotFoundException {
-    Optional<User> user = userRepository.findByUsername(username);
+    Optional<Voter> voter = voterRepository.findByUsername(username);
 
-    if (user.isEmpty()) {
+    if (voter.isEmpty()) {
       throw new UsernameNotFoundException("User Not Found with username: " + username);
     }
 
-    return UserDetailsImpl.build(user.get());
+    return UserDetailsImpl.build(voter.get());
   }
 }
