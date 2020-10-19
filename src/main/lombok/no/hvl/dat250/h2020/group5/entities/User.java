@@ -15,8 +15,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
-  private String password;
-
   private Boolean isAdmin = false;
 
   @ToString.Exclude
