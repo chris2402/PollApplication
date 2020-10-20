@@ -13,6 +13,7 @@ public class GuestResponse {
   private Long id;
   private String username;
   private String displayName;
+  private AuthInfo authInfo;
 
   public GuestResponse(Guest guest) {
     this.id = guest.getId();

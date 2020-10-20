@@ -1,14 +1,18 @@
 package no.hvl.dat250.h2020.group5.controllers.utils;
 
+import no.hvl.dat250.h2020.group5.responses.AuthInfo;
 import no.hvl.dat250.h2020.group5.security.jwt.JwtUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CreateCookie {
@@ -20,7 +24,7 @@ public class CreateCookie {
     this.jwtUtils = jwtUtils;
   }
 
-  public String signIn(String username, String password, HttpServletResponse response) {
+  public AuthInfo signIn(String username, String password, HttpServletResponse response) {
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(username, password));
@@ -35,6 +39,11 @@ public class CreateCookie {
     cookie.setPath("/");
     response.addCookie(cookie);
 
-    return jwt;
+    List<String> roles =
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.toList());
+
+    return new AuthInfo().jwt(jwt).roles(roles);
   }
 }

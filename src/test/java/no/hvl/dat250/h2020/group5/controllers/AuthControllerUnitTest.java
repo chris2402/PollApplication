@@ -8,6 +8,7 @@ import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.GuestService;
 import no.hvl.dat250.h2020.group5.service.UserService;
+import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ public class AuthControllerUnitTest {
   @Autowired private ObjectMapper objectMapper;
   @MockBean private GuestService guestService;
   @MockBean private UserService userService;
+  @MockBean private VotingDeviceService votingDeviceService;
   private UserResponse userResponse;
   private GuestResponse guestResponse1;
 

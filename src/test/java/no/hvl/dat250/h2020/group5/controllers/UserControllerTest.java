@@ -1,5 +1,6 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
@@ -19,7 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
+import java.util.List;
 
+import static no.hvl.dat250.h2020.group5.controllers.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -33,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerTest {
 
   @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
   @MockBean private UserService userService;
   @MockBean private ExtractIdFromAuth extractIdFromAuth;
 
@@ -94,19 +98,16 @@ public class UserControllerTest {
 
   @Test
   public void shouldGiveAllUsersTest() throws Exception {
-    when(userService.getAllUsers())
-        .thenReturn(
-            Arrays.asList(
-                new UserResponse(new User().userName("user1").admin(true).password("abcde")),
-                new UserResponse(new User().userName("user2").admin(false).password("1234")),
-                new UserResponse(
-                    new User().userName("user3").admin(false).password("my_cool_password"))));
+    List<UserResponse> response =
+        Arrays.asList(
+            new UserResponse(new User().userName("user1").admin(true).password("abcde")),
+            new UserResponse(new User().userName("user2").admin(false).password("1234")),
+            new UserResponse(
+                new User().userName("user3").admin(false).password("my_cool_password")));
+    when(userService.getAllUsers()).thenReturn(response);
     mockMvc
         .perform(MockMvcRequestBuilders.get("/users").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(
-            content()
-                .string(
-                    "[{\"id\":null,\"username\":\"user1\",\"isAdmin\":true},{\"id\":null,\"username\":\"user2\",\"isAdmin\":false},{\"id\":null,\"username\":\"user3\",\"isAdmin\":false}]"));
+        .andExpect(responseBody().containsObjectAsJson(response));
   }
 }

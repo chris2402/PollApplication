@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class VotingDeviceService {
@@ -39,9 +39,8 @@ public class VotingDeviceService {
   }
 
   public VotingDeviceResponse createDevice() {
-    Integer name = new Random().nextInt(10000000);
-    VotingDevice device =
-        new VotingDevice().password(encoder.encode(name.toString())).username(name.toString());
+    String name = UUID.randomUUID().toString();
+    VotingDevice device = new VotingDevice().password(encoder.encode(name)).username(name);
     return new VotingDeviceResponse(deviceRepository.save(device));
   }
 }

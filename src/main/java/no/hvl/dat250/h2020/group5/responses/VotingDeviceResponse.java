@@ -12,7 +12,7 @@ public class VotingDeviceResponse {
 
   private Long id;
   private String username;
-  private String jwt;
+  private AuthInfo authInfo;
 
   public VotingDeviceResponse(VotingDevice votingDevice) {
     this.id = votingDevice.getId();

@@ -12,6 +12,7 @@ public class UserResponse {
   private Long id;
   private String username;
   private Boolean isAdmin;
+  private AuthInfo authInfo;
 
   public UserResponse(User user) {
     this.id = user.getId();
