@@ -10,12 +10,13 @@ import no.hvl.dat250.h2020.group5.entities.Guest;
 @AllArgsConstructor
 public class GuestResponse {
 
-    private Long id;
-    private String username;
+  private Long id;
+  private String username;
+  private String displayName;
 
-
-    public GuestResponse(Guest guest) {
-        this.id = guest.getId();
-        this.username = guest.getUsername();
-    }
+  public GuestResponse(Guest guest) {
+    this.id = guest.getId();
+    this.username = guest.getUsername();
+    this.displayName = guest.getDisplayName();
+  }
 }

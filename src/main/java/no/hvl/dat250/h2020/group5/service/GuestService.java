@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class GuestService {
@@ -27,6 +28,8 @@ public class GuestService {
   }
 
   public GuestResponse createGuest(Guest guest) {
+    guest.setDisplayName(guest.getDisplayName());
+    guest.setUsername(UUID.randomUUID().toString());
     guest.setPassword(encoder.encode(guest.getUsername()));
     return new GuestResponse(guestRepository.save(guest));
   }

@@ -10,6 +10,7 @@ import no.hvl.dat250.h2020.group5.repositories.DeviceRepository;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.requests.LoginRequest;
+import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.responses.VotingDeviceResponse;
 import org.junit.jupiter.api.Assertions;
@@ -26,6 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
 @NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthControllerIT {
@@ -39,6 +42,7 @@ public class AuthControllerIT {
   @LocalServerPort private int port;
 
   private User savedUser;
+  private Guest savedGuest;
 
   @BeforeEach
   public void setUp() {
@@ -48,6 +52,10 @@ public class AuthControllerIT {
 
     User user = new User().userName("testtest").password(encoder.encode("12341234"));
     savedUser = userRepository.save(user);
+    String guestName = UUID.randomUUID().toString();
+    Guest guest =
+        new Guest().username(guestName).password(encoder.encode(guestName)).displayName("guest");
+    savedGuest = guestRepository.save(guest);
 
     template.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
   }
@@ -104,9 +112,26 @@ public class AuthControllerIT {
   }
 
   @Test
-  public void shouldLogInGuest() throws JsonProcessingException {
+  public void shouldRegisterAndLogInGuest() throws JsonProcessingException {
     String loginUrl = "http://localhost:" + port + "/auth/signup/guest";
-    Guest loginRequest = new Guest().username("guest");
+    Guest loginRequest = new Guest().displayName("guest");
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request =
+        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
+
+    ResponseEntity<GuestResponse> result =
+        template.postForEntity(loginUrl, request, GuestResponse.class);
+    Assertions.assertTrue(result.getHeaders().containsKey("Set-Cookie"));
+    Assertions.assertNotNull(result.getHeaders().get("Set-Cookie"));
+    Assertions.assertEquals("guest", result.getBody().getDisplayName());
+  }
+
+  @Test
+  public void shouldLogInGuest() throws JsonProcessingException {
+    String loginUrl = "http://localhost:" + port + "/auth/signin/guest";
+    Guest loginRequest = new Guest().username(savedGuest.getUsername());
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);

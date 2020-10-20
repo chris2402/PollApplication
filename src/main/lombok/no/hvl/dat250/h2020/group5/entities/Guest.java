@@ -10,6 +10,13 @@ import javax.persistence.Entity;
 @EqualsAndHashCode(callSuper = true)
 public class Guest extends Voter {
 
+  String displayName;
+
+  public Guest displayName(String displayName) {
+    setDisplayName(displayName);
+    return this;
+  }
+
   public Guest username(String username) {
     setUsername(username);
     return this;
