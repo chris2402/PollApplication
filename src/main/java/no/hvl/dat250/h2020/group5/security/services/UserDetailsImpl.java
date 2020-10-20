@@ -37,8 +37,6 @@ public class UserDetailsImpl implements UserDetails {
   }
 
   public static UserDetailsImpl build(Voter voter) {
-    System.out.println("INSTANCE: " + (voter instanceof Guest));
-
     User user = null;
     if (voter instanceof User) {
       user = (User) voter;
