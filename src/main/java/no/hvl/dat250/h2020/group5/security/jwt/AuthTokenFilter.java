@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -29,7 +30,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      String jwt = parseJwt(request);
+      String jwt = parseJwtFromCookie(request);
+      if (jwt == null) {
+        jwt = parseJwtFromHeader(request);
+      }
       if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
         String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
@@ -48,7 +52,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  private String parseJwt(HttpServletRequest request) {
+  private String parseJwtFromCookie(HttpServletRequest request) {
     if (request.getCookies() == null) {
       return null;
     }
@@ -57,5 +61,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             .filter(cookie -> cookie.getName().equals("auth"))
             .findFirst();
     return maybeCookie.map(Cookie::getValue).orElse(null);
+  }
+
+  private String parseJwtFromHeader(HttpServletRequest request) {
+    String headerAuth = request.getHeader("Authorization");
+
+    if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+      return headerAuth.substring(7, headerAuth.length());
+    }
+
+    return null;
   }
 }
