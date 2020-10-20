@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.controllers.UserController;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
-import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -17,9 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +33,7 @@ public class UserControllerIT {
   @Autowired TestRestTemplate testRestTemplate;
   @Autowired ObjectMapper objectMapper;
   @Autowired PasswordEncoder encoder;
+  @Autowired LoginUserInTest loginUserInTest;
   @LocalServerPort private int port;
   private URL base;
   private User savedUser;
@@ -55,20 +53,9 @@ public class UserControllerIT {
         .getRestTemplate()
         .setRequestFactory(
             new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to make PATCH
-    // request
-    login("username", "my password");
-  }
 
-  private void login(String username, String password) throws JsonProcessingException {
-    String loginUrl = "http://localhost:" + port + "/auth/signin";
-    LoginRequest loginRequest = new LoginRequest().username(username).password(password);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request =
-        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
-
-    testRestTemplate.postForEntity(loginUrl, request, String.class);
+    loginUserInTest.login(
+        "username", "my password", "/auth/signin", port, testRestTemplate, objectMapper);
   }
 
   @AfterEach
@@ -78,8 +65,8 @@ public class UserControllerIT {
 
   @Test
   public void shouldGetUsersAsAdmin() throws JsonProcessingException {
-    login("admin", "my password");
-
+    loginUserInTest.login(
+        "admin", "my password", "/auth/signin", port, testRestTemplate, objectMapper);
     ResponseEntity<UserResponse[]> response =
         testRestTemplate.getForEntity(base.toString(), UserResponse[].class);
 
@@ -90,7 +77,8 @@ public class UserControllerIT {
 
   @Test
   public void shouldGetUserAsAdmin() throws JsonProcessingException {
-    login("admin", "my password");
+    loginUserInTest.login(
+        "admin", "my password", "/auth/signin", port, testRestTemplate, objectMapper);
 
     ResponseEntity<UserResponse> response =
         testRestTemplate.getForEntity(
@@ -115,7 +103,7 @@ public class UserControllerIT {
   @Test
   public void shouldGetInfoAboutCurrentlyLoggedInUser() {
     ResponseEntity<UserResponse> response =
-        testRestTemplate.getForEntity(base.toString() + "/info/me", UserResponse.class);
+        testRestTemplate.getForEntity(base.toString() + "/me", UserResponse.class);
 
     UserResponse userResponse = response.getBody();
     Assertions.assertNotNull(userResponse);

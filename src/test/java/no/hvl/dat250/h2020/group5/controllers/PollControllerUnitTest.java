@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,20 +30,20 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ContextConfiguration(classes = {PollController.class})
 @WebMvcTest(PollController.class)
 @WithMockUser
 public class PollControllerUnitTest {
 
   @Autowired private ObjectMapper objectMapper;
-
   @Autowired private MockMvc mockMvc;
-
   @MockBean private PollService pollService;
+  @MockBean private ExtractIdFromAuth extractIdFromAuth;
 
   private Poll poll1;
   private PollResponse response1;
@@ -95,26 +97,12 @@ public class PollControllerUnitTest {
   }
 
   @Test
-  public void shouldReturnAllPollsOfOwnerAsAdminTest() throws Exception {
-    List<PollResponse> resultList = Arrays.asList(response1, response2);
-    when(pollService.getUserPollsAsAdmin(user.getId(), 4L)).thenReturn(resultList);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.get("/polls/admin/4/polls/" + user.getId())
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(responseBody().containsObjectAsJson(resultList));
-  }
-
-  @Test
   public void shouldReturnAllPollsAsAdminTest() throws Exception {
     List<PollResponse> resultList = Arrays.asList(response1, response2);
     when(pollService.getAllPolls()).thenReturn(resultList);
 
     mockMvc
-        .perform(
-            MockMvcRequestBuilders.get("/polls/admin/4/polls").accept(MediaType.APPLICATION_JSON))
+        .perform(MockMvcRequestBuilders.get("/polls/admin").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(responseBody().containsObjectAsJson(resultList));
   }
@@ -122,10 +110,12 @@ public class PollControllerUnitTest {
   @Test
   public void shouldCreatePoll() throws Exception {
     when(pollService.createPoll(any(Poll.class), eq(user.getId()))).thenReturn(response1);
+    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(user.getId());
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/polls/" + user.getId())
+            MockMvcRequestBuilders.post("/polls")
+                .with(csrf())
                 .content(objectMapper.writeValueAsString(poll1))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -136,10 +126,12 @@ public class PollControllerUnitTest {
   @Test
   public void shouldDeletePollTest() throws Exception {
     when(pollService.deletePoll(poll1.getId(), user.getId())).thenReturn(true);
+    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(user.getId());
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.delete("/polls/" + poll1.getId() + "/" + user.getId())
+            MockMvcRequestBuilders.delete("/polls/" + poll1.getId())
+                .with(csrf())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", is(true)));
@@ -148,10 +140,12 @@ public class PollControllerUnitTest {
   @Test
   public void shouldActivatePollTest() throws Exception {
     when(pollService.activatePoll(poll1.getId(), user.getId())).thenReturn(true);
+    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(user.getId());
 
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/polls/" + poll1.getId())
+                .with(csrf())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(responseBody().containsObjectAsJson(true));

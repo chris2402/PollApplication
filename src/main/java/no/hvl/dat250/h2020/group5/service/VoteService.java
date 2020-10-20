@@ -97,8 +97,8 @@ public class VoteService {
    * @param voteRequestFromDevice
    * @return the list of votes saved from device
    */
-  public List<Vote> saveVotesFromDevice(VoteRequestFromDevice voteRequestFromDevice) {
-    Optional<Poll> poll = pollRepository.findById(voteRequestFromDevice.getPollId());
+  public List<Vote> saveVotesFromDevice(Long pollId, VoteRequestFromDevice voteRequestFromDevice) {
+    Optional<Poll> poll = pollRepository.findById(pollId);
 
     if (poll.isPresent()) {
       List<Vote> votes = voteRequestFromDevice.getVotes();

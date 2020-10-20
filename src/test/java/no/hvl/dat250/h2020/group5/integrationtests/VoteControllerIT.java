@@ -10,13 +10,12 @@ import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
-import no.hvl.dat250.h2020.group5.requests.LoginRequest;
-import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,9 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,6 +43,7 @@ public class VoteControllerIT {
   @Autowired UserRepository userRepository;
   @Autowired PollRepository pollRepository;
   @Autowired TestRestTemplate testRestTemplate;
+  @Autowired LoginUserInTest loginUserInTest;
   @Autowired ObjectMapper objectMapper;
   @Autowired PasswordEncoder encoder;
   @LocalServerPort private int port;
@@ -80,6 +77,8 @@ public class VoteControllerIT {
     this.savedPoll = pollRepository.save(poll);
     User user = new User().userName("username").password(encoder.encode("password"));
     this.savedUser = userRepository.save(user);
+    Guest guest = new Guest().username("guest").password(encoder.encode("guest"));
+    this.savedGuest = guestRepository.save(guest);
 
     testRestTemplate
         .getRestTemplate()
@@ -100,37 +99,10 @@ public class VoteControllerIT {
     guestRepository.deleteAll();
   }
 
-  private void login(String username, String password) throws JsonProcessingException {
-    String loginUrl = "http://localhost:" + port + "/auth/signin";
-    LoginRequest loginRequest = new LoginRequest().username(username).password(password);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request =
-        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
-
-    ResponseEntity<String> response =
-        testRestTemplate.postForEntity(loginUrl, request, String.class);
-  }
-
-  private Long registerAsGuest() throws JsonProcessingException {
-    String loginUrl = "http://localhost:" + port + "/auth/signup/guest";
-    Guest loginRequest = new Guest().username("guest");
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request =
-        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
-
-    ResponseEntity<GuestResponse> guestResponse =
-        testRestTemplate.postForEntity(loginUrl, request, GuestResponse.class);
-
-    return guestResponse.getBody().getId();
-  }
-
   @Test
   public void shouldVoteByUserTest() throws JsonProcessingException {
-    login("username", "password");
+    loginUserInTest.login(
+        "username", "password", "/auth/signin", port, testRestTemplate, objectMapper);
 
     CastVoteRequest voteRequest = new CastVoteRequest();
     voteRequest.setVote("YES");
@@ -149,7 +121,8 @@ public class VoteControllerIT {
 
   @Test
   public void shouldVoteByGuestTest() throws JsonProcessingException {
-    Long guestId = registerAsGuest();
+    loginUserInTest.login(
+        "guest", "guest", "/auth/signin/guest", port, testRestTemplate, objectMapper);
 
     CastVoteRequest voteRequest = new CastVoteRequest();
     voteRequest.setVote("NO");
@@ -162,6 +135,6 @@ public class VoteControllerIT {
     Assertions.assertEquals(AnswerType.NO, savedVote.getAnswer());
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(savedPoll.getId(), voteRepository.findAll().get(0).getPoll().getId());
-    Assertions.assertEquals(guestId, voteRepository.findAll().get(0).getVoter().getId());
+    Assertions.assertEquals(savedGuest.getId(), voteRepository.findAll().get(0).getVoter().getId());
   }
 }

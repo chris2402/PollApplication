@@ -14,13 +14,11 @@ public class VoteRequestFromDevice {
 
   private int numberOfYes = 0;
   private int numberOfNo = 0;
-  private Long pollId;
   private Long deviceId;
 
-  public VoteRequestFromDevice(Long deviceId, Long pollId, int numberOfYes, int numberOfNo) {
+  public VoteRequestFromDevice(Long deviceId, int numberOfYes, int numberOfNo) {
     this.numberOfNo = numberOfNo;
     this.numberOfYes = numberOfYes;
-    this.pollId = pollId;
     this.deviceId = deviceId;
   }
 

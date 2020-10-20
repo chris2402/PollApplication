@@ -5,6 +5,7 @@ import lombok.Getter;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Voter;
+import no.hvl.dat250.h2020.group5.entities.VotingDevice;
 import no.hvl.dat250.h2020.group5.enums.Roles;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -43,6 +44,9 @@ public class UserDetailsImpl implements UserDetails {
       user = (User) voter;
     }
     List<GrantedAuthority> authorities = new ArrayList<>();
+    if (voter instanceof VotingDevice) {
+      authorities.add(new SimpleGrantedAuthority(Roles.DEVICE.toString()));
+    }
     if (voter instanceof Guest) {
       authorities.add(new SimpleGrantedAuthority(Roles.GUEST.toString()));
     }

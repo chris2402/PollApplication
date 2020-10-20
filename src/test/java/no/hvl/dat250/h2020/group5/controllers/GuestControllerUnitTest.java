@@ -1,6 +1,5 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import no.hvl.dat250.h2020.group5.service.GuestService;
@@ -20,17 +19,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import static no.hvl.dat250.h2020.group5.controllers.ResponseBodyMatchers.responseBody;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ContextConfiguration(classes = {GuestController.class})
 @WebMvcTest(GuestController.class)
 @WithMockUser
 public class GuestControllerUnitTest {
-
-  @Autowired private ObjectMapper objectMapper;
 
   @Autowired private MockMvc mockMvc;
 
@@ -59,19 +55,5 @@ public class GuestControllerUnitTest {
         .perform(MockMvcRequestBuilders.get("/guests").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(responseBody().containsObjectAsJson(resultList));
-  }
-
-  @Test
-  public void shouldCreateGuestTest() throws Exception {
-    when(guestService.createGuest(any(Guest.class))).thenReturn(guestResponse1);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/guests")
-                .content(objectMapper.writeValueAsString(new Guest()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(responseBody().containsObjectAsJson(guestResponse1));
   }
 }

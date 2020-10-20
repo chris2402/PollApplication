@@ -1,6 +1,8 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,37 +20,46 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ContextConfiguration(classes = {UserController.class})
 @WebMvcTest(UserController.class)
 @WithMockUser
 public class UserControllerTest {
 
   @Autowired private MockMvc mockMvc;
-
   @MockBean private UserService userService;
+  @MockBean private ExtractIdFromAuth extractIdFromAuth;
 
   private UserResponse userResponse;
 
   @BeforeEach
   public void setUp() {
-    User user = new User();
+    User user = new User().userName("my_awesome_name");
     user.setId(1L);
-    user.setUsername("my_awesome_name");
+
     this.userResponse = new UserResponse(user);
-    when(userService.getUser(1L)).thenReturn(userResponse);
+    when(userService.getUser(eq(1L))).thenReturn(userResponse);
   }
 
   @Test
   public void shouldReturnOneUserTest() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/users/1").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().json("{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
+  }
+
+  @Test
+  public void shouldReturnCurrentlyLoggedInUserTest() throws Exception {
+    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(1L);
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/users/me").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().json("{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
   }
@@ -67,12 +79,13 @@ public class UserControllerTest {
 
   @Test
   public void shouldUpdateUserTest() throws Exception {
-    when(userService.updateUser(any(), any())).thenReturn(true);
+    when(userService.updateUser(anyLong(), any(UpdateUserRequest.class))).thenReturn(true);
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/users/1")
                 .content(
                     "{\"username\":\"my_awesome_username\", \"oldPassword\":\"my_password\"}, \"newPassword\":\"my_new_awesome_password\"}")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())

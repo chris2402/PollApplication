@@ -27,6 +27,7 @@ public class User extends Voter {
       orphanRemoval = true)
   private List<Poll> userPolls = new ArrayList<>();
 
+  @Column(unique = true)
   public User userName(String username) {
     setUsername(username);
     return this;

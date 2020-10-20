@@ -1,9 +1,9 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
-import no.hvl.dat250.h2020.group5.security.services.UserDetailsImpl;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,9 +17,11 @@ import java.util.List;
 public class PollController {
 
   private final PollService pollService;
+  private final ExtractIdFromAuth extractIdFromAuth;
 
-  public PollController(PollService pollService) {
+  public PollController(PollService pollService, ExtractIdFromAuth extractIdFromAuth) {
     this.pollService = pollService;
+    this.extractIdFromAuth = extractIdFromAuth;
   }
 
   @GetMapping
@@ -41,12 +43,12 @@ public class PollController {
 
   @PostMapping
   public PollResponse createPoll(@RequestBody Poll body, Authentication authentication) {
-    return pollService.createPoll(body, getIdFromAuth(authentication));
+    return pollService.createPoll(body, extractIdFromAuth.getIdFromAuth(authentication));
   }
 
   @DeleteMapping(path = "/{pollId}")
   public boolean deletePoll(@PathVariable Long pollId, Authentication authentication) {
-    return pollService.deletePoll(pollId, getIdFromAuth(authentication));
+    return pollService.deletePoll(pollId, extractIdFromAuth.getIdFromAuth(authentication));
   }
 
   @GetMapping(path = "/{pollId}")
@@ -56,7 +58,7 @@ public class PollController {
 
   @PatchMapping(path = "/{pollId}")
   public boolean activatePoll(@PathVariable Long pollId, Authentication authentication) {
-    return pollService.activatePoll(pollId, getIdFromAuth(authentication));
+    return pollService.activatePoll(pollId, extractIdFromAuth.getIdFromAuth(authentication));
   }
 
   @GetMapping(path = "/{pollId}/active")
@@ -67,10 +69,5 @@ public class PollController {
   @GetMapping(path = "/{pollId}/votes")
   public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
     return pollService.getNumberOfVotes(pollId);
-  }
-
-  private long getIdFromAuth(Authentication authentication) {
-    UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-    return principal.getId();
   }
 }

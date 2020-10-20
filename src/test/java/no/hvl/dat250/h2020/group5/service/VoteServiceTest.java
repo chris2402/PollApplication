@@ -134,12 +134,11 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterOneYesVoteAndZeroNoVoteFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice =
-        new VoteRequestFromDevice(device.getId(), poll.getId(), 1, 0);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 1, 0);
     List<Vote> votes = Collections.singletonList(new Vote().answer(AnswerType.YES));
     when(voteRepository.saveAll(votes)).thenReturn(votes);
 
-    List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
+    List<Vote> savedVotes = voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);
 
     Assertions.assertEquals(1, savedVotes.size());
     Assertions.assertEquals(AnswerType.YES, savedVotes.get(0).getAnswer());
@@ -148,13 +147,12 @@ public class VoteServiceTest {
   @Test
   public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
     VotingDevice device = new VotingDevice();
-    VoteRequestFromDevice voteRequestFromDevice =
-        new VoteRequestFromDevice(device.getId(), poll.getId(), 2, 3);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 2, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, noVote, noVote, noVote);
 
     when(voteRepository.saveAll(votes)).thenReturn(votes);
 
-    List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
+    List<Vote> savedVotes = voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);
     Assertions.assertEquals(5, savedVotes.size());
     int yesVotes =
         (int) savedVotes.stream().filter(vote -> vote.getAnswer().equals(AnswerType.YES)).count();
@@ -167,10 +165,9 @@ public class VoteServiceTest {
   @Test
   public void shouldSaveAllVotesFromDeviceTest() {
     VotingDevice device = new VotingDevice();
-    VoteRequestFromDevice voteRequestFromDevice =
-        new VoteRequestFromDevice(device.getId(), poll.getId(), 4, 3);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 4, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
-    voteService.saveVotesFromDevice(voteRequestFromDevice);
+    voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);
     verify(voteRepository, times(2)).saveAll(votes);
   }
 }

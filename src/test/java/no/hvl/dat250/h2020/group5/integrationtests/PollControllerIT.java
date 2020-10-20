@@ -9,11 +9,11 @@ import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -24,9 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,6 +43,7 @@ public class PollControllerIT {
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
   @Autowired VoteRepository voteRepository;
+  @Autowired LoginUserInTest loginUserInTest;
   @Autowired ObjectMapper objectMapper;
   @Autowired PasswordEncoder encoder;
   @LocalServerPort private int port;
@@ -121,20 +119,7 @@ public class PollControllerIT {
         .getRestTemplate()
         .setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
     // make PATCH request
-
-    login("oddhus", "12341234");
-  }
-
-  private void login(String username, String password) throws JsonProcessingException {
-    String loginUrl = "http://localhost:" + port + "/auth/signin";
-    LoginRequest loginRequest = new LoginRequest().username(username).password(password);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request =
-        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
-
-    template.postForEntity(loginUrl, request, String.class);
+    loginUserInTest.login("oddhus", "12341234", "/auth/signin", port, template, objectMapper);
   }
 
   @AfterEach
@@ -152,7 +137,8 @@ public class PollControllerIT {
 
   @Test
   public void shouldGetAllPollsAsAdmin() throws JsonProcessingException {
-    login("mynameisadmin", "password");
+    loginUserInTest.login(
+        "mynameisadmin", "password", "/auth/signin", port, template, objectMapper);
 
     ResponseEntity<PollResponse[]> response =
         template.getForEntity(base.toString() + "/admin", PollResponse[].class);
@@ -167,7 +153,7 @@ public class PollControllerIT {
   }
 
   @Test
-  public void shouldGetPollByPollId() throws JsonProcessingException {
+  public void shouldGetPollByPollId() {
     ResponseEntity<PollResponse> response =
         template.getForEntity(base.toString() + "/" + this.savedPoll1.getId(), PollResponse.class);
     PollResponse poll = response.getBody();
@@ -207,8 +193,8 @@ public class PollControllerIT {
 
   @Test
   public void shouldGetAllUsersPollsAsAdmin() throws JsonProcessingException {
-    login("mynameisadmin", "password");
-
+    loginUserInTest.login(
+        "mynameisadmin", "password", "/auth/signin", port, template, objectMapper);
     ResponseEntity<PollResponse[]> response =
         template.getForEntity(
             base.toString() + "/owner/" + savedUser2.getId(), PollResponse[].class);

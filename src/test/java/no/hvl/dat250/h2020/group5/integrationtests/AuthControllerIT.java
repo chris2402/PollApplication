@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.VotingDevice;
+import no.hvl.dat250.h2020.group5.repositories.DeviceRepository;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
+import no.hvl.dat250.h2020.group5.responses.VotingDeviceResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +23,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @NotThreadSafe
@@ -31,6 +35,7 @@ public class AuthControllerIT {
   @Autowired PasswordEncoder encoder;
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
+  @Autowired DeviceRepository deviceRepository;
   @LocalServerPort private int port;
 
   private User savedUser;
@@ -38,8 +43,29 @@ public class AuthControllerIT {
   @BeforeEach
   public void setUp() {
     userRepository.deleteAll();
+    deviceRepository.deleteAll();
+    guestRepository.deleteAll();
+
     User user = new User().userName("testtest").password(encoder.encode("12341234"));
     savedUser = userRepository.save(user);
+
+    template.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+  }
+
+  private void loginAsAdmin(String username, String password) throws JsonProcessingException {
+    User admin =
+        new User().admin(true).userName("mynameisadmin").password(encoder.encode("password"));
+    userRepository.save(admin);
+
+    String loginUrl = "http://localhost:" + port + "/auth/signin";
+    LoginRequest loginRequest = new LoginRequest().username(username).password(password);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request =
+        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
+
+    template.postForEntity(loginUrl, request, String.class);
   }
 
   @Test
@@ -90,5 +116,47 @@ public class AuthControllerIT {
     ResponseEntity<String> result = template.postForEntity(loginUrl, request, String.class);
     Assertions.assertTrue(result.getHeaders().containsKey("Set-Cookie"));
     Assertions.assertNotNull(result.getHeaders().get("Set-Cookie"));
+  }
+
+  @Test
+  public void shouldSaveANewDeviceTest() throws JsonProcessingException {
+    loginAsAdmin("mynameisadmin", "password");
+
+    String registerUrl = "http://localhost:" + port + "/auth/signup/device";
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(""), headers);
+
+    ResponseEntity<VotingDeviceResponse> result =
+        template.postForEntity(registerUrl, request, VotingDeviceResponse.class);
+
+    VotingDeviceResponse savedDevice = result.getBody();
+    Assertions.assertNotNull(savedDevice.getId());
+    Assertions.assertEquals(1, deviceRepository.count());
+    Assertions.assertNotNull(
+        deviceRepository.findVotingDeviceByUsername(savedDevice.getUsername()).get().getPassword());
+  }
+
+  @Test
+  public void loginADeviceTest() throws JsonProcessingException {
+    deviceRepository.save(
+        new VotingDevice().username(123456 + "").password(encoder.encode(123456 + "")));
+
+    LoginRequest loginRequest = new LoginRequest().username("123456");
+
+    String registerUrl = "http://localhost:" + port + "/auth/signin/device";
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request =
+        new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers);
+
+    ResponseEntity<VotingDeviceResponse> result =
+        template.postForEntity(registerUrl, request, VotingDeviceResponse.class);
+
+    VotingDeviceResponse savedDevice = result.getBody();
+    Assertions.assertNotNull(savedDevice.getId());
+    Assertions.assertEquals(1, deviceRepository.count());
+    Assertions.assertNotNull(savedDevice.getJwt());
   }
 }
