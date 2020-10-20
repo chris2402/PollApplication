@@ -5,6 +5,7 @@ import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.publisher.Publisher;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
@@ -40,6 +41,7 @@ public class PollService {
       User user = foundUser.get();
       poll.setOwnerAndAddThisPollToOwner(user);
       pollRepository.save(poll);
+      Publisher.publishPoll(poll);
       return new PollResponse(poll);
     }
     return null;
