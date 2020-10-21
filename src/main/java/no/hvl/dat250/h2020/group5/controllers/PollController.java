@@ -4,6 +4,8 @@ import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
+import no.hvl.dat250.h2020.group5.service.Publisher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
