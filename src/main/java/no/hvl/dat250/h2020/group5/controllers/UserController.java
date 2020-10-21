@@ -6,9 +6,11 @@ import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @PreAuthorize("hasAuthority('USER')")
 @RestController
@@ -31,7 +33,12 @@ public class UserController {
 
   @GetMapping("/me")
   public UserResponse getMe(Authentication authentication) {
-    return userService.getUser(extractIdFromAuth.getIdFromAuth(authentication));
+    UserResponse user = userService.getUser(extractIdFromAuth.getIdFromAuth(authentication));
+    user.setRoles(
+        authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.toList()));
+    return user;
   }
 
   @PreAuthorize("authentication.principal.id == #id or hasAuthority('ADMIN')")

@@ -4,14 +4,12 @@ import no.hvl.dat250.h2020.group5.controllers.utils.CreateCookie;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.LoginRequest;
-import no.hvl.dat250.h2020.group5.responses.AuthInfo;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.responses.VotingDeviceResponse;
 import no.hvl.dat250.h2020.group5.service.GuestService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,40 +40,41 @@ public class AuthController {
   }
 
   @PostMapping("/signin")
-  public ResponseEntity<AuthInfo> authenticateUser(
+  public UserResponse authenticateUser(
       @Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-    AuthInfo authInfo =
-        createCookie.signIn(loginRequest.getUsername(), loginRequest.getPassword(), response);
-    return ResponseEntity.ok(authInfo);
+    UserResponse userResponse = userService.getUserByUsername(loginRequest.getUsername());
+    userResponse.setRoles(
+        createCookie.signIn(loginRequest.getUsername(), loginRequest.getPassword(), response));
+    return userResponse;
   }
 
   @PostMapping("/signup")
   public UserResponse createUser(@RequestBody User user, HttpServletResponse response) {
     String rawPassword = user.getPassword();
     UserResponse savedUser = userService.createUser(user);
-    savedUser.setAuthInfo(createCookie.signIn(user.getUsername(), rawPassword, response));
+    savedUser.setRoles(createCookie.signIn(user.getUsername(), rawPassword, response));
     return savedUser;
   }
 
   @PostMapping("/signup/guest")
   public GuestResponse createGuest(@RequestBody Guest guest, HttpServletResponse response) {
     GuestResponse savedGuest = guestService.createGuest(guest);
-    savedGuest.setAuthInfo(createCookie.signIn(guest.getUsername(), guest.getUsername(), response));
+    savedGuest.setRoles(createCookie.signIn(guest.getUsername(), guest.getUsername(), response));
     return savedGuest;
   }
 
   @PostMapping("/signin/guest")
-  public ResponseEntity<AuthInfo> signGuest(
-      @RequestBody Guest guest, HttpServletResponse response) {
-    AuthInfo authInfo = createCookie.signIn(guest.getUsername(), guest.getUsername(), response);
-    return ResponseEntity.ok(authInfo);
+  public GuestResponse signGuest(@RequestBody Guest guest, HttpServletResponse response) {
+    GuestResponse guestResponse = new GuestResponse(guest);
+    guestResponse.setRoles(createCookie.signIn(guest.getUsername(), guest.getUsername(), response));
+    return guestResponse;
   }
 
   @PreAuthorize("hasAuthority('ADMIN')")
   @PostMapping("/signup/device")
   public VotingDeviceResponse createDevice(HttpServletResponse response) {
     VotingDeviceResponse savedDevice = votingDeviceService.createDevice();
-    savedDevice.setAuthInfo(
+    savedDevice.setRoles(
         createCookie.signIn(savedDevice.getUsername(), savedDevice.getUsername(), response));
     return savedDevice;
   }
@@ -84,7 +83,7 @@ public class AuthController {
   public VotingDeviceResponse loginDevice(
       @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
     VotingDeviceResponse votingDevice = votingDeviceService.findDevice(loginRequest.getUsername());
-    votingDevice.setAuthInfo(
+    votingDevice.setRoles(
         createCookie.signIn(votingDevice.getUsername(), votingDevice.getUsername(), response));
     return votingDevice;
   }

@@ -61,6 +61,14 @@ public class UserService {
     return userRepository.findAll().stream().map(UserResponse::new).collect(Collectors.toList());
   }
 
+  public UserResponse getUserByUsername(String username) {
+    Optional<User> user = userRepository.findByUsername(username);
+    if (user.isEmpty()) {
+      return null;
+    }
+    return new UserResponse(user.get());
+  }
+
   public UserResponse getUser(Long userId) {
     Optional<User> user = userRepository.findById(userId);
     if (user.isEmpty()) {

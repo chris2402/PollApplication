@@ -182,6 +182,6 @@ public class AuthControllerIT {
     VotingDeviceResponse savedDevice = result.getBody();
     Assertions.assertNotNull(savedDevice.getId());
     Assertions.assertEquals(1, deviceRepository.count());
-    Assertions.assertNotNull(savedDevice.getAuthInfo());
+    Assertions.assertNotNull(savedDevice.getRoles());
   }
 }

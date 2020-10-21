@@ -1,6 +1,5 @@
 package no.hvl.dat250.h2020.group5.controllers.utils;
 
-import no.hvl.dat250.h2020.group5.responses.AuthInfo;
 import no.hvl.dat250.h2020.group5.security.jwt.JwtUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +23,7 @@ public class CreateCookie {
     this.jwtUtils = jwtUtils;
   }
 
-  public AuthInfo signIn(String username, String password, HttpServletResponse response) {
+  public List<String> signIn(String username, String password, HttpServletResponse response) {
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(username, password));
@@ -44,6 +43,6 @@ public class CreateCookie {
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
-    return new AuthInfo().jwt(jwt).roles(roles);
+    return roles;
   }
 }
