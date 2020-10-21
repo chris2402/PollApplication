@@ -29,4 +29,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     return UserDetailsImpl.build(voter.get());
   }
+
+  @Transactional
+  public UserDetailsImpl loadById(Long id) throws UsernameNotFoundException {
+    Optional<Voter> voter = voterRepository.findById(id);
+
+    if (voter.isEmpty()) {
+      throw new UsernameNotFoundException("User Not Found with username: " + id);
+    }
+
+    return UserDetailsImpl.build(voter.get());
+  }
 }
