@@ -1,4 +1,4 @@
-package no.hvl.dat250.h2020.group5.config;
+package no.hvl.dat250.h2020.group5;
 
 import no.hvl.dat250.h2020.group5.converters.StringToAnswerType;
 import no.hvl.dat250.h2020.group5.converters.StringToVisibilityType;
