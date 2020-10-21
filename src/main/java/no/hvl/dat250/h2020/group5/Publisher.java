@@ -25,7 +25,7 @@ public class Publisher implements Runnable{
     }
 
     /**
-     * Ask {@link PollService} for finished and public polls each 5 seconds.
+     * Ask {@link PollService} for finished and public polls each 5 seconds and publish them.
      */
     @Override
     public void run() {
