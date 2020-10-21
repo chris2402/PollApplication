@@ -18,8 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.lang.reflect.Array;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -175,5 +178,13 @@ public class PollServiceTest {
 
     Assertions.assertEquals(3, pollsFromServiceAsAdmin.size());
     Assertions.assertNull(pollsFromServiceNotAdmin);
+  }
+
+  @Test
+  public void shouldGiveFinishedAndPublicPollsTest() {
+    this.poll.setStartTime(Date.from(Instant.now()));
+    this.poll.setPollDuration(0);
+    when(pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC)).thenReturn(Arrays.asList(this.poll));
+    Assertions.assertEquals(1, pollService.getAllFinishedPublicPolls().size());
   }
 }

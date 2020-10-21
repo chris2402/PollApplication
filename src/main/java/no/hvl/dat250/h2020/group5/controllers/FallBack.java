@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FallBack {
 
-  //@Autowired
-  //Publisher publisher;
+  @Autowired
+  Publisher publisher;
 
   @GetMapping("/")
   public String fallBack() {
-    //publisher.send("Hello!");
+    publisher.send("Hello!");
     return "Hello!";
   }
 }
