@@ -1,11 +1,12 @@
 package no.hvl.dat250.h2020.group5.integrationtests;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
-import no.hvl.dat250.h2020.group5.controllers.GuestController;
 import no.hvl.dat250.h2020.group5.entities.Guest;
-import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
-import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -17,21 +18,23 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class GuestControllerIT {
 
   @Autowired TestRestTemplate template;
-  @Autowired GuestController guestcontroller;
   @Autowired GuestRepository guestRepository;
-  @Autowired VoteRepository voteRepository;
+  @Autowired UserRepository userRepository;
+  @Autowired LoginUserInTest loginUserInTest;
+  @Autowired PasswordEncoder encoder;
+  @Autowired ObjectMapper objectMapper;
 
   @LocalServerPort private int port;
   private URL base;
@@ -40,20 +43,14 @@ public class GuestControllerIT {
 
   @BeforeEach
   public void setUp() throws Exception {
-    this.guest = new Guest();
-    this.guest.setUsername("Guest 127348");
-    this.guest.setId(20L);
+    User user = new User().userName("testtest").password(encoder.encode("password")).admin(true);
+    userRepository.save(user);
 
-    Guest guest2 = new Guest();
-    guest2.setUsername("Guest 30");
-    guest2.setId(30L);
-
-    Guest guest3 = new Guest();
-    guest3.setUsername("Guest 60");
-    guest3.setId(60L);
+    guest = new Guest().username("Guest 127348");
+    Guest guest2 = new Guest().username("Guest 30");
+    Guest guest3 = new Guest().username("Guest 60");
 
     guests.addAll(Arrays.asList(guest, guest2, guest3));
-
     guestRepository.save(guest);
     guestRepository.save(guest2);
     guestRepository.save(guest3);
@@ -63,21 +60,17 @@ public class GuestControllerIT {
         .getRestTemplate()
         .setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to
     // make PATCH request
+
+    loginUserInTest.login("testtest", "password", "/auth/signin", port, template, objectMapper);
   }
 
   @AfterEach
   public void tearDown() {
-    for (Vote vote : voteRepository.findAll()) {
-      vote.setPollOnlyOnVoteSide(null);
-      vote.setVoterOnlyOnVoteSide(null);
-      voteRepository.delete(vote);
-    }
-
     guestRepository.deleteAll();
   }
 
   @Test
-  public void shouldGetAllGuests() {
+  public void shouldGetAllGuestsAsAdmin() {
     ResponseEntity<GuestResponse[]> response =
         template.getForEntity(base.toString(), GuestResponse[].class);
     GuestResponse[] guestsResponses = response.getBody();
@@ -91,22 +84,5 @@ public class GuestControllerIT {
       Assertions.assertEquals(guestResponse.getUsername(), guests.get(i).getUsername());
       i++;
     }
-  }
-
-  @Test
-  public void shouldCreateNewGuest() {
-    String username = "Guest 40";
-    Guest newGuest = new Guest();
-    newGuest.setUsername(username);
-
-    ResponseEntity<GuestResponse> response =
-        template.postForEntity(base.toString(), newGuest, GuestResponse.class);
-    GuestResponse guestResponse = response.getBody();
-    Assertions.assertNotNull(guestResponse);
-    Optional<Guest> guestFromRepository = guestRepository.findById(guestResponse.getId());
-
-    Assertions.assertNotNull(guestResponse);
-    Assertions.assertTrue(guestFromRepository.isPresent());
-    Assertions.assertEquals(username, guestFromRepository.get().getUsername());
   }
 }

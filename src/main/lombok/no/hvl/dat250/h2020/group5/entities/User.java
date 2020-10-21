@@ -15,8 +15,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
-  private String password;
-
   private Boolean isAdmin = false;
 
   @ToString.Exclude
@@ -29,6 +27,7 @@ public class User extends Voter {
       orphanRemoval = true)
   private List<Poll> userPolls = new ArrayList<>();
 
+  @Column(unique = true)
   public User userName(String username) {
     setUsername(username);
     return this;

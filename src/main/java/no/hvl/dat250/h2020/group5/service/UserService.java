@@ -7,6 +7,7 @@ import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +23,20 @@ public class UserService {
 
   final VoteRepository voteRepository;
 
+  final PasswordEncoder encoder;
+
   public UserService(
-      UserRepository userRepository, VoteRepository voteRepository, PollRepository pollRepository) {
+      UserRepository userRepository,
+      VoteRepository voteRepository,
+      PollRepository pollRepository,
+      PasswordEncoder encoder) {
     this.userRepository = userRepository;
     this.voteRepository = voteRepository;
+    this.encoder = encoder;
   }
 
   public UserResponse createUser(User user) {
+    user.setPassword(encoder.encode(user.getPassword()));
     return new UserResponse(userRepository.save(user));
   }
 
@@ -49,12 +57,16 @@ public class UserService {
     return true;
   }
 
-  public List<UserResponse> getAllUsers(Long adminId) {
-    Optional<User> maybeUser = userRepository.findById(adminId);
-    if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
-      return userRepository.findAll().stream().map(UserResponse::new).collect(Collectors.toList());
+  public List<UserResponse> getAllUsers() {
+    return userRepository.findAll().stream().map(UserResponse::new).collect(Collectors.toList());
+  }
+
+  public UserResponse getUserByUsername(String username) {
+    Optional<User> user = userRepository.findByUsername(username);
+    if (user.isEmpty()) {
+      return null;
     }
-    return null;
+    return new UserResponse(user.get());
   }
 
   public UserResponse getUser(Long userId) {
@@ -80,8 +92,8 @@ public class UserService {
 
     if (updateUserRequest.getOldPassword() != null
         && updateUserRequest.getNewPassword() != null
-        && updateUserRequest.getOldPassword().equals(user.get().getPassword())) {
-      user.get().setPassword(updateUserRequest.getNewPassword());
+        && encoder.matches(updateUserRequest.getOldPassword(), user.get().getPassword())) {
+      user.get().setPassword(encoder.encode(updateUserRequest.getNewPassword()));
       changesMade = true;
     }
 

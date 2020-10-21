@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
@@ -22,6 +23,7 @@ public class GuestServiceTest {
   @InjectMocks GuestService guestService;
 
   @Mock GuestRepository guestRepository;
+  @Mock PasswordEncoder encoder;
 
   private Guest guest1;
   private Guest guest2;
@@ -30,21 +32,19 @@ public class GuestServiceTest {
   @BeforeEach
   public void setup() {
 
-    this.guest1 = new Guest();
+    this.guest1 = new Guest().username("Guest 1");
     this.guest1.setId(1L);
-    this.guest1.setUsername("Guest 1");
 
-    this.guest2 = new Guest();
+    this.guest2 = new Guest().username("Guest 2");
     this.guest2.setId(2L);
-    this.guest2.setUsername("Guest 2");
 
-    this.guest3 = new Guest();
+    this.guest3 = new Guest().username("Guest 3");
     this.guest3.setId(3L);
-    this.guest3.setUsername("Guest 3");
 
     when(guestRepository.save(guest1)).thenReturn(guest1);
     when(guestRepository.save(guest2)).thenReturn(guest2);
     when(guestRepository.save(guest3)).thenReturn(guest3);
+    when(encoder.encode(anyString())).thenReturn("hashedPassword");
   }
 
   @Test

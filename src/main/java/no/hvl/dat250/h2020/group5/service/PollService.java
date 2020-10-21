@@ -71,12 +71,8 @@ public class PollService {
         .collect(Collectors.toList());
   }
 
-  public List<PollResponse> getAllPolls(Long adminId) {
-    Optional<User> maybeUser = userRepository.findById(adminId);
-    if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
-      return pollRepository.findAll().stream().map(PollResponse::new).collect(Collectors.toList());
-    }
-    return null;
+  public List<PollResponse> getAllPolls() {
+    return pollRepository.findAll().stream().map(PollResponse::new).collect(Collectors.toList());
   }
 
   public List<PollResponse> getUserPollsAsAdmin(Long userId, Long adminId) {
@@ -102,10 +98,10 @@ public class PollService {
     return poll.map(PollResponse::new).orElse(null);
   }
 
-  public Boolean activatePoll(Long pollId) {
+  public Boolean activatePoll(Long pollId, Long userId) {
 
     Optional<Poll> poll = pollRepository.findById(pollId);
-    if (poll.isEmpty()) {
+    if (poll.isEmpty() || !isOwnerOrAdmin(poll.get(), userId)) {
       return false;
     }
 

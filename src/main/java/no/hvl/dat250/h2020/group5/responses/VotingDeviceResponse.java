@@ -3,26 +3,25 @@ package no.hvl.dat250.h2020.group5.responses;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.VotingDevice;
 
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class UserResponse {
+public class VotingDeviceResponse {
+
   List<String> roles;
   private Long id;
   private String username;
-  private Boolean isAdmin;
 
-  public UserResponse(User user) {
-    this.id = user.getId();
-    this.username = user.getUsername();
-    this.isAdmin = user.getIsAdmin();
+  public VotingDeviceResponse(VotingDevice votingDevice) {
+    this.id = votingDevice.getId();
+    this.username = votingDevice.getUsername();
   }
 
-  public UserResponse roles(List<String> roles) {
+  public VotingDeviceResponse roles(List<String> roles) {
     this.roles = roles;
     return this;
   }

@@ -19,7 +19,7 @@ public abstract class Voter {
   @GeneratedValue(strategy = GenerationType.AUTO)
   protected Long id;
 
-  @Column(length = 20)
+  @Column(length = 40)
   @EqualsAndHashCode.Include
   protected String username;
 
@@ -31,6 +31,8 @@ public abstract class Voter {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
+
+  private String password;
 
   public void addVoteAndSetThisVoterInVote(Vote vote) {
     this.votes.add(vote);

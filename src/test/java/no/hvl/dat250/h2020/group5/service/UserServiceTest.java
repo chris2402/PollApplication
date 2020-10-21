@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
@@ -28,15 +29,16 @@ public class UserServiceTest {
 
   @Mock VoteRepository voteRepository;
 
+  @Mock PasswordEncoder passwordEncoder;
+
   private User user1;
   private User user2;
   private Vote vote;
 
   @BeforeEach
   public void setUp() {
-    user1 = new User();
+    user1 = new User().password("password");
     user1.setId(1L);
-    user1.setPassword("password");
     user2 = new User();
     user2.setId(2L);
 
@@ -47,6 +49,9 @@ public class UserServiceTest {
     when(userRepository.findById(user1.getId())).thenReturn(Optional.ofNullable(user1));
     when(userRepository.findById(user2.getId())).thenReturn(Optional.ofNullable(user2));
     when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
+
+    when(passwordEncoder.encode(anyString())).thenReturn("HashedString");
+    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
     when(voteRepository.findByVoter(user1)).thenReturn(Collections.singletonList(vote));
     when(voteRepository.save(any(Vote.class))).thenReturn(vote);
@@ -68,14 +73,8 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldGiveAllUsersToAdminTest() {
-    user1.setIsAdmin(true);
-    Assertions.assertEquals(2, userService.getAllUsers(user1.getId()).size());
-  }
-
-  @Test
-  public void shouldNotGiveAllUsersNoAdminTest() {
-    Assertions.assertNull(userService.getAllUsers(user1.getId()));
+  public void shouldGiveAllUsersTest() {
+    Assertions.assertEquals(2, userService.getAllUsers().size());
   }
 
   @Test
@@ -100,7 +99,7 @@ public class UserServiceTest {
     updateUserRequest.setOldPassword("password");
 
     Assertions.assertTrue(userService.updateUser(user1.getId(), updateUserRequest));
-    Assertions.assertEquals(updateUserRequest.getNewPassword(), user1.getPassword());
+    Assertions.assertEquals("HashedString", user1.getPassword());
     verify(userRepository, times(1)).save(user1);
   }
 

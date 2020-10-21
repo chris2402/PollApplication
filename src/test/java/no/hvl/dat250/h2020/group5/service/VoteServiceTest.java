@@ -42,10 +42,8 @@ public class VoteServiceTest {
 
   @BeforeEach
   public void setUp() {
-    poll = new Poll();
+    poll = new Poll().startTime(new Date()).pollDuration(100);
     poll.setId(1L);
-    poll.setStartTime(new Date());
-    poll.setPollDuration(100);
 
     voter = new User();
     voter.setId(2L);
@@ -57,8 +55,6 @@ public class VoteServiceTest {
     vote.setPollAndAddThisVoteToPoll(poll);
 
     castVoteRequest = new CastVoteRequest();
-    castVoteRequest.setPollId(poll.getId());
-    castVoteRequest.setUserId(voter.getId());
     castVoteRequest.setVote("YES");
 
     yesVote = new Vote().answer(AnswerType.YES);
@@ -78,46 +74,46 @@ public class VoteServiceTest {
   @Test
   public void shouldNotCastVoteWhenPollHaveNotStartedTest() {
     poll.setStartTime(null);
-    Assertions.assertNull(voteService.vote(castVoteRequest));
+    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
   public void shouldCastVoteWhenPollIsOnGoingAndVoteIsValidTest() {
-    Assertions.assertEquals(vote, voteService.vote(castVoteRequest));
+    Assertions.assertEquals(vote, voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
     castVoteRequest.setVote("NO");
-    Assertions.assertEquals(vote, voteService.vote(castVoteRequest));
+    Assertions.assertEquals(vote, voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWhenPollHaveEndedTest() {
     poll.setStartTime(new GregorianCalendar(2014, Calendar.FEBRUARY, 11).getTime());
-    Assertions.assertNull(voteService.vote(castVoteRequest));
+    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWithOutAnswerTest() {
     castVoteRequest.setVote("");
-    Assertions.assertNull(voteService.vote(castVoteRequest));
+    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWhenAnswerIsNotValidTest() {
     castVoteRequest.setVote("this is not valid");
-    Assertions.assertNull(voteService.vote(castVoteRequest));
+    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWithOutPollIdOrUserIdOrAnswerTest() {
-    castVoteRequest.setPollId(null);
-    Assertions.assertNull(voteService.vote(castVoteRequest));
+    // castVoteRequest.setPollId(null);
+    Assertions.assertNull(voteService.vote(null, voter.getId(), castVoteRequest));
 
-    castVoteRequest.setPollId(poll.getId());
-    castVoteRequest.setUserId(null);
-    Assertions.assertNull(voteService.vote(castVoteRequest));
+    // castVoteRequest.setPollId(poll.getId());
+    // castVoteRequest.setUserId(null);
+    Assertions.assertNull(voteService.vote(poll.getId(), null, castVoteRequest));
 
-    castVoteRequest.setUserId(voter.getId());
+    // castVoteRequest.setUserId(voter.getId());
     castVoteRequest.setVote(null);
-    Assertions.assertNull(voteService.vote(castVoteRequest));
+    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
@@ -138,12 +134,11 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterOneYesVoteAndZeroNoVoteFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice =
-        new VoteRequestFromDevice(device.getId(), poll.getId(), 1, 0);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 1, 0);
     List<Vote> votes = Collections.singletonList(new Vote().answer(AnswerType.YES));
     when(voteRepository.saveAll(votes)).thenReturn(votes);
 
-    List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
+    List<Vote> savedVotes = voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);
 
     Assertions.assertEquals(1, savedVotes.size());
     Assertions.assertEquals(AnswerType.YES, savedVotes.get(0).getAnswer());
@@ -152,13 +147,12 @@ public class VoteServiceTest {
   @Test
   public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
     VotingDevice device = new VotingDevice();
-    VoteRequestFromDevice voteRequestFromDevice =
-        new VoteRequestFromDevice(device.getId(), poll.getId(), 2, 3);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 2, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, noVote, noVote, noVote);
 
     when(voteRepository.saveAll(votes)).thenReturn(votes);
 
-    List<Vote> savedVotes = voteService.saveVotesFromDevice(voteRequestFromDevice);
+    List<Vote> savedVotes = voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);
     Assertions.assertEquals(5, savedVotes.size());
     int yesVotes =
         (int) savedVotes.stream().filter(vote -> vote.getAnswer().equals(AnswerType.YES)).count();
@@ -171,10 +165,9 @@ public class VoteServiceTest {
   @Test
   public void shouldSaveAllVotesFromDeviceTest() {
     VotingDevice device = new VotingDevice();
-    VoteRequestFromDevice voteRequestFromDevice =
-        new VoteRequestFromDevice(device.getId(), poll.getId(), 4, 3);
+    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 4, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
-    voteService.saveVotesFromDevice(voteRequestFromDevice);
+    voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);
     verify(voteRepository, times(2)).saveAll(votes);
   }
 }

@@ -5,17 +5,26 @@ import lombok.Getter;
 import lombok.Setter;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 public class GuestResponse {
 
-    private Long id;
-    private String username;
+  List<String> roles;
+  private Long id;
+  private String username;
+  private String displayName;
 
+  public GuestResponse(Guest guest) {
+    this.id = guest.getId();
+    this.username = guest.getUsername();
+    this.displayName = guest.getDisplayName();
+  }
 
-    public GuestResponse(Guest guest) {
-        this.id = guest.getId();
-        this.username = guest.getUsername();
-    }
+  public GuestResponse roles(List<String> roles) {
+    this.roles = roles;
+    return this;
+  }
 }

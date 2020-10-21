@@ -8,4 +8,14 @@ import javax.persistence.Entity;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-public class VotingDevice extends Voter {}
+public class VotingDevice extends Voter {
+  public VotingDevice username(String username) {
+    setUsername(username);
+    return this;
+  }
+
+  public VotingDevice password(String password) {
+    setPassword(password);
+    return this;
+  }
+}
