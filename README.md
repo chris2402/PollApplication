@@ -68,7 +68,9 @@ We use Heroku for deployment.
 **How to deploy**   
 Download [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) if you dont have it.    
 
-Commit you changes. If deploying from another branch (like dev) use `git push heroku your-branch:master`. If pushing directly from master use `git push heroku master`    
+``heroku login``   
+` heroku git:remote -a pollapplication-dat250-group5`   
+``git push heroku master`` or `git push heroku <your-branch>:master` if on another branch then master.  
 
 The deployment is [here](https://pollapplication-group5.herokuapp.com)!
 
