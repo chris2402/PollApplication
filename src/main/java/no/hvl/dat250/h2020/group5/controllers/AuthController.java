@@ -10,12 +10,14 @@ import no.hvl.dat250.h2020.group5.responses.VotingDeviceResponse;
 import no.hvl.dat250.h2020.group5.service.GuestService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -86,5 +88,14 @@ public class AuthController {
     votingDevice.setRoles(
         createCookie.signIn(votingDevice.getUsername(), votingDevice.getUsername(), response));
     return votingDevice;
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<?> loginDevice(HttpServletResponse response) {
+    Cookie cookie = new Cookie("auth", null);
+    cookie.setPath("/");
+    cookie.setMaxAge(0);
+    response.addCookie(cookie);
+    return ResponseEntity.noContent().build();
   }
 }
