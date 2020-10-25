@@ -13,6 +13,7 @@ public class Publisher implements Runnable{
 
     private final RabbitTemplate rabbitTemplate;
     private final PollService pollService;
+    private boolean running = true;
 
     public Publisher(RabbitTemplate rabbitTemplate, PollService pollService) {
         this.rabbitTemplate = rabbitTemplate;
@@ -29,7 +30,7 @@ public class Publisher implements Runnable{
      */
     @Override
     public void run() {
-        while (true) {
+        while (running) {
             List<Poll> finishedPolls = pollService.getAllFinishedPublicPolls();
             if (!finishedPolls.isEmpty()) {
                 for (Poll poll : finishedPolls) {
@@ -43,5 +44,9 @@ public class Publisher implements Runnable{
             }
         }
 
+    }
+
+    public void stop() {
+        this.running = false;
     }
 }
