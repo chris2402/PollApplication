@@ -3,6 +3,7 @@ package no.hvl.dat250.h2020.group5.controllers;
 import no.hvl.dat250.h2020.group5.controllers.utils.CreateCookie;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.exceptions.UsernameAlreadyTakenException;
 import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
@@ -10,12 +11,10 @@ import no.hvl.dat250.h2020.group5.responses.VotingDeviceResponse;
 import no.hvl.dat250.h2020.group5.service.GuestService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -97,5 +96,11 @@ public class AuthController {
     cookie.setMaxAge(0);
     response.addCookie(cookie);
     return ResponseEntity.noContent().build();
+  }
+
+  @ExceptionHandler({UsernameAlreadyTakenException.class})
+  public ResponseEntity<Object> handleUserNotFoundException(
+      UsernameAlreadyTakenException exception) {
+    return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }
