@@ -11,29 +11,28 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class Main {
 
-    static final String topicExchangeName = "pollapp-exchange";
+  static final String topicExchangeName = "pollapp-exchange";
 
-    static final String queueName = "polls";
+  static final String queueName = "polls";
 
-    static final String routingKey = "poll";
+  static final String routingKey = "poll";
 
-    @Bean
-    Queue queue() {
-        return new Queue(queueName, false);
-    }
+  @Bean
+  Queue queue() {
+    return new Queue(queueName, false);
+  }
 
-    @Bean
-    TopicExchange exchange() {
-        return new TopicExchange(topicExchangeName);
-    }
+  @Bean
+  TopicExchange exchange() {
+    return new TopicExchange(topicExchangeName);
+  }
 
-    @Bean
-    Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
-    }
+  @Bean
+  Binding binding(Queue queue, TopicExchange exchange) {
+    return BindingBuilder.bind(queue).to(exchange).with(routingKey);
+  }
 
-    public static void main(String[] args) {
-        SpringApplication.run(Main.class, args);
-    }
-
+  public static void main(String[] args) {
+    SpringApplication.run(Main.class, args);
+  }
 }

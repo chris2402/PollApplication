@@ -40,7 +40,7 @@ public class PublisherTest {
   @Test
   public void shouldSendMessageWhenFinishedPoll() {
     when(pollService.getAllFinishedPublicPolls()).thenReturn(Arrays.asList(pizzaPoll));
-    Thread publisherThread = new Thread(publisher);
+    Thread publisherThread = new Thread((Runnable) publisher);
     publisherThread.start();
     try {
       Thread.sleep(5000);
@@ -54,7 +54,7 @@ public class PublisherTest {
   @Test
   public void shouldSendNewMessageAfterFiveSeconds() {
     when(pollService.getAllFinishedPublicPolls()).thenReturn(Arrays.asList(pizzaPoll));
-    Thread publisherThread = new Thread(publisher);
+    Thread publisherThread = new Thread((Runnable) publisher);
     publisherThread.start();
     try {
       Thread.sleep(5000);
