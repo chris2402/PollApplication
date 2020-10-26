@@ -39,9 +39,10 @@ public class CreateCookie {
         "auth="
             + jwt
             + ";path=/;"
-            + "SameSite=None;"
+            + (isTest ? "" : "SameSite=None;")
             + (isTest ? "" : "Secure;")
-            + ";HttpOnly; Max-Age="
+            + ";HttpOnly;"
+            + " Max-Age="
             + Integer.MAX_VALUE);
 
     List<String> roles =
