@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -91,10 +90,8 @@ public class AuthController {
 
   @PostMapping("/logout")
   public ResponseEntity<?> loginDevice(HttpServletResponse response) {
-    Cookie cookie = new Cookie("auth", null);
-    cookie.setPath("/");
-    cookie.setMaxAge(0);
-    response.addCookie(cookie);
+    response.setHeader(
+        "Set-Cookie", "auth=;path=/;SameSite=None; Secure; HttpOnly; Max-Age=" + Integer.MAX_VALUE);
     return ResponseEntity.noContent().build();
   }
 
