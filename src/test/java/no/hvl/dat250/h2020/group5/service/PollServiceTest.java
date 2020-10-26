@@ -119,9 +119,9 @@ public class PollServiceTest {
     when(pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC))
         .thenReturn(
             Arrays.asList(
-                new Poll().visibilityType(PollVisibilityType.PUBLIC),
-                new Poll().visibilityType(PollVisibilityType.PUBLIC),
-                new Poll().visibilityType(PollVisibilityType.PUBLIC)));
+                new Poll().visibilityType(PollVisibilityType.PUBLIC).pollOwner(user),
+                new Poll().visibilityType(PollVisibilityType.PUBLIC).pollOwner(user),
+                new Poll().visibilityType(PollVisibilityType.PUBLIC).pollOwner(user)));
     Assertions.assertEquals(3, pollService.getAllPublicPolls().size());
     Assertions.assertEquals(
         PollVisibilityType.PUBLIC, pollService.getAllPublicPolls().get(0).getVisibilityType());
