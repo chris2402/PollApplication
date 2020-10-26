@@ -3,7 +3,6 @@ package no.hvl.dat250.h2020.group5;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.service.PollService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,16 +14,14 @@ public class Publisher implements Runnable {
 
   private final RabbitTemplate rabbitTemplate;
   private final PollService pollService;
-  private final TaskExecutor executer;
   private boolean running = true;
 
   private ArrayList<Poll> sentPolls;
 
-  public Publisher(RabbitTemplate rabbitTemplate, PollService pollService, TaskExecutor executor) {
+  public Publisher(RabbitTemplate rabbitTemplate, PollService pollService) {
     this.rabbitTemplate = rabbitTemplate;
     this.pollService = pollService;
     this.sentPolls = new ArrayList<>();
-    this.executer = executor;
     Logger.getLogger("Publisher").info("Initialized publisher");
   }
 

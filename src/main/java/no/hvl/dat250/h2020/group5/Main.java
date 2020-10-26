@@ -4,9 +4,6 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -40,13 +37,6 @@ public class Main {
   @Bean
   public TaskExecutor taskExecutor() {
     return new SimpleAsyncTaskExecutor();
-  }
-
-  @Autowired Publisher publisher;
-
-  @Bean
-  public CommandLineRunner publisherRunner(@Qualifier("taskExecutor") TaskExecutor taskExecutor) {
-    return args -> taskExecutor.execute(publisher);
   }
 
   public static void main(String[] args) {
