@@ -40,16 +40,7 @@ public class Publisher implements Runnable {
       if (!finishedPolls.isEmpty()) {
         for (Poll poll : finishedPolls) {
           if (!sentPolls.contains(poll)) {
-            VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
-            send(
-                "{ id:"
-                    + poll.getId()
-                    + ", question:\""
-                    + poll.getQuestion()
-                    + "\""
-                    + "votes:"
-                    + votes.toJSON()
-                    + "}");
+            send(getPollJSON(poll));
             sentPolls.add(poll);
           }
         }
@@ -64,5 +55,21 @@ public class Publisher implements Runnable {
 
   public void stop() {
     this.running = false;
+  }
+
+  private String getPollJSON(Poll poll) {
+    VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
+    String json =
+        "{ \"id\":"
+            + poll.getId()
+            + ", "
+            + "\"question\":\""
+            + poll.getQuestion()
+            + "\""
+            + ", "
+            + "\"votes\":"
+            + votes.toJSON()
+            + "}";
+    return json;
   }
 }

@@ -68,9 +68,9 @@ public class PublisherTest {
       Thread.sleep(6000);
       publisher.stop();
       verify(publisher, times(1))
-          .send("{ id:1, question:\"Do you like pizza?\"votes:{\"yes\":0,\"no\":0}}");
+          .send("{ \"id\":1, \"question\":\"Do you like pizza?\", \"votes\":{\"yes\":0,\"no\":0}}");
       verify(publisher, times(1))
-          .send("{ id:2, question:\"Do you like fruit?\"votes:{\"yes\":0,\"no\":0}}");
+          .send("{ \"id\":2, \"question\":\"Do you like fruit?\", \"votes\":{\"yes\":0,\"no\":0}}");
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -87,7 +87,7 @@ public class PublisherTest {
       Thread.sleep(5000);
       publisher.stop();
       verify(publisher, times(1))
-          .send("{ id:1, question:\"Do you like pizza?\"votes:{\"yes\":0,\"no\":1}}");
+          .send("{ \"id\":1, \"question\":\"Do you like pizza?\", \"votes\":{\"yes\":0,\"no\":1}}");
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
