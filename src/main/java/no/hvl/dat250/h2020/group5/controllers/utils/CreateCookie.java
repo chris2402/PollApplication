@@ -37,7 +37,7 @@ public class CreateCookie {
     //    cookie.setPath("/");
     response.setHeader(
         "Set-Cookie",
-        "path=/;auth=" + jwt + "SameSite=None; Secure; HttpOnly; Max-Age=" + Integer.MAX_VALUE);
+        "auth=" + jwt + ";path=/;SameSite=None; Secure; HttpOnly; Max-Age=" + Integer.MAX_VALUE);
     // response.addCookie(cookie);
 
     List<String> roles =
