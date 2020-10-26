@@ -18,7 +18,7 @@ public class CreateCookie {
   final AuthenticationManager authenticationManager;
   final JwtUtils jwtUtils;
 
-  @Value("${poll.app.isTest}")
+  @Value("${poll.app.test.environment}")
   private Boolean isTest;
 
   public CreateCookie(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {

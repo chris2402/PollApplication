@@ -29,7 +29,7 @@ public class AuthController {
   private final GuestService guestService;
   private final CreateCookie createCookie;
 
-  @Value("${poll.app.isTest}")
+  @Value("${poll.app.test.environment}")
   private Boolean isTest;
 
   public AuthController(
