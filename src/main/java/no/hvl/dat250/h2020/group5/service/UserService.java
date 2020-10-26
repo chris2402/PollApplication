@@ -2,6 +2,7 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.exceptions.UsernameAlreadyTakenException;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
@@ -36,10 +37,10 @@ public class UserService {
   }
 
   public UserResponse createUser(User user) {
-    // Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
-    // if (existingUser.isPresent()) {
-    //  throw new UsernameAlreadyTakenException("Username is already taken");
-    // }
+    Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
+    if (existingUser.isPresent()) {
+      throw new UsernameAlreadyTakenException("Username is already taken");
+    }
     user.setPassword(encoder.encode(user.getPassword()));
     return new UserResponse(userRepository.save(user));
   }
