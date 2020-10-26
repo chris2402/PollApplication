@@ -8,7 +8,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,12 +30,15 @@ public class CreateCookie {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
 
-    Cookie cookie = new Cookie("auth", jwt);
-    cookie.setSecure(false);
-    cookie.setHttpOnly(true);
-    cookie.setMaxAge(Integer.MAX_VALUE);
-    cookie.setPath("/");
-    response.addCookie(cookie);
+    //    Cookie cookie = new Cookie("auth", jwt);
+    //    cookie.setSecure(true);
+    //    cookie.setHttpOnly(true);
+    //    cookie.setMaxAge(Integer.MAX_VALUE);
+    //    cookie.setPath("/");
+    response.setHeader(
+        "Set-Cookie",
+        "auth=" + jwt + "; HttpOnly; Secure; SameSite=None; Max-Age=" + Integer.MAX_VALUE);
+    // response.addCookie(cookie);
 
     List<String> roles =
         authentication.getAuthorities().stream()
