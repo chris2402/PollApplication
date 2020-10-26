@@ -11,6 +11,7 @@ import no.hvl.dat250.h2020.group5.responses.VotingDeviceResponse;
 import no.hvl.dat250.h2020.group5.service.GuestService;
 import no.hvl.dat250.h2020.group5.service.UserService;
 import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +28,9 @@ public class AuthController {
   private final UserService userService;
   private final GuestService guestService;
   private final CreateCookie createCookie;
+
+  @Value("${poll.app.isTest}")
+  private Boolean isTest;
 
   public AuthController(
       VotingDeviceService votingDeviceService,
@@ -91,7 +95,14 @@ public class AuthController {
   @PostMapping("/logout")
   public ResponseEntity<?> loginDevice(HttpServletResponse response) {
     response.setHeader(
-        "Set-Cookie", "auth=;path=/;SameSite=None; Secure; HttpOnly; Max-Age=" + Integer.MAX_VALUE);
+        "Set-Cookie",
+        "auth=;"
+            + "path=/;"
+            + "SameSite=None;"
+            + (isTest ? "" : "Secure;")
+            + "HttpOnly;"
+            + "Max-Age="
+            + Integer.MAX_VALUE);
     return ResponseEntity.noContent().build();
   }
 
