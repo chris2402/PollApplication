@@ -119,7 +119,7 @@ public class PollService {
     List<Poll> finishedPolls = new ArrayList<>();
     List<Poll> publicPolls = pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
     for (Poll poll : publicPolls) {
-      if (!isActivated(poll.getId())) {
+      if (poll.getStartTime() != null && !isActivated(poll.getId())) {
         finishedPolls.add(poll);
       }
     }
