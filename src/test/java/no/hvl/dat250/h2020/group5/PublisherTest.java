@@ -3,6 +3,7 @@ package no.hvl.dat250.h2020.group5;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.service.PollService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,20 +26,43 @@ public class PublisherTest {
 
   @InjectMocks @Spy Publisher publisher;
 
+  private Poll pizzaPoll;
+  private Poll fruitPoll;
+
+  @BeforeEach
+  public void setUp() {
+    this.pizzaPoll =
+        new Poll().visibilityType(PollVisibilityType.PUBLIC).question("Do you like pizza?");
+    this.fruitPoll =
+        new Poll().visibilityType(PollVisibilityType.PUBLIC).question("Do you like fruit?");
+  }
+
   @Test
   public void shouldSendMessageWhenFinishedPoll() {
-    when(pollService.getAllFinishedPublicPolls())
-        .thenReturn(
-            Arrays.asList(
-                new Poll()
-                    .visibilityType(PollVisibilityType.PUBLIC)
-                    .question("Do you like pizza?")));
+    when(pollService.getAllFinishedPublicPolls()).thenReturn(Arrays.asList(pizzaPoll));
     Thread publisherThread = new Thread(publisher);
     publisherThread.start();
     try {
       Thread.sleep(5000);
       publisher.stop();
       verify(publisher, times(1)).send(anyString());
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void shouldSendNewMessageAfterFiveSeconds() {
+    when(pollService.getAllFinishedPublicPolls()).thenReturn(Arrays.asList(pizzaPoll));
+    Thread publisherThread = new Thread(publisher);
+    publisherThread.start();
+    try {
+      Thread.sleep(5000);
+      when(pollService.getAllFinishedPublicPolls()).thenReturn(Arrays.asList(pizzaPoll, fruitPoll));
+      Thread.sleep(5000);
+      publisher.stop();
+      verify(publisher, times(1)).send(pizzaPoll.toString());
+      verify(publisher, times(1)).send(fruitPoll.toString());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
