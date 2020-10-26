@@ -13,6 +13,7 @@ import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -108,6 +109,17 @@ public class PollService {
     poll.get().setStartTime(new Date());
     pollRepository.save(poll.get());
     return true;
+  }
+
+  public List<Poll> getAllFinishedPublicPolls() {
+    List<Poll> finishedPolls = new ArrayList<>();
+    List<Poll> publicPolls = pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC);
+    for (Poll poll : publicPolls) {
+      if (poll.getStartTime() != null && !isActivated(poll.getId())) {
+        finishedPolls.add(poll);
+      }
+    }
+    return finishedPolls;
   }
 
   public boolean isActivated(Long pollId) {

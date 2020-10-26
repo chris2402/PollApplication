@@ -100,11 +100,4 @@ public class Poll {
     this.pollDuration = pollDuration;
     return this;
   }
-
-  public void detachAllVotesFromVoter() {
-    for (Vote vote : new ArrayList<>(votes)) {
-      // vote.setPollAndAddThisVoteToPoll(null);
-      vote.setVoterAndAddThisVoteToVoter(null);
-    }
-  }
 }
