@@ -10,8 +10,12 @@ import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,11 +27,16 @@ import java.util.stream.Collectors;
 @Service
 public class PollService {
 
+  private static final Logger logger = LoggerFactory.getLogger(PollService.class);
+
   final PollRepository pollRepository;
 
   final UserRepository userRepository;
 
   final VoteRepository voteRepository;
+
+  private final WebClient webClient =
+      WebClient.create("https://dweet.io/dweet/for/poll-application-group5");
 
   public PollService(
       PollRepository pollRepository, UserRepository userRepository, VoteRepository voteRepository) {
@@ -106,6 +115,20 @@ public class PollService {
     if (poll.isEmpty() || !isOwnerOrAdmin(poll.get(), userId)) {
       return false;
     }
+
+    logger.info("Sending tweet when activating poll");
+    Mono<String> response =
+        webClient
+            .get()
+            .uri(
+                "?pollName="
+                    + poll.get().getName()
+                    + "&question="
+                    + poll.get().getQuestion()
+                    + "&status=started")
+            .retrieve()
+            .bodyToMono(String.class);
+    logger.info(response.block());
 
     poll.get().setStartTime(new Date());
     pollRepository.save(poll.get());
