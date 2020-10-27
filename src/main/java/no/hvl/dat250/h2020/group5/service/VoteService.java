@@ -5,6 +5,9 @@ import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.entities.Voter;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
+import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
+import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
@@ -44,19 +47,29 @@ public class VoteService {
 
   public Vote vote(Long pollId, Long userId, CastVoteRequest castVoteRequest) {
     if (castVoteRequest.getVote() == null) {
-      return null;
+      throw new IllegalArgumentException("Vote must contain an answer");
     }
 
     Optional<Poll> p = pollRepository.findById(pollId);
     Optional<Voter> u = voterRepository.findById(userId);
     AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
 
+    if (answer == null){
+      throw new IllegalArgumentException("Vote has no valid answer");
+    }
+
     if (p.isEmpty()
-        || p.get().getStartTime() == null
-        || u.isEmpty()
-        || answer == null
-        || checkVoteDateTime(p)) {
-      return null;
+        || u.isEmpty()) {
+      throw new NotFoundException("Poll or voter not found");
+    }
+
+    if (p.get().getStartTime() == null || checkVoteDateTime(p)){
+      throw new InvalidTimeException("The poll has expired or is not activated");
+    }
+
+    Optional<Vote> savedVote = voteRepository.findByVoterAndPoll(u.get(), p.get());
+    if (savedVote.isPresent()){
+      throw new AlreadyVotedException("You have already voted on this poll");
     }
 
     Vote v = new Vote();
