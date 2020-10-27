@@ -35,7 +35,8 @@ public class Publisher implements Runnable {
     rabbitTemplate.convertAndSend(Main.topicExchangeName, Main.routingKey, message);
   }
 
-  public void sendDweet(String name, String question, String status, VotesResponse votes) {
+  public void sendDweet(
+      String name, String question, String status, Long pollId, VotesResponse votes) {
     Logger.getLogger("Publisher").info("Sending dweet when poll is finished...");
     Mono<String> response =
         webClient
@@ -43,6 +44,8 @@ public class Publisher implements Runnable {
             .uri(
                 "?pollName="
                     + name
+                    + "&pollId="
+                    + pollId
                     + "&question="
                     + question
                     + "&status="
@@ -66,7 +69,7 @@ public class Publisher implements Runnable {
         for (Poll poll : finishedPolls) {
           if (!sentPolls.contains(poll)) {
             VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
-            sendDweet(poll.getName(), poll.getQuestion(), "completed", votes);
+            sendDweet(poll.getName(), poll.getQuestion(), "completed", poll.getId(), votes);
             send(getPollJSON(poll, votes));
             sentPolls.add(poll);
           }

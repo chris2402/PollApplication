@@ -123,6 +123,8 @@ public class PollService {
             .uri(
                 "?pollName="
                     + poll.get().getName()
+                    + "&pollId="
+                    + pollId
                     + "&question="
                     + poll.get().getQuestion()
                     + "&status=started")
