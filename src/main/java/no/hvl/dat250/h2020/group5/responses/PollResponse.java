@@ -19,6 +19,7 @@ public class PollResponse {
     private Date startTime;
     private Integer pollDuration;
     private PollVisibilityType visibilityType;
+    private String owner;
 
     public PollResponse(Poll poll) {
         this.id = poll.getId();
@@ -27,5 +28,6 @@ public class PollResponse {
         this.question = poll.getQuestion();
         this.startTime = poll.getStartTime();
         this.visibilityType = poll.getVisibilityType();
+        this.owner = poll.getPollOwner().getUsername();
     }
 }
