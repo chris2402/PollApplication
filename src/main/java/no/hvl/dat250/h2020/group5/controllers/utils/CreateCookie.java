@@ -1,6 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers.utils;
 
 import no.hvl.dat250.h2020.group5.security.jwt.JwtUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 public class CreateCookie {
   final AuthenticationManager authenticationManager;
   final JwtUtils jwtUtils;
+
+  @Value("${poll.app.test.environment}")
+  private Boolean isTest;
 
   public CreateCookie(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
     this.authenticationManager = authenticationManager;
@@ -31,12 +34,16 @@ public class CreateCookie {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
 
-    Cookie cookie = new Cookie("auth", jwt);
-    cookie.setSecure(false);
-    cookie.setHttpOnly(true);
-    cookie.setMaxAge(Integer.MAX_VALUE);
-    cookie.setPath("/");
-    response.addCookie(cookie);
+    response.setHeader(
+        "Set-Cookie",
+        "auth="
+            + jwt
+            + ";path=/;"
+            + (isTest ? "" : "SameSite=None;")
+            + (isTest ? "" : "Secure;")
+            + ";HttpOnly;"
+            + " Max-Age="
+            + Integer.MAX_VALUE);
 
     List<String> roles =
         authentication.getAuthorities().stream()
