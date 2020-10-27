@@ -11,6 +11,7 @@ import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -138,6 +139,7 @@ public class PollService {
     return Instant.now().isBefore(startTimePlusDuration);
   }
 
+  @Transactional
   public VotesResponse getNumberOfVotes(Long pollId) {
     Optional<Poll> poll = pollRepository.findById(pollId);
     if (poll.isEmpty()) {
