@@ -87,7 +87,7 @@ public class UserServiceTest {
     UpdateUserRequest updateUserRequest = new UpdateUserRequest();
     updateUserRequest.setUsername("New username");
 
-    Assertions.assertTrue(userService.updateUser(user1.getId(), updateUserRequest));
+    Assertions.assertTrue(userService.updateUser(user1.getId(), updateUserRequest, anyLong()));
     Assertions.assertEquals(updateUserRequest.getUsername(), user1.getUsername());
     verify(userRepository, times(1)).save(user1);
   }
@@ -98,7 +98,7 @@ public class UserServiceTest {
     updateUserRequest.setNewPassword("New password");
     updateUserRequest.setOldPassword("password");
 
-    Assertions.assertTrue(userService.updateUser(user1.getId(), updateUserRequest));
+    Assertions.assertTrue(userService.updateUser(user1.getId(), updateUserRequest, anyLong()));
     Assertions.assertEquals("HashedString", user1.getPassword());
     verify(userRepository, times(1)).save(user1);
   }
@@ -107,7 +107,7 @@ public class UserServiceTest {
   public void shouldNotUpdateUserWithInvalidUserRequest() {
     UpdateUserRequest updateUserRequest = new UpdateUserRequest();
 
-    Assertions.assertFalse(userService.updateUser(user1.getId(), updateUserRequest));
+    Assertions.assertFalse(userService.updateUser(user1.getId(), updateUserRequest, anyLong()));
     verify(userRepository, times(0)).save(user1);
   }
 
@@ -117,7 +117,7 @@ public class UserServiceTest {
     updateUserRequest.setNewPassword("New password");
     updateUserRequest.setOldPassword("password");
 
-    Assertions.assertFalse(userService.updateUser(3L, updateUserRequest));
+    Assertions.assertFalse(userService.updateUser(3L, updateUserRequest, anyLong()));
     verify(userRepository, times(0)).save(user1);
   }
 

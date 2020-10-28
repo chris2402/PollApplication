@@ -83,7 +83,7 @@ public class UserControllerTest {
 
   @Test
   public void shouldUpdateUserTest() throws Exception {
-    when(userService.updateUser(anyLong(), any(UpdateUserRequest.class))).thenReturn(true);
+    when(userService.updateUser(anyLong(), any(UpdateUserRequest.class), anyLong())).thenReturn(true);
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/users/1")
