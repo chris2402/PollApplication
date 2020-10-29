@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.enums.Roles;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -20,6 +22,7 @@ public class UserResponse {
     this.id = user.getId();
     this.username = user.getUsername();
     this.isAdmin = user.getIsAdmin();
+    this.roles = Arrays.asList(user.getIsAdmin() ? Roles.ADMIN.toString() : Roles.USER.toString());
   }
 
   public UserResponse roles(List<String> roles) {
