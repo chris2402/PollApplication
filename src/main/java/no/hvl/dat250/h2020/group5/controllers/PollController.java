@@ -51,6 +51,7 @@ public class PollController {
     return pollService.deletePoll(pollId, extractIdFromAuth.getIdFromAuth(authentication));
   }
 
+  @PreAuthorize("hasAuthority('USER') or hasAuthority('GUEST')")
   @GetMapping(path = "/{pollId}")
   public PollResponse getPoll(@PathVariable Long pollId) {
     return pollService.getPoll(pollId);
@@ -66,6 +67,7 @@ public class PollController {
     return pollService.isActivated(pollId);
   }
 
+  @PreAuthorize("hasAuthority('USER') or hasAuthority('GUEST')")
   @GetMapping(path = "/{pollId}/votes")
   public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
     return pollService.getNumberOfVotes(pollId);

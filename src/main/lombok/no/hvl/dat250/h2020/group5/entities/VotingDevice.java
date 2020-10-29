@@ -6,9 +6,15 @@ import lombok.EqualsAndHashCode;
 import javax.persistence.Entity;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
+@EqualsAndHashCode(callSuper = true)
 public class VotingDevice extends Voter {
+
+  public VotingDevice displayName(String displayName) {
+    setDisplayName(displayName);
+    return this;
+  }
+
   public VotingDevice username(String username) {
     setUsername(username);
     return this;

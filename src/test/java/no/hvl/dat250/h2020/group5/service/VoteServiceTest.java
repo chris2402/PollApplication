@@ -5,6 +5,7 @@ import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
 import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
+import no.hvl.dat250.h2020.group5.repositories.DeviceRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoterRepository;
@@ -33,6 +34,8 @@ public class VoteServiceTest {
   @Mock VoteRepository voteRepository;
 
   @Mock PollRepository pollRepository;
+
+  @Mock DeviceRepository deviceRepository;
 
   private Poll poll;
   private Voter voter;
@@ -72,13 +75,18 @@ public class VoteServiceTest {
     when(voteRepository.save(any(Vote.class))).thenReturn(vote);
     when(voteRepository.findByVoterAndPoll(voter, poll)).thenReturn(Optional.ofNullable(vote));
     when(voteRepository.findByVoterAndPoll(voter2, poll)).thenReturn(Optional.empty());
-    device = new VotingDevice();
+
+    device = new VotingDevice().displayName("uuid");
+    when(deviceRepository.findVotingDeviceByUsername(device.getUsername()))
+        .thenReturn(Optional.ofNullable(device));
   }
 
   @Test
   public void shouldNotCastVoteWhenPollHaveNotStartedTest() {
     poll.setStartTime(null);
-    Assertions.assertThrows(InvalidTimeException.class, () -> voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    Assertions.assertThrows(
+        InvalidTimeException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
@@ -122,15 +130,19 @@ public class VoteServiceTest {
   @Test
   public void shouldNotCastVoteWithOutPollIdOrUserIdOrAnswerTest() {
     // castVoteRequest.setPollId(null);
-    Assertions.assertThrows(NotFoundException.class, () -> voteService.vote(null, voter.getId(), castVoteRequest));
+    Assertions.assertThrows(
+        NotFoundException.class, () -> voteService.vote(null, voter.getId(), castVoteRequest));
 
     // castVoteRequest.setPollId(poll.getId());
     // castVoteRequest.setUserId(null);
-    Assertions.assertThrows(NotFoundException.class, () -> voteService.vote(poll.getId(), null, castVoteRequest));
+    Assertions.assertThrows(
+        NotFoundException.class, () -> voteService.vote(poll.getId(), null, castVoteRequest));
 
     // castVoteRequest.setUserId(voter.getId());
     castVoteRequest.setVote(null);
-    Assertions.assertThrows(IllegalArgumentException.class, () -> voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
   }
 
   @Test
@@ -151,7 +163,8 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterOneYesVoteAndZeroNoVoteFromDeviceTest() {
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 1, 0);
+    VoteRequestFromDevice voteRequestFromDevice =
+        new VoteRequestFromDevice(device.getUsername(), 1, 0);
     List<Vote> votes = Collections.singletonList(new Vote().answer(AnswerType.YES));
     when(voteRepository.saveAll(votes)).thenReturn(votes);
 
@@ -163,8 +176,9 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
-    VotingDevice device = new VotingDevice();
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 2, 3);
+    VotingDevice device = new VotingDevice().displayName("uuid");
+    VoteRequestFromDevice voteRequestFromDevice =
+        new VoteRequestFromDevice(device.getUsername(), 2, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, noVote, noVote, noVote);
 
     when(voteRepository.saveAll(votes)).thenReturn(votes);
@@ -182,7 +196,8 @@ public class VoteServiceTest {
   @Test
   public void shouldSaveAllVotesFromDeviceTest() {
     VotingDevice device = new VotingDevice();
-    VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 4, 3);
+    VoteRequestFromDevice voteRequestFromDevice =
+        new VoteRequestFromDevice(device.getDisplayName(), 4, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
     voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);
     verify(voteRepository, times(2)).saveAll(votes);

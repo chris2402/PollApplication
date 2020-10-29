@@ -17,6 +17,9 @@ public class User extends Voter {
 
   private Boolean isAdmin = false;
 
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<VotingDevice> votingDevices;
+
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   @JsonManagedReference(value = "pollOwner")
@@ -27,7 +30,6 @@ public class User extends Voter {
       orphanRemoval = true)
   private List<Poll> userPolls = new ArrayList<>();
 
-  @Column(unique = true)
   public User userName(String username) {
     setUsername(username);
     return this;

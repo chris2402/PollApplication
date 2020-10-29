@@ -14,12 +14,12 @@ public class VoteRequestFromDevice {
 
   private int numberOfYes = 0;
   private int numberOfNo = 0;
-  private Long deviceId;
+  private String deviceUUID;
 
-  public VoteRequestFromDevice(Long deviceId, int numberOfYes, int numberOfNo) {
+  public VoteRequestFromDevice(String deviceUUID, int numberOfYes, int numberOfNo) {
     this.numberOfNo = numberOfNo;
     this.numberOfYes = numberOfYes;
-    this.deviceId = deviceId;
+    this.deviceUUID = deviceUUID;
   }
 
   public List<Vote> getVotes() {

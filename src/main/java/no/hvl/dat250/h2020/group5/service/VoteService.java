@@ -4,14 +4,12 @@ import no.hvl.dat250.h2020.group5.converters.StringToAnswerType;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.entities.Voter;
+import no.hvl.dat250.h2020.group5.entities.VotingDevice;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
 import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
-import no.hvl.dat250.h2020.group5.repositories.PollRepository;
-import no.hvl.dat250.h2020.group5.repositories.UserRepository;
-import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.repositories.VoterRepository;
+import no.hvl.dat250.h2020.group5.repositories.*;
 import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
 import no.hvl.dat250.h2020.group5.requests.VoteRequestFromDevice;
 import org.springframework.stereotype.Service;
@@ -32,17 +30,21 @@ public class VoteService {
 
   final UserRepository userRepository;
 
+  final DeviceRepository deviceRepository;
+
   final StringToAnswerType stringToAnswerType = new StringToAnswerType();
 
   public VoteService(
       PollRepository pollRepository,
       VoterRepository voterRepository,
       VoteRepository voteRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      DeviceRepository deviceRepository) {
     this.pollRepository = pollRepository;
     this.voterRepository = voterRepository;
     this.voteRepository = voteRepository;
     this.userRepository = userRepository;
+    this.deviceRepository = deviceRepository;
   }
 
   public Vote vote(Long pollId, Long userId, CastVoteRequest castVoteRequest) {
@@ -54,21 +56,20 @@ public class VoteService {
     Optional<Voter> u = voterRepository.findById(userId);
     AnswerType answer = stringToAnswerType.convert(castVoteRequest.getVote());
 
-    if (answer == null){
+    if (answer == null) {
       throw new IllegalArgumentException("Vote has no valid answer");
     }
 
-    if (p.isEmpty()
-        || u.isEmpty()) {
+    if (p.isEmpty() || u.isEmpty()) {
       throw new NotFoundException("Poll or voter not found");
     }
 
-    if (p.get().getStartTime() == null || checkVoteDateTime(p)){
+    if (p.get().getStartTime() == null || checkVoteDateTime(p)) {
       throw new InvalidTimeException("The poll has expired or is not activated");
     }
 
     Optional<Vote> savedVote = voteRepository.findByVoterAndPoll(u.get(), p.get());
-    if (savedVote.isPresent()){
+    if (savedVote.isPresent()) {
       throw new AlreadyVotedException("You have already voted on this poll");
     }
 
@@ -112,15 +113,20 @@ public class VoteService {
    */
   public List<Vote> saveVotesFromDevice(Long pollId, VoteRequestFromDevice voteRequestFromDevice) {
     Optional<Poll> poll = pollRepository.findById(pollId);
-
-    if (poll.isPresent()) {
-      List<Vote> votes = voteRequestFromDevice.getVotes();
-      voteRepository.saveAll(votes);
-      return voteRepository.saveAll(
-          votes.stream()
-              .peek(vote -> vote.setPollAndAddThisVoteToPoll(poll.get()))
-              .collect(Collectors.toList()));
+    if (poll.isEmpty()) {
+      throw new NotFoundException("Poll not found");
     }
-    return null;
+    Optional<VotingDevice> votingDevice =
+        deviceRepository.findVotingDeviceByUsername(voteRequestFromDevice.getDeviceUUID());
+    if (votingDevice.isEmpty()) {
+      throw new NotFoundException("Device not found");
+    }
+
+    List<Vote> votes = voteRequestFromDevice.getVotes();
+    voteRepository.saveAll(votes);
+    return voteRepository.saveAll(
+        votes.stream()
+            .peek(vote -> vote.setPollAndAddThisVoteToPoll(poll.get()))
+            .collect(Collectors.toList()));
   }
 }
