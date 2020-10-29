@@ -1,5 +1,7 @@
 package no.hvl.dat250.h2020.group5;
 
+import no.hvl.dat250.h2020.group5.KeyHelper;
+
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -40,6 +42,7 @@ public class Main {
   }
 
   public static void main(String[] args) {
+    KeyHelper.writeKeyToFile();
     SpringApplication.run(Main.class, args);
   }
 }
