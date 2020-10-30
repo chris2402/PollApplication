@@ -2,6 +2,7 @@ package no.hvl.dat250.h2020.group5.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.hvl.dat250.h2020.group5.controllers.utils.CreateCookie;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthControllerUnitTest {
 
   @MockBean CreateCookie createCookie;
+  @MockBean private ExtractIdFromAuth extractIdFromAuth;
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
   @MockBean private GuestService guestService;

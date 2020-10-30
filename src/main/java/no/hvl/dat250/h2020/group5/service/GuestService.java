@@ -28,7 +28,6 @@ public class GuestService {
   }
 
   public GuestResponse createGuest(Guest guest) {
-    guest.setDisplayName(guest.getDisplayName());
     guest.setUsername(UUID.randomUUID().toString());
     guest.setPassword(encoder.encode(guest.getUsername()));
     return new GuestResponse(guestRepository.save(guest));

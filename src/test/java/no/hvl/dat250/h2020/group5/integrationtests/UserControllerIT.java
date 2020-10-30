@@ -101,16 +101,6 @@ public class UserControllerIT {
   }
 
   @Test
-  public void shouldGetInfoAboutCurrentlyLoggedInUser() {
-    ResponseEntity<UserResponse> response =
-        testRestTemplate.getForEntity(base.toString() + "/me", UserResponse.class);
-
-    UserResponse userResponse = response.getBody();
-    Assertions.assertNotNull(userResponse);
-    Assertions.assertEquals(savedUser.getId(), userResponse.getId());
-  }
-
-  @Test
   public void shouldUpdatePasswordTest() {
     UpdateUserRequest newPasswordRequest = new UpdateUserRequest();
     newPasswordRequest.setOldPassword("my password");

@@ -6,6 +6,7 @@ import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import no.hvl.dat250.h2020.group5.service.UserService;
+import no.hvl.dat250.h2020.group5.service.VoterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,6 +39,7 @@ public class UserControllerTest {
   @Autowired private ObjectMapper objectMapper;
   @MockBean private UserService userService;
   @MockBean private ExtractIdFromAuth extractIdFromAuth;
+  @MockBean private VoterService voterService;
 
   private UserResponse userResponse;
 
@@ -55,15 +56,6 @@ public class UserControllerTest {
   public void shouldReturnOneUserTest() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/users/1").accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().json("{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
-  }
-
-  @Test
-  public void shouldReturnCurrentlyLoggedInUserTest() throws Exception {
-    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(1L);
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/users/me").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().json("{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
   }

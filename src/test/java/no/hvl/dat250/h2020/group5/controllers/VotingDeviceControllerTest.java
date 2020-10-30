@@ -1,10 +1,13 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.entities.VotingDevice;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.requests.VoteRequestFromDevice;
 import no.hvl.dat250.h2020.group5.service.VoteService;
+import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,10 @@ public class VotingDeviceControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @MockBean private VoteService voteService;
+  @MockBean private VotingDeviceService votingDeviceService;
+  @MockBean private VotingDevice votingDevice;
+  @MockBean private ExtractIdFromAuth extractIdFromAuth;
+
   private Vote yesVote;
   private Vote noVote;
   private Poll poll;
@@ -56,8 +63,8 @@ public class VotingDeviceControllerTest {
         .thenReturn(Collections.singletonList(yesVote));
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/votingDevice/1")
-                .content("{\"deviceId\": \"1\", \"numberOfYes\":\"1\", \"numberOfNo\":\"0\"}")
+            MockMvcRequestBuilders.post("/voting-device/1")
+                .content("{\"deviceUUID\": \"1a\", \"numberOfYes\":\"1\", \"numberOfNo\":\"0\"}")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -71,8 +78,8 @@ public class VotingDeviceControllerTest {
         .thenReturn(Arrays.asList(yesVote, yesVote, noVote, noVote, noVote, noVote));
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/votingDevice/1")
-                .content("{\"deviceId\": \"1\", \"numberOfYes\":\"2\", \"numberOfNo\":\"4\"}")
+            MockMvcRequestBuilders.post("/voting-device/1")
+                .content("{\"deviceUUID\": \"1a\", \"numberOfYes\":\"2\", \"numberOfNo\":\"4\"}")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

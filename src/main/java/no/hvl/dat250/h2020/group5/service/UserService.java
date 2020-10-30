@@ -3,7 +3,6 @@ package no.hvl.dat250.h2020.group5.service;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.exceptions.UsernameAlreadyTakenException;
-import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
@@ -27,10 +26,7 @@ public class UserService {
   final PasswordEncoder encoder;
 
   public UserService(
-      UserRepository userRepository,
-      VoteRepository voteRepository,
-      PollRepository pollRepository,
-      PasswordEncoder encoder) {
+      UserRepository userRepository, VoteRepository voteRepository, PasswordEncoder encoder) {
     this.userRepository = userRepository;
     this.voteRepository = voteRepository;
     this.encoder = encoder;

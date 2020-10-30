@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,9 @@ public class CreateCookie {
 
   @Value("${poll.app.test.environment}")
   private Boolean isTest;
+
+  @Value("${poll.app.jwtExpirationMs}")
+  private int jwtExpirationMs;
 
   public CreateCookie(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
     this.authenticationManager = authenticationManager;
@@ -43,7 +48,7 @@ public class CreateCookie {
             + (isTest ? "" : "Secure;")
             + ";HttpOnly;"
             + " Max-Age="
-            + Integer.MAX_VALUE);
+            + Instant.now().plus(jwtExpirationMs, ChronoUnit.MILLIS));
 
     List<String> roles =
         authentication.getAuthorities().stream()

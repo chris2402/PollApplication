@@ -32,6 +32,9 @@ public abstract class Voter {
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
 
+  @Column(length = 40)
+  protected String displayName;
+
   private String password;
 
   public void addVoteAndSetThisVoterInVote(Vote vote) {
