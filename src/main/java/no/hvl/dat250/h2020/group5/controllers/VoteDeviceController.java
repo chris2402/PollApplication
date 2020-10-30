@@ -7,6 +7,8 @@ import no.hvl.dat250.h2020.group5.requests.VoteRequestFromDevice;
 import no.hvl.dat250.h2020.group5.responses.VotingDeviceResponse;
 import no.hvl.dat250.h2020.group5.service.VoteService;
 import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -56,5 +58,10 @@ public class VoteDeviceController {
   public List<VotingDeviceResponse> getAllUsersDevices(Authentication authentication) {
     return votingDeviceService.getAllDevicesToOwner(
         extractIdFromAuth.getIdFromAuth(authentication));
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<Object> handleUserNotFoundException(Exception exception) {
+    return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }
