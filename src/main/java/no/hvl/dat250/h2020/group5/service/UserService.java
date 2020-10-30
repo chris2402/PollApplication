@@ -78,8 +78,9 @@ public class UserService {
     return new UserResponse(user.get());
   }
 
-  public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest) {
+  public boolean updateUser(Long userId, UpdateUserRequest updateUserRequest, Long authId) {
     Optional<User> user = userRepository.findById(userId);
+    Optional<User> authUser = userRepository.findById(authId);
     boolean changesMade = false;
 
     if (user.isEmpty()) {
@@ -95,6 +96,12 @@ public class UserService {
         && updateUserRequest.getNewPassword() != null
         && encoder.matches(updateUserRequest.getOldPassword(), user.get().getPassword())) {
       user.get().setPassword(encoder.encode(updateUserRequest.getNewPassword()));
+      changesMade = true;
+    }
+
+    if(updateUserRequest.getIsAdmin() != null
+       && authUser.get().getIsAdmin()){
+      user.get().setIsAdmin(updateUserRequest.getIsAdmin());
       changesMade = true;
     }
 

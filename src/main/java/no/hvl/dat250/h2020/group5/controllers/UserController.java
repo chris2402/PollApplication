@@ -34,8 +34,8 @@ public class UserController {
   @PreAuthorize("authentication.principal.id == #id or hasAuthority('ADMIN')")
   @PatchMapping("/{id}")
   public Boolean updateUser(
-      @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
-    return userService.updateUser(id, updateUserRequest);
+      @PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest, Authentication authentication) {
+    return userService.updateUser(id, updateUserRequest, extractIdFromAuth.getIdFromAuth(authentication));
   }
 
   @PreAuthorize("authentication.principal.id == #id or hasAuthority('ADMIN')")
