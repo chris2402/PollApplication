@@ -74,6 +74,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers("/voting-device/**")
         .permitAll()
+        .antMatchers("/votes/**")
+        .permitAll()
+        .antMatchers("/guests/**")
+        .permitAll()
         .anyRequest()
         .authenticated();
 

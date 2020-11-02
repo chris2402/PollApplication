@@ -9,19 +9,8 @@ import javax.persistence.Entity;
 @Entity
 @EqualsAndHashCode(callSuper = true)
 public class VotingDevice extends Voter {
-
-  public VotingDevice displayName(String displayName) {
-    setDisplayName(displayName);
-    return this;
-  }
-
-  public VotingDevice username(String username) {
-    setUsername(username);
-    return this;
-  }
-
-  public VotingDevice password(String password) {
-    setPassword(password);
+  public VotingDevice displayName(String name) {
+    setDisplayName(name);
     return this;
   }
 }

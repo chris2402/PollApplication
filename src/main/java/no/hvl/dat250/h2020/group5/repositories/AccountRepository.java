@@ -1,13 +1,12 @@
 package no.hvl.dat250.h2020.group5.repositories;
 
-import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
-  Optional<User> findByDisplayName(String displayName);
+public interface AccountRepository extends JpaRepository<Account, Long> {
+  Optional<Account> findByEmail(String email);
 }

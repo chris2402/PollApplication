@@ -15,8 +15,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
-  private Boolean isAdmin = false;
-
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   private List<VotingDevice> votingDevices;
 
@@ -30,20 +28,10 @@ public class User extends Voter {
       orphanRemoval = true)
   private List<Poll> userPolls = new ArrayList<>();
 
-  public User userName(String username) {
-    setUsername(username);
-    return this;
-  }
-
-  public User password(String password) {
-    setPassword(password);
-    return this;
-  }
-
-  public User admin(boolean isAdmin) {
-    setIsAdmin(isAdmin);
-    return this;
-  }
+  @OneToOne(fetch = FetchType.LAZY)
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
+  private Account account;
 
   public void setPollOwnerAndAddToUserPoll(Poll poll) {
     poll.setPollOwnerOnlyOnPollSide(this);
@@ -53,5 +41,10 @@ public class User extends Voter {
   public boolean detachPoll(Poll poll) {
     poll.setPollOwnerOnlyOnPollSide(null);
     return userPolls.remove(poll);
+  }
+
+  public User displayName(String name) {
+    setDisplayName(name);
+    return this;
   }
 }

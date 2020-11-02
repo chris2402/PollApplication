@@ -1,27 +1,29 @@
 package no.hvl.dat250.h2020.group5.service;
 
+import no.hvl.dat250.h2020.group5.entities.Account;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
+import no.hvl.dat250.h2020.group5.repositories.AccountRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.requests.CreateOrUpdatePollRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,28 +37,54 @@ public class PollService {
 
   final VoteRepository voteRepository;
 
+  final AccountRepository accountRepository;
+
   private final WebClient webClient =
       WebClient.create("https://dweet.io/dweet/for/poll-application-group5");
 
   public PollService(
-      PollRepository pollRepository, UserRepository userRepository, VoteRepository voteRepository) {
+      PollRepository pollRepository,
+      UserRepository userRepository,
+      VoteRepository voteRepository,
+      AccountRepository accountRepository) {
     this.pollRepository = pollRepository;
     this.userRepository = userRepository;
     this.voteRepository = voteRepository;
+    this.accountRepository = accountRepository;
   }
 
-  public PollResponse createPoll(Poll poll, Long userId) {
+  public PollResponse createPoll(CreateOrUpdatePollRequest createOrUpdatePollRequest, UUID userId) {
     Optional<User> foundUser = userRepository.findById(userId);
-    if (foundUser.isPresent()) {
-      User user = foundUser.get();
-      poll.setOwnerAndAddThisPollToOwner(user);
-      pollRepository.save(poll);
-      return new PollResponse(poll);
+    if (foundUser.isEmpty()) {
+      throw new NotFoundException("User not found when creating poll");
     }
-    return null;
+    Poll poll = createOrUpdatePollRequest.getPoll();
+    poll.setOwnerAndAddThisPollToOwner(foundUser.get());
+
+    addEmails(poll, createOrUpdatePollRequest);
+
+    pollRepository.save(poll);
+    return new PollResponse(poll);
   }
 
-  public boolean deletePoll(Long pollId, Long userId) {
+  public PollResponse updatePoll(Long pollId, CreateOrUpdatePollRequest request, UUID userId) {
+    Optional<Poll> foundPoll = pollRepository.findById(pollId);
+
+    if (foundPoll.isEmpty()) {
+      throw new NotFoundException("Cannot update poll. Poll not found");
+    }
+
+    if (!isOwnerOrAdmin(foundPoll.get(), userId)) {
+      throw new BadCredentialsException("Not allowed");
+    }
+
+    addEmails(request.getPoll(), request);
+
+    request.getPoll().setId(pollId);
+    return new PollResponse(pollRepository.save(request.getPoll()));
+  }
+
+  public boolean deletePoll(Long pollId, UUID userId) {
     Optional<Poll> poll = pollRepository.findById(pollId);
     if (poll.isEmpty() || !isOwnerOrAdmin(poll.get(), userId)) {
       return false;
@@ -86,30 +114,34 @@ public class PollService {
     return pollRepository.findAll().stream().map(PollResponse::new).collect(Collectors.toList());
   }
 
-  public List<PollResponse> getUserPollsAsAdmin(Long userId, Long adminId) {
-    Optional<User> maybeUser = userRepository.findById(adminId);
-    if (maybeUser.isPresent() && maybeUser.get().getIsAdmin()) {
-      return getUserPollsAsOwner(userId);
-    }
-    return null;
-  }
-
-  public List<PollResponse> getUserPollsAsOwner(Long userId) {
+  @Transactional
+  public List<PollResponse> getUserPollsAsOwner(UUID userId) {
     Optional<User> user = userRepository.findById(userId);
-    if (user.isPresent()) {
-      return pollRepository.findAllByPollOwner(user.get()).stream()
-          .map(PollResponse::new)
-          .collect(Collectors.toList());
-    }
-    return null;
+    return user.map(
+            value ->
+                pollRepository.findAllByPollOwner(user.get()).stream()
+                    .map(PollResponse::new)
+                    .collect(Collectors.toList()))
+        .orElse(null);
   }
 
-  public PollResponse getPoll(Long pollId) {
+  public PollResponse getPoll(Long pollId, UUID userId) {
     Optional<Poll> poll = pollRepository.findById(pollId);
-    return poll.map(PollResponse::new).orElse(null);
+    if (poll.isEmpty()) {
+      throw new NotFoundException("Poll not found");
+    }
+    if (poll.get().getVisibilityType().equals(PollVisibilityType.PUBLIC)) {
+      return new PollResponse(poll.get());
+    }
+
+    if (isOwnerOrAdmin(poll.get(), userId) || allowedToVote(poll.get(), userId)) {
+      return new PollResponse(poll.get());
+    }
+
+    throw new BadCredentialsException("Not allowed");
   }
 
-  public Boolean activatePoll(Long pollId, Long userId) {
+  public Boolean activatePoll(Long pollId, UUID userId) {
 
     Optional<Poll> poll = pollRepository.findById(pollId);
     if (poll.isEmpty() || !isOwnerOrAdmin(poll.get(), userId)) {
@@ -165,17 +197,34 @@ public class PollService {
   }
 
   @Transactional
-  public VotesResponse getNumberOfVotes(Long pollId) {
+  public VotesResponse getNumberOfVotesAsAdmin(Long pollId) {
     Optional<Poll> poll = pollRepository.findById(pollId);
     if (poll.isEmpty()) {
-      return null;
+      throw new NotFoundException("Poll not found");
+    }
+    return countVotes(poll.get());
+  }
+
+  @Transactional
+  public VotesResponse getNumberOfVotes(Long pollId, UUID userId) {
+    Optional<Poll> poll = pollRepository.findById(pollId);
+    if (poll.isEmpty()) {
+      throw new NotFoundException("Poll not found");
+    }
+    if (poll.get().getVisibilityType().equals(PollVisibilityType.PRIVATE)
+        && !(isOwnerOrAdmin(poll.get(), userId) || allowedToVote(poll.get(), userId))) {
+      throw new BadCredentialsException("You are not allowed to view this poll");
     }
 
+    return countVotes(poll.get());
+  }
+
+  private VotesResponse countVotes(Poll poll) {
     VotesResponse votesResponse = new VotesResponse();
     int yes = 0;
     int no = 0;
 
-    for (Vote vote : poll.get().getVotes()) {
+    for (Vote vote : poll.getVotes()) {
       if ((vote.getAnswer().equals(AnswerType.YES))) {
         yes++;
       } else {
@@ -188,10 +237,31 @@ public class PollService {
     return votesResponse;
   }
 
-  private boolean isOwnerOrAdmin(Poll poll, Long userId) {
+  private boolean allowedToVote(Poll poll, UUID userId) {
+    return poll.getAllowedVoters().stream().anyMatch(user -> user.getId().equals(userId));
+  }
+
+  private boolean isOwnerOrAdmin(Poll poll, UUID userId) {
     Optional<User> maybeUser = userRepository.findById(userId);
     return maybeUser
-        .filter(user -> user.getId().equals(poll.getPollOwner().getId()) || user.getIsAdmin())
+        .filter(
+            user ->
+                user.getId().equals(poll.getPollOwner().getId()) || user.getAccount().getIsAdmin())
         .isPresent();
+  }
+
+  private void addEmails(Poll poll, CreateOrUpdatePollRequest request) {
+    if (request.getEmails() != null
+        && !request.getEmails().isEmpty()
+        && poll.getVisibilityType() != null
+        && poll.getVisibilityType().equals(PollVisibilityType.PRIVATE)) {
+      request
+          .getEmails()
+          .forEach(
+              email -> {
+                Optional<Account> account = accountRepository.findByEmail(email);
+                account.ifPresent(value -> poll.getAllowedVoters().add(value.getUser()));
+              });
+    }
   }
 }

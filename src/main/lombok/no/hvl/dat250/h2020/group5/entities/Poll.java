@@ -31,12 +31,12 @@ public class Poll {
   private Integer pollDuration;
 
   @Enumerated(EnumType.STRING)
-  private PollVisibilityType visibilityType;
+  private PollVisibilityType visibilityType = PollVisibilityType.PUBLIC;
 
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   @JsonBackReference(value = "pollOwner")
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "pollId")
   @Setter(AccessLevel.PRIVATE)
   private User pollOwner;
@@ -52,18 +52,15 @@ public class Poll {
   @Setter(AccessLevel.PRIVATE)
   private List<Vote> votes = new ArrayList<>();
 
+  @OneToMany private List<User> allowedVoters = new ArrayList<>();
+
   public void setPollOwnerOnlyOnPollSide(User owner) {
     setPollOwner(owner);
   }
 
-  /**
-   * @param vote
-   * @return True if vote is added to this poll
-   */
-  public boolean addVoteAndSetThisPollInVote(Vote vote) {
+  public void addVoteAndSetThisPollInVote(Vote vote) {
     this.votes.add(vote);
     vote.setPollOnlyOnVoteSide(this);
-    return true;
   }
 
   public void setOwnerAndAddThisPollToOwner(User user) {

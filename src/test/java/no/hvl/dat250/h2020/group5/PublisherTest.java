@@ -39,8 +39,8 @@ public class PublisherTest {
     pizzaPoll.setId(1L);
     fruitPoll.setId(2L);
 
-    when(pollService.getNumberOfVotes(pizzaPoll.getId())).thenReturn(new VotesResponse());
-    when(pollService.getNumberOfVotes(fruitPoll.getId())).thenReturn(new VotesResponse());
+    when(pollService.getNumberOfVotesAsAdmin(pizzaPoll.getId())).thenReturn(new VotesResponse());
+    when(pollService.getNumberOfVotesAsAdmin(fruitPoll.getId())).thenReturn(new VotesResponse());
   }
 
   @Test
@@ -79,7 +79,7 @@ public class PublisherTest {
   @Test
   public void shouldSendVoteResponse() {
     when(pollService.getAllFinishedPublicPolls()).thenReturn(Arrays.asList(pizzaPoll));
-    when(pollService.getNumberOfVotes(pizzaPoll.getId()))
+    when(pollService.getNumberOfVotesAsAdmin(pizzaPoll.getId()))
         .thenReturn(new VotesResponse().no(1).yes(0));
     Thread publisherThread = new Thread(publisher);
     publisherThread.start();

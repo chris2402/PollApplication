@@ -4,18 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.controllers.VoteController;
-import no.hvl.dat250.h2020.group5.entities.Guest;
-import no.hvl.dat250.h2020.group5.entities.Poll;
-import no.hvl.dat250.h2020.group5.entities.User;
-import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
-import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
-import no.hvl.dat250.h2020.group5.repositories.PollRepository;
-import no.hvl.dat250.h2020.group5.repositories.UserRepository;
-import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
+import no.hvl.dat250.h2020.group5.repositories.*;
+import no.hvl.dat250.h2020.group5.requests.VoteRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +33,7 @@ public class VoteControllerIT {
 
   @Autowired VoteController voteController;
   @Autowired VoteRepository voteRepository;
+  @Autowired AccountRepository accountRepository;
   @Autowired GuestRepository guestRepository;
   @Autowired UserRepository userRepository;
   @Autowired PollRepository pollRepository;
@@ -50,7 +45,7 @@ public class VoteControllerIT {
   private URL base;
 
   private Poll savedPoll;
-  private User savedUser;
+  private Account savedAccount;
   private Guest savedGuest;
 
   @BeforeEach
@@ -65,6 +60,7 @@ public class VoteControllerIT {
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
+    accountRepository.deleteAll();
 
     this.base = new URL("http://localhost:" + port + "/votes");
 
@@ -75,9 +71,13 @@ public class VoteControllerIT {
             .name("my first poll")
             .startTime(Date.from(Instant.now()));
     this.savedPoll = pollRepository.save(poll);
-    User user = new User().userName("username").password(encoder.encode("password"));
-    this.savedUser = userRepository.save(user);
-    Guest guest = new Guest().username("guest").password(encoder.encode("guest"));
+
+    User user = new User();
+    Account account = new Account().email("username").password(encoder.encode("password"));
+    account.setUserAndAddThisToUser(user);
+    this.savedAccount = accountRepository.save(account);
+
+    Guest guest = new Guest().displayName("guest");
     this.savedGuest = guestRepository.save(guest);
 
     testRestTemplate
@@ -97,6 +97,7 @@ public class VoteControllerIT {
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
+    accountRepository.deleteAll();
   }
 
   @Test
@@ -104,7 +105,7 @@ public class VoteControllerIT {
     loginUserInTest.login(
         "username", "password", "/auth/signin", port, testRestTemplate, objectMapper);
 
-    CastVoteRequest voteRequest = new CastVoteRequest();
+    VoteRequest voteRequest = new VoteRequest();
     voteRequest.setVote("YES");
 
     ResponseEntity<Vote> response =
@@ -116,25 +117,39 @@ public class VoteControllerIT {
     Assertions.assertEquals(AnswerType.YES, savedVote.getAnswer());
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(savedPoll.getId(), voteRepository.findAll().get(0).getPoll().getId());
-    Assertions.assertEquals(savedUser.getId(), voteRepository.findAll().get(0).getVoter().getId());
+    Assertions.assertEquals(
+        savedAccount.getUser().getId(), voteRepository.findAll().get(0).getVoter().getId());
   }
 
   @Test
-  public void shouldVoteByGuestTest() throws JsonProcessingException {
-    loginUserInTest.login(
-        "guest", "guest", "/auth/signin/guest", port, testRestTemplate, objectMapper);
-
-    CastVoteRequest voteRequest = new CastVoteRequest();
+  public void shouldVoteAsGuestTest() {
+    VoteRequest voteRequest = new VoteRequest();
     voteRequest.setVote("NO");
+    voteRequest.setId(savedGuest.getId());
 
     ResponseEntity<Vote> response =
         testRestTemplate.postForEntity(
             base.toString() + "/" + savedPoll.getId(), voteRequest, Vote.class);
+    System.out.println(response);
     Vote savedVote = response.getBody();
+    Assertions.assertNotNull(savedVote);
     Assertions.assertNotNull(savedVote.getId());
     Assertions.assertEquals(AnswerType.NO, savedVote.getAnswer());
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(savedPoll.getId(), voteRepository.findAll().get(0).getPoll().getId());
     Assertions.assertEquals(savedGuest.getId(), voteRepository.findAll().get(0).getVoter().getId());
+  }
+
+  @Test
+  public void shouldFailToVoteAsGuestWithoutIdTest() {
+    VoteRequest voteRequest = new VoteRequest();
+    voteRequest.setVote("NO");
+
+    ResponseEntity<Vote> response =
+        testRestTemplate.postForEntity(
+            base.toString() + "/" + savedPoll.getId(), voteRequest, Vote.class);
+    System.out.println(response);
+    Vote savedVote = response.getBody();
+    Assertions.assertNull(savedVote);
   }
 }

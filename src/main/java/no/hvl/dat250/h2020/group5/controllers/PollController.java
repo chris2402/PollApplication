@@ -1,7 +1,7 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
-import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
+import no.hvl.dat250.h2020.group5.requests.CreateOrUpdatePollRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
@@ -10,18 +10,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
-@PreAuthorize("hasAuthority('USER')")
 @RestController
 @RequestMapping("/polls")
 public class PollController {
 
   private final PollService pollService;
-  private final ExtractIdFromAuth extractIdFromAuth;
+  private final ExtractFromAuth extractFromAuth;
 
-  public PollController(PollService pollService, ExtractIdFromAuth extractIdFromAuth) {
+  public PollController(PollService pollService, ExtractFromAuth extractFromAuth) {
     this.pollService = pollService;
-    this.extractIdFromAuth = extractIdFromAuth;
+    this.extractFromAuth = extractFromAuth;
   }
 
   @GetMapping
@@ -29,9 +29,9 @@ public class PollController {
     return pollService.getAllPublicPolls();
   }
 
-  @PreAuthorize("authentication.principal.id == #ownerId or hasAuthority('ADMIN')")
+  @PreAuthorize("authentication.principal.userId == #ownerId or hasAuthority('ADMIN')")
   @GetMapping("owner/{ownerId}")
-  public List<PollResponse> getAllPollsAsOwner(@PathVariable Long ownerId) {
+  public List<PollResponse> getAllPollsAsOwner(@PathVariable UUID ownerId) {
     return pollService.getUserPollsAsOwner(ownerId);
   }
 
@@ -41,35 +41,49 @@ public class PollController {
     return pollService.getAllPolls();
   }
 
+  @PreAuthorize("hasAuthority('USER')")
   @PostMapping
-  public PollResponse createPoll(@RequestBody Poll body, Authentication authentication) {
-    return pollService.createPoll(body, extractIdFromAuth.getIdFromAuth(authentication));
+  public PollResponse createPoll(
+      @RequestBody CreateOrUpdatePollRequest createOrUpdatePollRequest,
+      Authentication authentication) {
+    return pollService.createPoll(
+        createOrUpdatePollRequest, extractFromAuth.userId(authentication));
   }
 
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping(path = "/{pollId}")
+  public PollResponse updatePoll(
+      @PathVariable Long pollId,
+      @RequestBody CreateOrUpdatePollRequest request,
+      Authentication authentication) {
+    return pollService.updatePoll(pollId, request, extractFromAuth.userId(authentication));
+  }
+
+  @PreAuthorize("hasAuthority('USER')")
   @DeleteMapping(path = "/{pollId}")
   public boolean deletePoll(@PathVariable Long pollId, Authentication authentication) {
-    return pollService.deletePoll(pollId, extractIdFromAuth.getIdFromAuth(authentication));
+    return pollService.deletePoll(pollId, extractFromAuth.userId(authentication));
   }
 
-  @PreAuthorize("hasAuthority('USER') or hasAuthority('GUEST')")
   @GetMapping(path = "/{pollId}")
-  public PollResponse getPoll(@PathVariable Long pollId) {
-    return pollService.getPoll(pollId);
+  public PollResponse getPoll(@PathVariable Long pollId, Authentication authentication) {
+    return pollService.getPoll(pollId, extractFromAuth.userId(authentication));
   }
 
+  @PreAuthorize("hasAuthority('USER')")
   @PatchMapping(path = "/{pollId}")
   public boolean activatePoll(@PathVariable Long pollId, Authentication authentication) {
-    return pollService.activatePoll(pollId, extractIdFromAuth.getIdFromAuth(authentication));
+    return pollService.activatePoll(pollId, extractFromAuth.userId(authentication));
   }
 
+  @PreAuthorize("hasAuthority('USER')")
   @GetMapping(path = "/{pollId}/active")
   public boolean isPollActive(@PathVariable Long pollId) {
     return pollService.isActivated(pollId);
   }
 
-  @PreAuthorize("hasAuthority('USER') or hasAuthority('GUEST')")
   @GetMapping(path = "/{pollId}/votes")
-  public VotesResponse getNumberOfVotes(@PathVariable Long pollId) {
-    return pollService.getNumberOfVotes(pollId);
+  public VotesResponse getNumberOfVotes(@PathVariable Long pollId, Authentication authentication) {
+    return pollService.getNumberOfVotes(pollId, extractFromAuth.userId(authentication));
   }
 }

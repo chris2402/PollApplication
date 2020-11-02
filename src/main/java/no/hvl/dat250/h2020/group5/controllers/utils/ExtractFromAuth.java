@@ -4,11 +4,18 @@ import no.hvl.dat250.h2020.group5.security.services.UserDetailsImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-@Component
-public class ExtractIdFromAuth {
+import java.util.UUID;
 
-  public long getIdFromAuth(Authentication authentication) {
+@Component
+public class ExtractFromAuth {
+
+  public long accountId(Authentication authentication) {
     UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
     return principal.getId();
+  }
+
+  public UUID userId(Authentication authentication) {
+    UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
+    return principal.getUserId();
   }
 }

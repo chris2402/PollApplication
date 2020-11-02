@@ -4,9 +4,7 @@ import no.hvl.dat250.h2020.group5.entities.Voter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface VoterRepository extends JpaRepository<Voter, Long> {
-  Optional<Voter> findByUsername(String username);
-}
+public interface VoterRepository extends JpaRepository<Voter, UUID> {}

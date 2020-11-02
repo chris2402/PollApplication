@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface DeviceRepository extends JpaRepository<VotingDevice, Long> {
-  Optional<VotingDevice> findVotingDeviceByUsername(String username);
+public interface DeviceRepository extends JpaRepository<VotingDevice, UUID> {
+  Optional<VotingDevice> findVotingDeviceByDisplayName(String displayName);
 }
