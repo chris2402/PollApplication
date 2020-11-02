@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@PreAuthorize("hasAuthority('USER')")
+// @PreAuthorize("hasAuthority('USER')")
 @RestController
 @RequestMapping("/polls")
 public class PollController {
