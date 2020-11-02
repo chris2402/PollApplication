@@ -1,10 +1,10 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import no.hvl.dat250.h2020.group5.controllers.utils.CreateCookie;
-import no.hvl.dat250.h2020.group5.requests.CreateUserRequest;
+import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
-import no.hvl.dat250.h2020.group5.service.AccountService;
+import no.hvl.dat250.h2020.group5.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,33 +17,31 @@ import javax.validation.Valid;
 @RequestMapping("/auth")
 public class AuthController {
 
-  private final AccountService accountService;
+  private final UserService userService;
   private final CreateCookie createCookie;
 
   @Value("${poll.app.test.environment}")
   private Boolean isTest;
 
-  public AuthController(AccountService accountService, CreateCookie createCookie) {
-    this.accountService = accountService;
+  public AuthController(UserService userService, CreateCookie createCookie) {
+    this.userService = userService;
     this.createCookie = createCookie;
   }
 
   @PostMapping("/signin")
   public UserResponse authenticateUser(
       @Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-    UserResponse userResponse = accountService.getAccountByEmail(loginRequest.getEmail());
+    UserResponse userResponse = userService.getUserAccountByEmail(loginRequest.getEmail());
     userResponse.setRoles(
         createCookie.signIn(loginRequest.getEmail(), loginRequest.getPassword(), response));
     return userResponse;
   }
 
   @PostMapping("/signup")
-  public UserResponse createUser(
-      @RequestBody CreateUserRequest createUserRequest, HttpServletResponse response) {
-    UserResponse savedUser = accountService.createAccount(createUserRequest);
-    savedUser.setRoles(
-        createCookie.signIn(
-            createUserRequest.getEmail(), createUserRequest.getPassword(), response));
+  public UserResponse createUser(@RequestBody User user, HttpServletResponse response) {
+    String rawPassword = user.getPassword();
+    UserResponse savedUser = userService.createAccount(user);
+    savedUser.setRoles(createCookie.signIn(user.getEmail(), rawPassword, response));
     return savedUser;
   }
 
@@ -57,7 +55,7 @@ public class AuthController {
             + (isTest ? "" : "Secure;")
             + "HttpOnly;"
             + "Max-Age="
-            + Integer.MAX_VALUE);
+            + Integer.MIN_VALUE);
     return ResponseEntity.noContent().build();
   }
 

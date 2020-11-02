@@ -2,7 +2,6 @@ package no.hvl.dat250.h2020.group5.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
-import no.hvl.dat250.h2020.group5.entities.Account;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
@@ -51,17 +50,12 @@ public class PollControllerUnitTest {
   private Poll poll1;
   private PollResponse response1;
   private PollResponse response2;
-  private Account account;
   private User user;
 
   @BeforeEach
   public void setUp() {
-    user = new User();
+    user = new User().email("email");
     user.setId(UUID.randomUUID());
-
-    account = new Account().email("email");
-    account.setId(1L);
-    account.setUserAndAddThisToUser(user);
 
     poll1 =
         new Poll()

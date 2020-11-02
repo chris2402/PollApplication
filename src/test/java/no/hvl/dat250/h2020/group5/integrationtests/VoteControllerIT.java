@@ -4,11 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.controllers.VoteController;
-import no.hvl.dat250.h2020.group5.entities.*;
+import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
-import no.hvl.dat250.h2020.group5.repositories.*;
+import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.VoteRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -33,7 +39,6 @@ public class VoteControllerIT {
 
   @Autowired VoteController voteController;
   @Autowired VoteRepository voteRepository;
-  @Autowired AccountRepository accountRepository;
   @Autowired GuestRepository guestRepository;
   @Autowired UserRepository userRepository;
   @Autowired PollRepository pollRepository;
@@ -45,7 +50,7 @@ public class VoteControllerIT {
   private URL base;
 
   private Poll savedPoll;
-  private Account savedAccount;
+  private User savedUser;
   private Guest savedGuest;
 
   @BeforeEach
@@ -60,7 +65,6 @@ public class VoteControllerIT {
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
-    accountRepository.deleteAll();
 
     this.base = new URL("http://localhost:" + port + "/votes");
 
@@ -72,10 +76,8 @@ public class VoteControllerIT {
             .startTime(Date.from(Instant.now()));
     this.savedPoll = pollRepository.save(poll);
 
-    User user = new User();
-    Account account = new Account().email("username").password(encoder.encode("password"));
-    account.setUserAndAddThisToUser(user);
-    this.savedAccount = accountRepository.save(account);
+    User user = new User().email("username").password(encoder.encode("password"));
+    this.savedUser = userRepository.save(user);
 
     Guest guest = new Guest().displayName("guest");
     this.savedGuest = guestRepository.save(guest);
@@ -97,7 +99,6 @@ public class VoteControllerIT {
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
-    accountRepository.deleteAll();
   }
 
   @Test
@@ -117,8 +118,7 @@ public class VoteControllerIT {
     Assertions.assertEquals(AnswerType.YES, savedVote.getAnswer());
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(savedPoll.getId(), voteRepository.findAll().get(0).getPoll().getId());
-    Assertions.assertEquals(
-        savedAccount.getUser().getId(), voteRepository.findAll().get(0).getVoter().getId());
+    Assertions.assertEquals(savedUser.getId(), voteRepository.findAll().get(0).getVoter().getId());
   }
 
   @Test

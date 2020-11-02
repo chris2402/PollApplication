@@ -2,7 +2,7 @@ package no.hvl.dat250.h2020.group5.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-import no.hvl.dat250.h2020.group5.entities.Account;
+import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.enums.Roles;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,39 +17,28 @@ import java.util.UUID;
 public class UserDetailsImpl implements UserDetails {
   private static final long serialVersionUID = 1L;
 
-  private Long id;
-  private UUID userId;
-  private String username;
-  @JsonIgnore private String password;
+  private final UUID id;
+  private final String username;
+  @JsonIgnore private final String password;
 
-  private Collection<? extends GrantedAuthority> authorities;
+  private final Collection<? extends GrantedAuthority> authorities;
 
   public UserDetailsImpl(
-      Long id,
-      UUID userId,
-      String username,
-      String password,
-      Collection<? extends GrantedAuthority> authorities) {
+      UUID id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
     this.id = id;
-    this.userId = userId;
-    this.username = username;
+    this.username = email;
     this.password = password;
     this.authorities = authorities;
   }
 
-  public static UserDetailsImpl build(Account account) {
+  public static UserDetailsImpl build(User user) {
     List<GrantedAuthority> authorities = new ArrayList<>();
     authorities.add(new SimpleGrantedAuthority(Roles.USER.toString()));
-    if (account.getIsAdmin()) {
+    if (user.getIsAdmin()) {
       authorities.add(new SimpleGrantedAuthority(Roles.ADMIN.toString()));
     }
 
-    return new UserDetailsImpl(
-        account.getId(),
-        account.getUser().getId(),
-        account.getEmail(),
-        account.getPassword(),
-        authorities);
+    return new UserDetailsImpl(user.getId(), user.getEmail(), user.getPassword(), authorities);
   }
 
   @Override

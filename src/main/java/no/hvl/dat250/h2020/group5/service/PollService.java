@@ -1,13 +1,11 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.entities.Account;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
-import no.hvl.dat250.h2020.group5.repositories.AccountRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
@@ -37,22 +35,17 @@ public class PollService {
 
   final VoteRepository voteRepository;
 
-  final AccountRepository accountRepository;
-
   private final WebClient webClient =
       WebClient.create("https://dweet.io/dweet/for/poll-application-group5");
 
   public PollService(
-      PollRepository pollRepository,
-      UserRepository userRepository,
-      VoteRepository voteRepository,
-      AccountRepository accountRepository) {
+      PollRepository pollRepository, UserRepository userRepository, VoteRepository voteRepository) {
     this.pollRepository = pollRepository;
     this.userRepository = userRepository;
     this.voteRepository = voteRepository;
-    this.accountRepository = accountRepository;
   }
 
+  @Transactional
   public PollResponse createPoll(CreateOrUpdatePollRequest createOrUpdatePollRequest, UUID userId) {
     Optional<User> foundUser = userRepository.findById(userId);
     if (foundUser.isEmpty()) {
@@ -137,7 +130,6 @@ public class PollService {
     if (isOwnerOrAdmin(poll.get(), userId) || allowedToVote(poll.get(), userId)) {
       return new PollResponse(poll.get());
     }
-
     throw new BadCredentialsException("Not allowed");
   }
 
@@ -244,9 +236,7 @@ public class PollService {
   private boolean isOwnerOrAdmin(Poll poll, UUID userId) {
     Optional<User> maybeUser = userRepository.findById(userId);
     return maybeUser
-        .filter(
-            user ->
-                user.getId().equals(poll.getPollOwner().getId()) || user.getAccount().getIsAdmin())
+        .filter(user -> user.getId().equals(poll.getPollOwner().getId()) || user.getIsAdmin())
         .isPresent();
   }
 
@@ -259,8 +249,8 @@ public class PollService {
           .getEmails()
           .forEach(
               email -> {
-                Optional<Account> account = accountRepository.findByEmail(email);
-                account.ifPresent(value -> poll.getAllowedVoters().add(value.getUser()));
+                Optional<User> user = userRepository.findByEmail(email);
+                user.ifPresent(value -> poll.getAllowedVoters().add(value));
               });
     }
   }

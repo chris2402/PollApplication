@@ -1,43 +1,44 @@
 package no.hvl.dat250.h2020.group5.security.services;
 
-import no.hvl.dat250.h2020.group5.entities.Account;
-import no.hvl.dat250.h2020.group5.repositories.AccountRepository;
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-  final AccountRepository accountRepository;
+  final UserRepository userRepository;
 
-  public UserDetailsServiceImpl(AccountRepository accountRepository) {
-    this.accountRepository = accountRepository;
+  public UserDetailsServiceImpl(UserRepository userRepository) {
+    this.userRepository = userRepository;
   }
 
   @Override
   @Transactional
   public UserDetailsImpl loadUserByUsername(String email) throws UsernameNotFoundException {
-    Optional<Account> account = accountRepository.findByEmail(email);
+    Optional<User> user = userRepository.findByEmail(email);
 
-    if (account.isEmpty()) {
+    if (user.isEmpty()) {
       throw new UsernameNotFoundException("User Not Found with email: " + email);
     }
 
-    return UserDetailsImpl.build(account.get());
+    return UserDetailsImpl.build(user.get());
   }
 
   @Transactional
-  public UserDetailsImpl loadById(Long id) throws UsernameNotFoundException {
-    Optional<Account> account = accountRepository.findById(id);
+  public UserDetailsImpl loadById(UUID id) throws UsernameNotFoundException {
+    Optional<User> user = userRepository.findById(id);
 
-    if (account.isEmpty()) {
-      throw new UsernameNotFoundException("User Not Found with username: " + id);
+    if (user.isEmpty()) {
+      throw new UsernameNotFoundException("User Not Found with id: " + id);
     }
 
-    return UserDetailsImpl.build(account.get());
+    return UserDetailsImpl.build(user.get());
   }
 }

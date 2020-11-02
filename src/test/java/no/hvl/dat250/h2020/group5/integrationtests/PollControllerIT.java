@@ -4,11 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
 import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
-import no.hvl.dat250.h2020.group5.entities.*;
+import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
+import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
-import no.hvl.dat250.h2020.group5.repositories.*;
+import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
+import no.hvl.dat250.h2020.group5.repositories.PollRepository;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
+import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.CreateOrUpdatePollRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
@@ -33,7 +39,6 @@ import java.util.*;
 public class PollControllerIT {
 
   @Autowired TestRestTemplate template;
-  @Autowired AccountRepository accountRepository;
   @Autowired PollRepository pollRepository;
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
@@ -45,8 +50,8 @@ public class PollControllerIT {
   @LocalServerPort private int port;
 
   private URL base;
-  private Account savedAccount1;
-  private Account savedAccount2;
+  private User savedUser1;
+  private User savedUser2;
   private Guest savedGuest1;
   private Poll savedPoll1;
   private Poll savedPoll2;
@@ -63,30 +68,28 @@ public class PollControllerIT {
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
-    accountRepository.deleteAll();
 
-    User adminUser = new User().displayName("admin");
-    Account admin =
-        new Account().admin(true).email("mynameisadmin").password(encoder.encode("password"));
-    admin.setUserAndAddThisToUser(adminUser);
+    User adminUser =
+        new User()
+            .displayName("admin")
+            .email("mynameisadmin")
+            .password(encoder.encode("password"))
+            .admin(true);
 
-    User user1 = new User();
-    Account account1 = new Account().email("oddhus").password(encoder.encode("12341234"));
-    account1.setUserAndAddThisToUser(user1);
+    User user1 = new User().email("oddhus").password(encoder.encode("12341234"));
 
-    User user2 = new User();
-    Account account2 = new Account().email("email2").password(encoder.encode("12341234"));
-    account2.setUserAndAddThisToUser(user2);
+    User user2 = new User().email("email2").password(encoder.encode("12341234"));
+    ;
 
     Guest guest1 = new Guest().displayName("guest1");
 
-    accountRepository.save(admin);
-    savedAccount1 = accountRepository.save(account1);
-    savedAccount2 = accountRepository.save(account2);
+    userRepository.save(adminUser);
+    savedUser1 = userRepository.save(user1);
+    savedUser2 = userRepository.save(user2);
     savedGuest1 = guestRepository.save(guest1);
 
     Poll poll1 = new Poll().question("Question").visibilityType(PollVisibilityType.PUBLIC);
-    poll1.setPollOwnerOnlyOnPollSide(savedAccount1.getUser());
+    poll1.setPollOwnerOnlyOnPollSide(savedUser1);
 
     Poll poll2 =
         new Poll()
@@ -94,17 +97,17 @@ public class PollControllerIT {
             .visibilityType(PollVisibilityType.PRIVATE)
             .startTime(new Date())
             .pollDuration(1000);
-    poll2.setOwnerAndAddThisPollToOwner(savedAccount2.getUser());
+    poll2.setOwnerAndAddThisPollToOwner(savedUser2);
 
     savedPoll1 = pollRepository.save(poll1);
     savedPoll2 = pollRepository.save(poll2);
 
     Vote vote1 = new Vote().answer(AnswerType.NO);
-    vote1.setVoterAndAddThisVoteToVoter(savedAccount1.getUser());
+    vote1.setVoterAndAddThisVoteToVoter(savedUser1);
     vote1.setPollAndAddThisVoteToPoll(savedPoll1);
 
     Vote vote2 = new Vote().answer(AnswerType.YES);
-    vote2.setVoterAndAddThisVoteToVoter(savedAccount2.getUser());
+    vote2.setVoterAndAddThisVoteToVoter(savedUser2);
     vote2.setPollAndAddThisVoteToPoll(savedPoll1);
 
     Vote vote3 = new Vote().answer(AnswerType.NO);
@@ -139,7 +142,6 @@ public class PollControllerIT {
     pollRepository.deleteAll();
     userRepository.deleteAll();
     guestRepository.deleteAll();
-    accountRepository.deleteAll();
   }
 
   @Test
@@ -187,14 +189,15 @@ public class PollControllerIT {
 
   @Test
   public void shouldNotGetPollByPollIdIfPrivateAndNotAllowed() {
-    ResponseEntity<PollResponse> response =
-        template.getForEntity(base.toString() + "/" + this.savedPoll2.getId(), PollResponse.class);
-    Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    ResponseEntity<String> response =
+        template.getForEntity(base.toString() + "/" + this.savedPoll2.getId(), String.class);
+
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
   public void shouldGetPollByPollIdIfPrivateAndAllowed() {
-    savedPoll2.getAllowedVoters().add(savedAccount1.getUser());
+    savedPoll2.getAllowedVoters().add(savedUser1);
     pollRepository.save(savedPoll2);
     ResponseEntity<PollResponse> response =
         template.getForEntity(base.toString() + "/" + this.savedPoll2.getId(), PollResponse.class);
@@ -225,7 +228,7 @@ public class PollControllerIT {
   public void shouldGetAllUsersPollsAsOwner() {
     ResponseEntity<PollResponse[]> response =
         template.getForEntity(
-            base.toString() + "/owner/" + savedAccount1.getUser().getId(), PollResponse[].class);
+            base.toString() + "/owner/" + savedUser1.getId(), PollResponse[].class);
     PollResponse[] polls = response.getBody();
     Assertions.assertNotNull(polls);
     Assertions.assertEquals(1, polls.length);
@@ -237,7 +240,7 @@ public class PollControllerIT {
         "mynameisadmin", "password", "/auth/signin", port, template, objectMapper);
     ResponseEntity<PollResponse[]> response =
         template.getForEntity(
-            base.toString() + "/owner/" + savedAccount1.getUser().getId(), PollResponse[].class);
+            base.toString() + "/owner/" + savedUser1.getId(), PollResponse[].class);
     PollResponse[] polls = response.getBody();
     Assertions.assertNotNull(polls);
     Assertions.assertEquals(1, polls.length);
@@ -301,12 +304,12 @@ public class PollControllerIT {
     ResponseEntity<String> response =
         template.getForEntity(
             base.toString() + "/" + this.savedPoll2.getId() + "/votes", String.class);
-    Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    Assertions.assertTrue(response.getBody().contains("not allowed"));
   }
 
   @Test
   public void shouldGetNumberOfYesAndNoVotesIfPrivateAndAllowed() {
-    savedPoll2.getAllowedVoters().add(savedAccount1.getUser());
+    savedPoll2.getAllowedVoters().add(savedUser1);
     pollRepository.save(savedPoll2);
 
     ResponseEntity<VotesResponse> response =

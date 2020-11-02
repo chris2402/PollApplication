@@ -3,11 +3,9 @@ package no.hvl.dat250.h2020.group5.integrationtests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
-import no.hvl.dat250.h2020.group5.entities.Account;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
-import no.hvl.dat250.h2020.group5.repositories.AccountRepository;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.responses.GuestResponse;
@@ -39,7 +37,6 @@ public class GuestControllerIT {
   @Autowired TestRestTemplate template;
   @Autowired GuestRepository guestRepository;
   @Autowired UserRepository userRepository;
-  @Autowired AccountRepository accountRepository;
   @Autowired LoginUserInTest loginUserInTest;
   @Autowired PasswordEncoder encoder;
   @Autowired ObjectMapper objectMapper;
@@ -51,11 +48,8 @@ public class GuestControllerIT {
 
   @BeforeEach
   public void setUp() throws MalformedURLException {
-    User user = new User();
-    Account account =
-        new Account().email("testtest").password(encoder.encode("password")).admin(true);
-    account.setUserAndAddThisToUser(user);
-    accountRepository.save(account);
+    User user = new User().email("testtest").password(encoder.encode("password")).admin(true);
+    userRepository.save(user);
 
     guest = new Guest().displayName("Guest 127348");
     Guest guest2 = new Guest().displayName("Guest 30");

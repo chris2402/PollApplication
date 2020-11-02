@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import no.hvl.dat250.h2020.group5.entities.Poll;
+import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 
 import java.util.Date;
@@ -31,14 +32,12 @@ public class PollResponse {
     this.question = poll.getQuestion();
     this.startTime = poll.getStartTime();
     this.visibilityType = poll.getVisibilityType();
-    this.owner = poll.getPollOwner().getAccount().getEmail();
+    this.owner = poll.getPollOwner().getEmail();
     if (poll.getVisibilityType().equals(PollVisibilityType.PRIVATE)
         && poll.getAllowedVoters() != null
         && !poll.getAllowedVoters().isEmpty()) {
       allowedVoters =
-          poll.getAllowedVoters().stream()
-              .map(user -> user.getAccount().getEmail())
-              .collect(Collectors.toList());
+          poll.getAllowedVoters().stream().map(User::getEmail).collect(Collectors.toList());
     }
   }
 }

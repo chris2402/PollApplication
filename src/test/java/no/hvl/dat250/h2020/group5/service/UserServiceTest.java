@@ -1,11 +1,10 @@
 package no.hvl.dat250.h2020.group5.service;
 
-import no.hvl.dat250.h2020.group5.entities.Account;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
-import no.hvl.dat250.h2020.group5.repositories.AccountRepository;
+import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
+import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.requests.CreateUserRequest;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
@@ -23,76 +22,70 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-public class AccountServiceTest {
+public class UserServiceTest {
 
-  @InjectMocks AccountService accountService;
+  @InjectMocks UserService userService;
 
-  @Mock AccountRepository accountRepository;
+  @Mock UserRepository userRepository;
 
   @Mock VoteRepository voteRepository;
 
   @Mock PasswordEncoder passwordEncoder;
 
-  private Account account1;
   private User user;
-  private Account account2;
+  private User user2;
+
   private Vote vote;
-  private CreateUserRequest createUserRequest;
+  private User createUser;
 
   @BeforeEach
   public void setUp() {
-    user = new User();
+    user = new User().password("password");
     user.setId(UUID.randomUUID());
-    account1 = new Account().password("password");
-    account1.setUser(user);
-    account1.setId(1L);
 
-    createUserRequest =
-        new CreateUserRequest().displayName("test").password("password").email("test@test.com");
+    user2 = new User().password("password");
+    user2.setId(UUID.randomUUID());
 
-    account2 = new Account();
-    account2.setId(2L);
+    createUser = new User().displayName("test").password("password").email("test@test.com");
 
     vote = new Vote();
-    vote.setVoterAndAddThisVoteToVoter(account1.getUser());
+    vote.setVoterAndAddThisVoteToVoter(user);
 
-    when(accountRepository.save(any(Account.class))).thenReturn(new Account());
-    when(accountRepository.findById(account1.getId())).thenReturn(Optional.ofNullable(account1));
-    when(accountRepository.findById(account2.getId())).thenReturn(Optional.ofNullable(account2));
-    when(accountRepository.findAll()).thenReturn(Arrays.asList(account1, account2));
+    when(userRepository.save(any(User.class))).thenReturn(new User());
+    when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
+    when(userRepository.findById(user2.getId())).thenReturn(Optional.ofNullable(user2));
+    when(userRepository.findAll()).thenReturn(Arrays.asList(user, user2));
 
     when(passwordEncoder.encode(anyString())).thenReturn("HashedString");
     when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
-    when(voteRepository.findByVoter(account1.getUser()))
-        .thenReturn(Collections.singletonList(vote));
+    when(voteRepository.findByVoter(user)).thenReturn(Collections.singletonList(vote));
     when(voteRepository.save(any(Vote.class))).thenReturn(vote);
   }
 
   @Test
   public void shouldCreateUserTest() {
-    Assertions.assertNotNull(accountService.createAccount(createUserRequest));
-    Assertions.assertEquals(
-        UserResponse.class, accountService.createAccount(createUserRequest).getClass());
+    Assertions.assertNotNull(userService.createAccount(createUser));
+    Assertions.assertEquals(UserResponse.class, userService.createAccount(createUser).getClass());
   }
 
   @Test
   public void shouldDeleteUserAndUserVotesTest() {
     Assertions.assertNotNull(vote.getVoter());
-    Assertions.assertTrue(accountService.deleteAccount(account1.getId()));
+    Assertions.assertTrue(userService.deleteUser(user.getId()));
     Assertions.assertNull(vote.getVoter());
     verify(voteRepository, times(1)).saveAll(anyIterable());
-    verify(accountRepository, times(1)).delete(account1);
+    verify(userRepository, times(1)).delete(user);
   }
 
   @Test
   public void shouldGiveAllUsersTest() {
-    Assertions.assertEquals(2, accountService.getAllAccounts().size());
+    Assertions.assertEquals(2, userService.getAllUserAccounts().size());
   }
 
   @Test
   public void shouldFindUserByUserId() {
-    Assertions.assertEquals(account1.getId(), accountService.getAccount(account1.getId()).getId());
+    Assertions.assertEquals(user.getId(), userService.getUser(user.getId()).getId());
   }
 
   @Test
@@ -101,9 +94,9 @@ public class AccountServiceTest {
     updateUserRequest.setEmail("New email");
 
     Assertions.assertTrue(
-        accountService.updateAccount(account1.getId(), updateUserRequest, anyLong()));
-    Assertions.assertEquals(updateUserRequest.getEmail(), account1.getEmail());
-    verify(accountRepository, times(1)).save(account1);
+        userService.updateAccount(user.getId(), updateUserRequest, any(UUID.class)));
+    Assertions.assertEquals(updateUserRequest.getEmail(), user.getEmail());
+    verify(userRepository, times(1)).save(user);
   }
 
   @Test
@@ -113,9 +106,9 @@ public class AccountServiceTest {
     updateUserRequest.setOldPassword("password");
 
     Assertions.assertTrue(
-        accountService.updateAccount(account1.getId(), updateUserRequest, anyLong()));
-    Assertions.assertEquals("HashedString", account1.getPassword());
-    verify(accountRepository, times(1)).save(account1);
+        userService.updateAccount(user.getId(), updateUserRequest, any(UUID.class)));
+    Assertions.assertEquals("HashedString", user.getPassword());
+    verify(userRepository, times(1)).save(user);
   }
 
   @Test
@@ -123,8 +116,8 @@ public class AccountServiceTest {
     UpdateUserRequest updateUserRequest = new UpdateUserRequest();
 
     Assertions.assertFalse(
-        accountService.updateAccount(account1.getId(), updateUserRequest, anyLong()));
-    verify(accountRepository, times(0)).save(account1);
+        userService.updateAccount(user.getId(), updateUserRequest, any(UUID.class)));
+    verify(userRepository, times(0)).save(user);
   }
 
   @Test
@@ -133,14 +126,16 @@ public class AccountServiceTest {
     updateUserRequest.setNewPassword("New password");
     updateUserRequest.setOldPassword("password");
 
-    Assertions.assertFalse(accountService.updateAccount(3L, updateUserRequest, anyLong()));
-    verify(accountRepository, times(0)).save(account1);
+    Assertions.assertThrows(
+        NotFoundException.class,
+        () -> userService.updateAccount(UUID.randomUUID(), updateUserRequest, any(UUID.class)));
+    verify(userRepository, times(0)).save(user);
   }
 
   @Test
   public void shouldNotDeleteVotesWhenUserIsDeletedTest() {
-    List<Vote> userVotes = new ArrayList<>(account1.getUser().getVotes());
-    accountService.deleteAccount(account1.getId());
+    List<Vote> userVotes = new ArrayList<>(user.getVotes());
+    userService.deleteUser(user.getId());
     verify(voteRepository, times(1)).saveAll(userVotes);
   }
 }

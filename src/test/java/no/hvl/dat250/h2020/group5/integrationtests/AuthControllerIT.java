@@ -3,13 +3,10 @@ package no.hvl.dat250.h2020.group5.integrationtests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
-import no.hvl.dat250.h2020.group5.entities.Account;
 import no.hvl.dat250.h2020.group5.entities.User;
-import no.hvl.dat250.h2020.group5.repositories.AccountRepository;
 import no.hvl.dat250.h2020.group5.repositories.DeviceRepository;
 import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
-import no.hvl.dat250.h2020.group5.requests.CreateUserRequest;
 import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
@@ -36,7 +33,6 @@ public class AuthControllerIT {
   @Autowired UserRepository userRepository;
   @Autowired GuestRepository guestRepository;
   @Autowired DeviceRepository deviceRepository;
-  @Autowired AccountRepository accountRepository;
   @LocalServerPort private int port;
 
   @BeforeEach
@@ -44,7 +40,6 @@ public class AuthControllerIT {
     userRepository.deleteAll();
     deviceRepository.deleteAll();
     guestRepository.deleteAll();
-    accountRepository.deleteAll();
 
     template.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
   }
@@ -52,13 +47,11 @@ public class AuthControllerIT {
   @Test
   public void shouldSaveANewUserTest() throws JsonProcessingException {
     String registerUrl = "http://localhost:" + port + "/auth/signup";
-    CreateUserRequest createUserRequest =
-        new CreateUserRequest().email("username").password("12341234").displayName("hi");
+    User user = new User().email("username").password("12341234").displayName("hi");
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request =
-        new HttpEntity<>(objectMapper.writeValueAsString(createUserRequest), headers);
+    HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(user), headers);
 
     ResponseEntity<UserResponse> result =
         template.postForEntity(registerUrl, request, UserResponse.class);
@@ -70,17 +63,17 @@ public class AuthControllerIT {
     Assertions.assertFalse(registeredUser.getRoles().contains("ADMIN"));
     Assertions.assertEquals("username", registeredUser.getEmail());
     Assertions.assertEquals(1, userRepository.count());
-    Assertions.assertEquals(1, accountRepository.count());
-    Assertions.assertNotNull(
-        accountRepository.findById(registeredUser.getId()).get().getPassword());
+    Assertions.assertNotNull(userRepository.findById(registeredUser.getId()).get().getPassword());
   }
 
   @Test
   public void shouldLogInAsUser() throws JsonProcessingException {
-    User user = new User().displayName("my_display_name");
-    Account account = new Account().email("testtest").password(encoder.encode("12341234"));
-    account.setUserAndAddThisToUser(user);
-    Account savedAccount = accountRepository.save(account);
+    User user =
+        new User()
+            .displayName("my_display_name")
+            .email("testtest")
+            .password(encoder.encode("12341234"));
+    User savedUser = userRepository.save(user);
 
     String loginUrl = "http://localhost:" + port + "/auth/signin";
     LoginRequest loginRequest = new LoginRequest().email("testtest").password("12341234");
@@ -97,16 +90,18 @@ public class AuthControllerIT {
     Assertions.assertNotNull(result.getBody());
     Assertions.assertTrue(result.getBody().getRoles().contains("USER"));
     Assertions.assertFalse(result.getBody().getRoles().contains("ADMIN"));
-    Assertions.assertEquals(savedAccount.getId(), result.getBody().getId());
+    Assertions.assertEquals(savedUser.getId(), result.getBody().getId());
   }
 
   @Test
   public void shouldLoginAsAdmin() throws JsonProcessingException {
-    User user = new User().displayName("my_display_name");
-    Account account =
-        new Account().admin(true).email("mynameisadmin").password(encoder.encode("password"));
-    account.setUserAndAddThisToUser(user);
-    Account savedAccount = accountRepository.save(account);
+    User user =
+        new User()
+            .admin(true)
+            .displayName("my_display_name")
+            .email("mynameisadmin")
+            .password(encoder.encode("password"));
+    User savedUser = userRepository.save(user);
 
     String loginUrl = "http://localhost:" + port + "/auth/signin";
     LoginRequest loginRequest = new LoginRequest().email("mynameisadmin").password("password");
@@ -123,6 +118,6 @@ public class AuthControllerIT {
     Assertions.assertNotNull(result.getHeaders().get("Set-Cookie"));
     Assertions.assertNotNull(result.getBody());
     Assertions.assertTrue(result.getBody().getRoles().contains("ADMIN"));
-    Assertions.assertEquals(savedAccount.getId(), result.getBody().getId());
+    Assertions.assertEquals(savedUser.getId(), result.getBody().getId());
   }
 }

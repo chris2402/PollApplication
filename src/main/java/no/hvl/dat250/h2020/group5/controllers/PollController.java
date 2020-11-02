@@ -5,6 +5,8 @@ import no.hvl.dat250.h2020.group5.requests.CreateOrUpdatePollRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +31,7 @@ public class PollController {
     return pollService.getAllPublicPolls();
   }
 
-  @PreAuthorize("authentication.principal.userId == #ownerId or hasAuthority('ADMIN')")
+  @PreAuthorize("authentication.principal.id == #ownerId or hasAuthority('ADMIN')")
   @GetMapping("owner/{ownerId}")
   public List<PollResponse> getAllPollsAsOwner(@PathVariable UUID ownerId) {
     return pollService.getUserPollsAsOwner(ownerId);
@@ -67,7 +69,8 @@ public class PollController {
 
   @GetMapping(path = "/{pollId}")
   public PollResponse getPoll(@PathVariable Long pollId, Authentication authentication) {
-    return pollService.getPoll(pollId, extractFromAuth.userId(authentication));
+    return pollService.getPoll(
+        pollId, authentication == null ? null : extractFromAuth.userId(authentication));
   }
 
   @PreAuthorize("hasAuthority('USER')")
@@ -84,6 +87,12 @@ public class PollController {
 
   @GetMapping(path = "/{pollId}/votes")
   public VotesResponse getNumberOfVotes(@PathVariable Long pollId, Authentication authentication) {
-    return pollService.getNumberOfVotes(pollId, extractFromAuth.userId(authentication));
+    return pollService.getNumberOfVotes(
+        pollId, authentication == null ? null : extractFromAuth.userId(authentication));
+  }
+
+  @ExceptionHandler({Exception.class})
+  public ResponseEntity<Object> handleUserNotFoundException(Exception exception) {
+    return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }

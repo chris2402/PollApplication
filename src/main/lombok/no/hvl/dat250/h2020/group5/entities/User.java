@@ -28,10 +28,9 @@ public class User extends Voter {
       orphanRemoval = true)
   private List<Poll> userPolls = new ArrayList<>();
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @ToString.Exclude
-  @EqualsAndHashCode.Exclude
-  private Account account;
+  private String email;
+  private String password;
+  private Boolean isAdmin = false;
 
   public void setPollOwnerAndAddToUserPoll(Poll poll) {
     poll.setPollOwnerOnlyOnPollSide(this);
@@ -45,6 +44,21 @@ public class User extends Voter {
 
   public User displayName(String name) {
     setDisplayName(name);
+    return this;
+  }
+
+  public User email(String email) {
+    setEmail(email);
+    return this;
+  }
+
+  public User password(String password) {
+    setPassword(password);
+    return this;
+  }
+
+  public User admin(boolean isAdmin) {
+    setIsAdmin(isAdmin);
     return this;
   }
 }

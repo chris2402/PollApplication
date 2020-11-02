@@ -76,6 +76,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers("/votes/**")
         .permitAll()
+        .antMatchers("/polls/**")
+        .permitAll()
         .antMatchers("/guests/**")
         .permitAll()
         .anyRequest()

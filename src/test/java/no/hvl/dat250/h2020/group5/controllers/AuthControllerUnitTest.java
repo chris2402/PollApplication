@@ -3,12 +3,11 @@ package no.hvl.dat250.h2020.group5.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.hvl.dat250.h2020.group5.controllers.utils.CreateCookie;
 import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
-import no.hvl.dat250.h2020.group5.entities.Account;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.requests.CreateUserRequest;
 import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
-import no.hvl.dat250.h2020.group5.service.AccountService;
+import no.hvl.dat250.h2020.group5.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,23 +39,20 @@ public class AuthControllerUnitTest {
   @MockBean private ExtractFromAuth extractFromAuth;
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
-  @MockBean private AccountService accountService;
+  @MockBean private UserService userService;
   private UserResponse userResponse;
 
   @BeforeEach
   public void setUp() {
-    User user = new User().displayName("hi");
+    User user = new User().displayName("hi").email("email").password("password");
     user.setId(UUID.randomUUID());
-    Account account = new Account().email("email").password("password");
-    account.setUserAndAddThisToUser(user);
-    account.setId(1L);
-    this.userResponse = new UserResponse(account);
+    this.userResponse = new UserResponse(user);
   }
 
   @Test
   public void shouldLoginUserAndAccountTest() throws Exception {
     LoginRequest loginRequest = new LoginRequest().email("email").password("password");
-    when(accountService.getAccountByEmail("email")).thenReturn(userResponse);
+    when(userService.getUserAccountByEmail("email")).thenReturn(userResponse);
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/auth/signin")
@@ -74,7 +70,7 @@ public class AuthControllerUnitTest {
   public void shouldCreateUserAndAccountTest() throws Exception {
     CreateUserRequest createUserRequest =
         new CreateUserRequest().email("email").displayName("hi").password("password");
-    when(accountService.createAccount(any(CreateUserRequest.class))).thenReturn(userResponse);
+    when(userService.createAccount(any(User.class))).thenReturn(userResponse);
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/auth/signup")

@@ -9,13 +9,8 @@ import java.util.UUID;
 @Component
 public class ExtractFromAuth {
 
-  public long accountId(Authentication authentication) {
-    UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-    return principal.getId();
-  }
-
   public UUID userId(Authentication authentication) {
     UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-    return principal.getUserId();
+    return principal.getId();
   }
 }
