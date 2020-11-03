@@ -253,12 +253,14 @@ public class PollService {
 
   private void addEmails(Poll poll, CreateOrUpdatePollRequest request) {
     poll.getAllowedVoters().clear();
-    request
-        .getEmails()
-        .forEach(
-            email -> {
-              Optional<User> user = userRepository.findByEmail(email);
-              user.ifPresent(value -> poll.getAllowedVoters().add(value));
-            });
+    if (request.getEmails() != null) {
+      request
+          .getEmails()
+          .forEach(
+              email -> {
+                Optional<User> user = userRepository.findByEmail(email);
+                user.ifPresent(value -> poll.getAllowedVoters().add(value));
+              });
+    }
   }
 }
