@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.UUID;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
   private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
@@ -32,9 +31,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     try {
       String jwt = parseJwtFromCookie(request);
       if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-        UUID id = UUID.fromString(jwtUtils.getIdFromJwtToken(jwt));
+        String email = jwtUtils.getUserNameFromJwtToken(jwt);
 
-        UserDetailsImpl userDetails = userDetailsService.loadById(id);
+        UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(email);
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());

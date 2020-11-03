@@ -50,15 +50,6 @@ public class JwtUtils {
         .getSubject();
   }
 
-  public String getIdFromJwtToken(String token) {
-    return Jwts.parserBuilder()
-        .setSigningKey(getSigningKey())
-        .build()
-        .parseClaimsJws(token)
-        .getBody()
-        .getId();
-  }
-
   public boolean validateJwtToken(String authToken) {
     try {
       Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parse(authToken);

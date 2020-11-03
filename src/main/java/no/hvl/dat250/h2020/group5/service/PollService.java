@@ -5,6 +5,7 @@ import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
@@ -66,15 +67,24 @@ public class PollService {
     if (foundPoll.isEmpty()) {
       throw new NotFoundException("Cannot update poll. Poll not found");
     }
+    Poll poll = foundPoll.get();
+    Poll updatedPoll = request.getPoll();
 
-    if (!isOwnerOrAdmin(foundPoll.get(), userId)) {
+    if (poll.getStartTime() != null) {
+      throw new InvalidTimeException("Cannot edit a poll that has started");
+    }
+
+    if (!isOwnerOrAdmin(poll, userId)) {
       throw new BadCredentialsException("Not allowed");
     }
 
-    addEmails(request.getPoll(), request);
+    poll.question(updatedPoll.getQuestion())
+        .name(updatedPoll.getName())
+        .visibilityType(updatedPoll.getVisibilityType())
+        .pollDuration(updatedPoll.getPollDuration());
+    addEmails(poll, request);
 
-    request.getPoll().setId(pollId);
-    return new PollResponse(pollRepository.save(request.getPoll()));
+    return new PollResponse(pollRepository.save(poll));
   }
 
   public boolean deletePoll(Long pollId, UUID userId) {
@@ -127,10 +137,11 @@ public class PollService {
       return new PollResponse(poll.get());
     }
 
-    if (isOwnerOrAdmin(poll.get(), userId) || allowedToVote(poll.get(), userId)) {
+    if (userId != null
+        && (isOwnerOrAdmin(poll.get(), userId) || allowedToVote(poll.get(), userId))) {
       return new PollResponse(poll.get());
     }
-    throw new BadCredentialsException("Not allowed");
+    throw new BadCredentialsException("You have no access to this poll");
   }
 
   public Boolean activatePoll(Long pollId, UUID userId) {
@@ -241,17 +252,13 @@ public class PollService {
   }
 
   private void addEmails(Poll poll, CreateOrUpdatePollRequest request) {
-    if (request.getEmails() != null
-        && !request.getEmails().isEmpty()
-        && poll.getVisibilityType() != null
-        && poll.getVisibilityType().equals(PollVisibilityType.PRIVATE)) {
-      request
-          .getEmails()
-          .forEach(
-              email -> {
-                Optional<User> user = userRepository.findByEmail(email);
-                user.ifPresent(value -> poll.getAllowedVoters().add(value));
-              });
-    }
+    poll.getAllowedVoters().clear();
+    request
+        .getEmails()
+        .forEach(
+            email -> {
+              Optional<User> user = userRepository.findByEmail(email);
+              user.ifPresent(value -> poll.getAllowedVoters().add(value));
+            });
   }
 }

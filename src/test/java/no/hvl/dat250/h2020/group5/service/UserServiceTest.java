@@ -93,8 +93,7 @@ public class UserServiceTest {
     UpdateUserRequest updateUserRequest = new UpdateUserRequest();
     updateUserRequest.setEmail("New email");
 
-    Assertions.assertTrue(
-        userService.updateAccount(user.getId(), updateUserRequest, any(UUID.class)));
+    Assertions.assertTrue(userService.updateAccount(user.getId(), updateUserRequest, anyBoolean()));
     Assertions.assertEquals(updateUserRequest.getEmail(), user.getEmail());
     verify(userRepository, times(1)).save(user);
   }
@@ -105,8 +104,7 @@ public class UserServiceTest {
     updateUserRequest.setNewPassword("New password");
     updateUserRequest.setOldPassword("password");
 
-    Assertions.assertTrue(
-        userService.updateAccount(user.getId(), updateUserRequest, any(UUID.class)));
+    Assertions.assertTrue(userService.updateAccount(user.getId(), updateUserRequest, anyBoolean()));
     Assertions.assertEquals("HashedString", user.getPassword());
     verify(userRepository, times(1)).save(user);
   }
@@ -116,7 +114,7 @@ public class UserServiceTest {
     UpdateUserRequest updateUserRequest = new UpdateUserRequest();
 
     Assertions.assertFalse(
-        userService.updateAccount(user.getId(), updateUserRequest, any(UUID.class)));
+        userService.updateAccount(user.getId(), updateUserRequest, anyBoolean()));
     verify(userRepository, times(0)).save(user);
   }
 
@@ -128,7 +126,7 @@ public class UserServiceTest {
 
     Assertions.assertThrows(
         NotFoundException.class,
-        () -> userService.updateAccount(UUID.randomUUID(), updateUserRequest, any(UUID.class)));
+        () -> userService.updateAccount(UUID.randomUUID(), updateUserRequest, anyBoolean()));
     verify(userRepository, times(0)).save(user);
   }
 

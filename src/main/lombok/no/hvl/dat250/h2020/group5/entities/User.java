@@ -37,9 +37,9 @@ public class User extends Voter {
     this.userPolls.add(poll);
   }
 
-  public boolean detachPoll(Poll poll) {
+  public void detachPoll(Poll poll) {
     poll.setPollOwnerOnlyOnPollSide(null);
-    return userPolls.remove(poll);
+    userPolls.remove(poll);
   }
 
   public User displayName(String name) {

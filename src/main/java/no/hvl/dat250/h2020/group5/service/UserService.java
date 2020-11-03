@@ -42,7 +42,7 @@ public class UserService {
 
     user.setPassword(encoder.encode(user.getPassword()));
 
-    return new UserResponse(user);
+    return new UserResponse(userRepository.save(user));
   }
 
   @Transactional
@@ -82,9 +82,8 @@ public class UserService {
     return new UserResponse(user.get());
   }
 
-  public boolean updateAccount(UUID userId, UpdateUserRequest updateUserRequest, UUID authId) {
+  public boolean updateAccount(UUID userId, UpdateUserRequest updateUserRequest, Boolean isAdmin) {
     Optional<User> user = userRepository.findById(userId);
-    Optional<User> authUser = userRepository.findById(authId);
     boolean changesMade = false;
 
     if (user.isEmpty()) {
@@ -103,9 +102,7 @@ public class UserService {
       changesMade = true;
     }
 
-    if (updateUserRequest.getIsAdmin() != null
-        && authUser.isPresent()
-        && authUser.get().getIsAdmin()) {
+    if (isAdmin) {
       user.get().setIsAdmin(updateUserRequest.getIsAdmin());
       changesMade = true;
     }

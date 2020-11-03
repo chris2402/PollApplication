@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -26,17 +25,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     if (user.isEmpty()) {
       throw new UsernameNotFoundException("User Not Found with email: " + email);
-    }
-
-    return UserDetailsImpl.build(user.get());
-  }
-
-  @Transactional
-  public UserDetailsImpl loadById(UUID id) throws UsernameNotFoundException {
-    Optional<User> user = userRepository.findById(id);
-
-    if (user.isEmpty()) {
-      throw new UsernameNotFoundException("User Not Found with id: " + id);
     }
 
     return UserDetailsImpl.build(user.get());

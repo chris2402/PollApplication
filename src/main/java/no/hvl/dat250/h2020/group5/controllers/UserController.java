@@ -56,7 +56,8 @@ public class UserController {
       @PathVariable UUID id,
       @RequestBody UpdateUserRequest updateUserRequest,
       Authentication authentication) {
-    return userService.updateAccount(id, updateUserRequest, extractFromAuth.userId(authentication));
+    return userService.updateAccount(
+        id, updateUserRequest, extractFromAuth.isAdmin(authentication));
   }
 
   @PreAuthorize("authentication.principal.id == #id or hasAuthority('ADMIN')")

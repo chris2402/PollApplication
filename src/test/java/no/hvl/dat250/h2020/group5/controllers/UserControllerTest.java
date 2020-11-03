@@ -89,8 +89,9 @@ public class UserControllerTest {
   public void shouldUpdateAccountTest() throws Exception {
     UpdateUserRequest updateUserRequest =
         new UpdateUserRequest().email("new_name").oldPassword("old").newPassword("new");
-    when(userService.updateAccount(any(UUID.class), any(UpdateUserRequest.class), any(UUID.class)))
+    when(userService.updateAccount(any(UUID.class), any(UpdateUserRequest.class), eq(true)))
         .thenReturn(true);
+    when(extractFromAuth.isAdmin(any(Authentication.class))).thenReturn(true);
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/users/" + user.getId())
