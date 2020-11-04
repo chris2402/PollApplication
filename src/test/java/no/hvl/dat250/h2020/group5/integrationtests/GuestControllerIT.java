@@ -70,6 +70,7 @@ public class GuestControllerIT {
   @AfterEach
   public void tearDown() {
     guestRepository.deleteAll();
+    userRepository.deleteAll();
   }
 
   @Test
