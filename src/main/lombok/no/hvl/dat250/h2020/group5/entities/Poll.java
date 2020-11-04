@@ -52,7 +52,7 @@ public class Poll {
   @Setter(AccessLevel.PRIVATE)
   private List<Vote> votes = new ArrayList<>();
 
-  @OneToMany private List<User> allowedVoters = new ArrayList<>();
+  @ManyToMany private List<User> allowedVoters = new ArrayList<>();
 
   public void setPollOwnerOnlyOnPollSide(User owner) {
     setPollOwner(owner);

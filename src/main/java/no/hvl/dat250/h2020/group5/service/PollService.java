@@ -252,7 +252,7 @@ public class PollService {
   }
 
   private void addEmails(Poll poll, CreateOrUpdatePollRequest request) {
-    poll.getAllowedVoters().clear();
+    poll.setAllowedVoters(new ArrayList<>());
     if (request.getEmails() != null) {
       request
           .getEmails()
