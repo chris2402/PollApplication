@@ -16,7 +16,7 @@ import java.util.List;
 public class User extends Voter {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<VotingDevice> votingDevices;
+  private List<VotingDevice> votingDevices = new ArrayList<>();
 
   @ToString.Exclude
   @EqualsAndHashCode.Exclude

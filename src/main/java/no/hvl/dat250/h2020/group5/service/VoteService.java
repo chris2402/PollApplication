@@ -7,6 +7,7 @@ import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.entities.Voter;
 import no.hvl.dat250.h2020.group5.entities.VotingDevice;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
 import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
@@ -107,9 +108,11 @@ public class VoteService {
       throw new NotFoundException("Device not found");
     }
 
-    if (!deviceAllowed(poll.get(), voteRequestFromDevice.getId())) {
+    if (poll.get().getVisibilityType().equals(PollVisibilityType.PRIVATE)
+        && !deviceAllowed(poll.get(), voteRequestFromDevice.getId())) {
       throw new BadCredentialsException("You are not allowed to vote on this poll");
     }
+
     List<Vote> votes = voteRequestFromDevice.getVotes();
     voteRepository.saveAll(votes);
     return voteRepository.saveAll(

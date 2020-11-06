@@ -2,6 +2,7 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
 import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
 import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
@@ -48,7 +49,11 @@ public class VoteServiceTest {
 
   @BeforeEach
   public void setUp() {
-    poll = new Poll().startTime(new Date()).pollDuration(100);
+    poll =
+        new Poll()
+            .startTime(new Date())
+            .pollDuration(100)
+            .visibilityType(PollVisibilityType.PUBLIC);
     poll.setId(1L);
 
     voter = new User();
