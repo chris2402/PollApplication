@@ -215,7 +215,9 @@ public class PollService {
       throw new NotFoundException("Poll not found");
     }
     if (poll.get().getVisibilityType().equals(PollVisibilityType.PRIVATE)
-        && !(isOwnerOrAdmin(poll.get(), userId) || allowedToVote(poll.get(), userId))) {
+        && !(isOwnerOrAdmin(poll.get(), userId)
+            || allowedToVote(poll.get(), userId)
+            || deviceAllowed(poll.get(), userId))) {
       throw new BadCredentialsException("You are not allowed to view this poll");
     }
 
@@ -238,6 +240,11 @@ public class PollService {
     votesResponse.setNo(no);
     votesResponse.setYes(yes);
     return votesResponse;
+  }
+
+  protected boolean deviceAllowed(Poll poll, UUID voterId) {
+    return poll.getPollOwner().getVotingDevices().stream()
+        .anyMatch(device -> device.getId().equals(voterId));
   }
 
   private boolean allowedToVote(Poll poll, UUID userId) {

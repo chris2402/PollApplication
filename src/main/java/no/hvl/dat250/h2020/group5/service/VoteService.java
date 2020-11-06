@@ -13,6 +13,7 @@ import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
 import no.hvl.dat250.h2020.group5.repositories.*;
 import no.hvl.dat250.h2020.group5.requests.VoteRequest;
 import no.hvl.dat250.h2020.group5.requests.VoteRequestFromDevice;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -106,6 +107,9 @@ public class VoteService {
       throw new NotFoundException("Device not found");
     }
 
+    if (!deviceAllowed(poll.get(), voteRequestFromDevice.getId())) {
+      throw new BadCredentialsException("You are not allowed to vote on this poll");
+    }
     List<Vote> votes = voteRequestFromDevice.getVotes();
     voteRepository.saveAll(votes);
     return voteRepository.saveAll(
@@ -137,5 +141,10 @@ public class VoteService {
     Instant startTime = p.get().getStartTime().toInstant();
     Instant startTimePlusDuration = startTime.plusSeconds(p.get().getPollDuration());
     return Instant.now().isAfter(startTimePlusDuration);
+  }
+
+  protected boolean deviceAllowed(Poll poll, UUID voterId) {
+    return poll.getPollOwner().getVotingDevices().stream()
+        .anyMatch(device -> device.getId().equals(voterId));
   }
 }
