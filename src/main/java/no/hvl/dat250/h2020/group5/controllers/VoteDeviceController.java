@@ -1,6 +1,6 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.entities.VotingDevice;
 import no.hvl.dat250.h2020.group5.requests.VoteRequestFromDevice;
@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/voting-device")
@@ -21,15 +22,15 @@ public class VoteDeviceController {
 
   final VoteService voteService;
   final VotingDeviceService votingDeviceService;
-  final ExtractIdFromAuth extractIdFromAuth;
+  final ExtractFromAuth extractFromAuth;
 
   public VoteDeviceController(
       VoteService voteService,
       VotingDeviceService votingDeviceService,
-      ExtractIdFromAuth extractIdFromAuth) {
+      ExtractFromAuth extractFromAuth) {
     this.voteService = voteService;
     this.votingDeviceService = votingDeviceService;
-    this.extractIdFromAuth = extractIdFromAuth;
+    this.extractFromAuth = extractFromAuth;
   }
 
   @PostMapping("/{pollId}")
@@ -40,9 +41,8 @@ public class VoteDeviceController {
 
   @PreAuthorize("hasAuthority('USER')")
   @DeleteMapping("/{deviceId}")
-  public boolean deleteDevice(@PathVariable Long deviceId, Authentication authentication) {
-    return votingDeviceService.deleteDevice(
-        deviceId, extractIdFromAuth.getIdFromAuth(authentication));
+  public boolean deleteDevice(@PathVariable UUID deviceId, Authentication authentication) {
+    return votingDeviceService.deleteDevice(deviceId, extractFromAuth.userId(authentication));
   }
 
   @PreAuthorize("hasAuthority('USER')")
@@ -50,14 +50,13 @@ public class VoteDeviceController {
   public VotingDeviceResponse createDevice(
       @RequestBody VotingDevice votingDevice, Authentication authentication) {
     return votingDeviceService.addDeviceToUser(
-        extractIdFromAuth.getIdFromAuth(authentication), votingDevice);
+        extractFromAuth.userId(authentication), votingDevice);
   }
 
   @PreAuthorize("hasAuthority('USER')")
   @GetMapping
   public List<VotingDeviceResponse> getAllUsersDevices(Authentication authentication) {
-    return votingDeviceService.getAllDevicesToOwner(
-        extractIdFromAuth.getIdFromAuth(authentication));
+    return votingDeviceService.getAllDevicesToOwner(extractFromAuth.userId(authentication));
   }
 
   @ExceptionHandler(Exception.class)

@@ -68,7 +68,7 @@ public class Publisher implements Runnable {
       if (!finishedPolls.isEmpty()) {
         for (Poll poll : finishedPolls) {
           if (!sentPolls.contains(poll)) {
-            VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
+            VotesResponse votes = pollService.getNumberOfVotesAsAdmin(poll.getId());
             sendDweet(poll.getName(), poll.getQuestion(), "completed", poll.getId(), votes);
             send(getPollJSON(poll, votes));
             sentPolls.add(poll);

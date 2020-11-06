@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoginUserInTest {
   public void login(
-      String username,
+      String email,
       String password,
       String endPoint,
       int port,
@@ -20,7 +20,7 @@ public class LoginUserInTest {
       ObjectMapper objectMapper)
       throws JsonProcessingException {
     String loginUrl = "http://localhost:" + port + endPoint;
-    LoginRequest loginRequest = new LoginRequest().username(username).password(password);
+    LoginRequest loginRequest = new LoginRequest().email(email).password(password);
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);

@@ -3,7 +3,6 @@ package no.hvl.dat250.h2020.group5.integrationtests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
-import no.hvl.dat250.h2020.group5.controllers.UserController;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.integrationtests.util.LoginUserInTest;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
@@ -28,7 +27,6 @@ import java.net.URL;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerIT {
 
-  @Autowired UserController userController;
   @Autowired UserRepository userRepository;
   @Autowired TestRestTemplate testRestTemplate;
   @Autowired ObjectMapper objectMapper;
@@ -43,11 +41,17 @@ public class UserControllerIT {
     userRepository.deleteAll();
     this.base = new URL("http://localhost:" + port + "/users");
 
-    User user = new User().userName("username").password(encoder.encode("my password"));
-    User admin = new User().userName("admin").password(encoder.encode("my password")).admin(true);
+    User user =
+        new User().displayName("my_name").email("email").password(encoder.encode("my password"));
+    User user2 =
+        new User()
+            .displayName("my_name")
+            .email("admin")
+            .password(encoder.encode("my password"))
+            .admin(true);
 
     savedUser = userRepository.save(user);
-    userRepository.save(admin);
+    userRepository.save(user2);
 
     testRestTemplate
         .getRestTemplate()
@@ -55,7 +59,7 @@ public class UserControllerIT {
             new HttpComponentsClientHttpRequestFactory()); // Necessary to be able to make PATCH
 
     loginUserInTest.login(
-        "username", "my password", "/auth/signin", port, testRestTemplate, objectMapper);
+        "email", "my password", "/auth/signin", port, testRestTemplate, objectMapper);
   }
 
   @AfterEach
@@ -64,11 +68,23 @@ public class UserControllerIT {
   }
 
   @Test
-  public void shouldGetUsersAsAdmin() throws JsonProcessingException {
+  public void shouldGetInfoAboutCurrentlyLoggedInAccount() {
+    ResponseEntity<UserResponse> response =
+        testRestTemplate.getForEntity(base.toString() + "/me", UserResponse.class);
+
+    UserResponse userResponse = response.getBody();
+    Assertions.assertNotNull(userResponse);
+    Assertions.assertEquals(savedUser.getId(), userResponse.getId());
+  }
+
+  @Test
+  public void shouldGetAccountsAsAdmin() throws JsonProcessingException {
     loginUserInTest.login(
         "admin", "my password", "/auth/signin", port, testRestTemplate, objectMapper);
     ResponseEntity<UserResponse[]> response =
         testRestTemplate.getForEntity(base.toString(), UserResponse[].class);
+
+    System.out.println(response);
 
     UserResponse[] userResponses = response.getBody();
     Assertions.assertNotNull(userResponses);
@@ -76,7 +92,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void shouldGetUserAsAdmin() throws JsonProcessingException {
+  public void shouldGetAccountAsAdmin() throws JsonProcessingException {
     loginUserInTest.login(
         "admin", "my password", "/auth/signin", port, testRestTemplate, objectMapper);
 
@@ -90,7 +106,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void shouldGetUserAsUser() {
+  public void shouldGetAccountAsUser() {
     ResponseEntity<UserResponse> response =
         testRestTemplate.getForEntity(
             base.toString() + "/" + savedUser.getId(), UserResponse.class);
@@ -118,7 +134,7 @@ public class UserControllerIT {
   @Test
   public void shouldUpdateUsernameTest() {
     UpdateUserRequest newUsernameRequest = new UpdateUserRequest();
-    newUsernameRequest.setUsername("my new username");
+    newUsernameRequest.setEmail("my new username");
 
     String pathToEndpoint = base.toString() + "/" + savedUser.getId().toString();
     Boolean response =
@@ -126,15 +142,16 @@ public class UserControllerIT {
 
     Assertions.assertTrue(response);
     Assertions.assertEquals(
-        "my new username", userRepository.findById(savedUser.getId()).get().getUsername());
+        "my new username", userRepository.findById(savedUser.getId()).get().getEmail());
     Assertions.assertEquals(2, userRepository.count());
   }
 
   @Test
-  public void shouldDeleteUserTest() {
+  public void shouldDeleteAccountTest() {
     String pathToEndpoint = base.toString() + "/" + savedUser.getId().toString();
     testRestTemplate.delete(pathToEndpoint);
 
     Assertions.assertEquals(1, userRepository.count());
+    Assertions.assertTrue(userRepository.findById(savedUser.getId()).isEmpty());
   }
 }

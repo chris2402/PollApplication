@@ -1,10 +1,11 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.requests.CreateOrUpdatePollRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import no.hvl.dat250.h2020.group5.service.PollService;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static no.hvl.dat250.h2020.group5.controllers.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.is;
@@ -43,7 +45,7 @@ public class PollControllerUnitTest {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private MockMvc mockMvc;
   @MockBean private PollService pollService;
-  @MockBean private ExtractIdFromAuth extractIdFromAuth;
+  @MockBean private ExtractFromAuth extractFromAuth;
 
   private Poll poll1;
   private PollResponse response1;
@@ -52,8 +54,8 @@ public class PollControllerUnitTest {
 
   @BeforeEach
   public void setUp() {
-    user = new User().userName("my_awesome_username");
-    user.setId(3L);
+    user = new User().email("email");
+    user.setId(UUID.randomUUID());
 
     poll1 =
         new Poll()
@@ -109,8 +111,9 @@ public class PollControllerUnitTest {
 
   @Test
   public void shouldCreatePoll() throws Exception {
-    when(pollService.createPoll(any(Poll.class), eq(user.getId()))).thenReturn(response1);
-    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(user.getId());
+    when(pollService.createPoll(any(CreateOrUpdatePollRequest.class), eq(user.getId())))
+        .thenReturn(response1);
+    when(extractFromAuth.userId(any(Authentication.class))).thenReturn(user.getId());
 
     mockMvc
         .perform(
@@ -126,7 +129,7 @@ public class PollControllerUnitTest {
   @Test
   public void shouldDeletePollTest() throws Exception {
     when(pollService.deletePoll(poll1.getId(), user.getId())).thenReturn(true);
-    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(user.getId());
+    when(extractFromAuth.userId(any(Authentication.class))).thenReturn(user.getId());
 
     mockMvc
         .perform(
@@ -140,7 +143,7 @@ public class PollControllerUnitTest {
   @Test
   public void shouldActivatePollTest() throws Exception {
     when(pollService.activatePoll(poll1.getId(), user.getId())).thenReturn(true);
-    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(user.getId());
+    when(extractFromAuth.userId(any(Authentication.class))).thenReturn(user.getId());
 
     mockMvc
         .perform(
@@ -166,7 +169,25 @@ public class PollControllerUnitTest {
   @Test
   public void shouldReturnNumberOfVotesTest() throws Exception {
     VotesResponse votesResponse = new VotesResponse().no(0).yes(0);
-    when(pollService.getNumberOfVotes(poll1.getId())).thenReturn(votesResponse);
+
+    when(extractFromAuth.userId(any(Authentication.class))).thenReturn(user.getId());
+    when(pollService.getNumberOfVotes(poll1.getId(), user.getId())).thenReturn(votesResponse);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/polls/" + poll1.getId() + "/votes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(responseBody().containsObjectAsJson(votesResponse));
+  }
+
+  @Test
+  public void shouldReturnNumberOfVotesTestAsGuest() throws Exception {
+    VotesResponse votesResponse = new VotesResponse().no(0).yes(0);
+
+    when(extractFromAuth.userId(any(Authentication.class))).thenReturn(null);
+    when(pollService.getNumberOfVotes(poll1.getId(), null)).thenReturn(votesResponse);
 
     mockMvc
         .perform(

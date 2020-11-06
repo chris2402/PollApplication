@@ -15,7 +15,7 @@ import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
-import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
+import no.hvl.dat250.h2020.group5.requests.VoteRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,9 +75,11 @@ public class VoteControllerIT {
             .name("my first poll")
             .startTime(Date.from(Instant.now()));
     this.savedPoll = pollRepository.save(poll);
-    User user = new User().userName("username").password(encoder.encode("password"));
+
+    User user = new User().email("username").password(encoder.encode("password"));
     this.savedUser = userRepository.save(user);
-    Guest guest = new Guest().username("guest").password(encoder.encode("guest"));
+
+    Guest guest = new Guest().displayName("guest");
     this.savedGuest = guestRepository.save(guest);
 
     testRestTemplate
@@ -104,7 +106,7 @@ public class VoteControllerIT {
     loginUserInTest.login(
         "username", "password", "/auth/signin", port, testRestTemplate, objectMapper);
 
-    CastVoteRequest voteRequest = new CastVoteRequest();
+    VoteRequest voteRequest = new VoteRequest();
     voteRequest.setVote("YES");
 
     ResponseEntity<Vote> response =
@@ -120,21 +122,34 @@ public class VoteControllerIT {
   }
 
   @Test
-  public void shouldVoteByGuestTest() throws JsonProcessingException {
-    loginUserInTest.login(
-        "guest", "guest", "/auth/signin/guest", port, testRestTemplate, objectMapper);
-
-    CastVoteRequest voteRequest = new CastVoteRequest();
+  public void shouldVoteAsGuestTest() {
+    VoteRequest voteRequest = new VoteRequest();
     voteRequest.setVote("NO");
+    voteRequest.setId(savedGuest.getId());
 
     ResponseEntity<Vote> response =
         testRestTemplate.postForEntity(
             base.toString() + "/" + savedPoll.getId(), voteRequest, Vote.class);
+    System.out.println(response);
     Vote savedVote = response.getBody();
+    Assertions.assertNotNull(savedVote);
     Assertions.assertNotNull(savedVote.getId());
     Assertions.assertEquals(AnswerType.NO, savedVote.getAnswer());
     Assertions.assertEquals(1, voteRepository.count());
     Assertions.assertEquals(savedPoll.getId(), voteRepository.findAll().get(0).getPoll().getId());
     Assertions.assertEquals(savedGuest.getId(), voteRepository.findAll().get(0).getVoter().getId());
+  }
+
+  @Test
+  public void shouldFailToVoteAsGuestWithoutIdTest() {
+    VoteRequest voteRequest = new VoteRequest();
+    voteRequest.setVote("NO");
+
+    ResponseEntity<Vote> response =
+        testRestTemplate.postForEntity(
+            base.toString() + "/" + savedPoll.getId(), voteRequest, Vote.class);
+    System.out.println(response);
+    Vote savedVote = response.getBody();
+    Assertions.assertNull(savedVote);
   }
 }

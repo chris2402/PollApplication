@@ -34,28 +34,25 @@ public class VotingDeviceService {
   }
 
   public VotingDeviceResponse findDevice(String name) {
-    Optional<VotingDevice> foundDevice = deviceRepository.findVotingDeviceByUsername(name);
+    Optional<VotingDevice> foundDevice = deviceRepository.findVotingDeviceByDisplayName(name);
     if (foundDevice.isEmpty()) {
       return null;
     }
     return new VotingDeviceResponse(foundDevice.get());
   }
 
-  public VotingDeviceResponse addDeviceToUser(Long id, VotingDevice votingDevice) {
+  public VotingDeviceResponse addDeviceToUser(UUID id, VotingDevice votingDevice) {
     Optional<User> user = userRepository.findById(id);
     if (user.isEmpty()) {
       throw new NotFoundException("Cannot add device to empty user");
     }
-    votingDevice.username(UUID.randomUUID().toString());
-    user.get().getVotingDevices().add(votingDevice);
-    return new VotingDeviceResponse(
-        userRepository.save(user.get()).getVotingDevices().stream()
-            .filter(device -> device.getUsername().equals(votingDevice.getUsername()))
-            .collect(Collectors.toList())
-            .get(0));
+    VotingDevice savedVotingDevice = deviceRepository.save(votingDevice);
+    user.get().getVotingDevices().add(savedVotingDevice);
+    userRepository.save(user.get());
+    return new VotingDeviceResponse(savedVotingDevice);
   }
 
-  public List<VotingDeviceResponse> getAllDevicesToOwner(Long id) {
+  public List<VotingDeviceResponse> getAllDevicesToOwner(UUID id) {
     Optional<User> user = userRepository.findById(id);
     if (user.isEmpty()) {
       throw new NotFoundException("User not found");
@@ -65,7 +62,7 @@ public class VotingDeviceService {
         .collect(Collectors.toList());
   }
 
-  public boolean deleteDevice(Long deviceId, Long userId) {
+  public boolean deleteDevice(UUID deviceId, UUID userId) {
     Optional<User> user = userRepository.findById(userId);
     if (user.isEmpty()) {
       throw new NotFoundException("User not found");

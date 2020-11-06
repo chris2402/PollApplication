@@ -5,9 +5,11 @@ import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.requests.CreateOrUpdatePollRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.Assertions;
@@ -16,13 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -38,18 +38,28 @@ public class PollServiceTest {
   @Mock VoteRepository voteRepository;
 
   private User user;
+  private User user2;
+  private CreateOrUpdatePollRequest createOrUpdatePollRequest;
   private Poll poll;
   private Vote vote;
   private List<Poll> polls;
 
   @BeforeEach
   public void setUp() {
-    this.user = new User();
-    this.poll = new Poll();
-    this.vote = new Vote().answer(AnswerType.YES);
+    user = new User().email("email").password("password");
+    ;
+    user.setId(UUID.randomUUID());
 
-    user.setId(1L);
+    user2 = new User().email("account2").password("password");
+    user2.setId(UUID.randomUUID());
+
+    poll =
+        new Poll().name("pollname").question("question").visibilityType(PollVisibilityType.PUBLIC);
+    poll.setOwnerAndAddThisPollToOwner(user);
     poll.setId(2L);
+    createOrUpdatePollRequest = new CreateOrUpdatePollRequest().poll(poll);
+
+    this.vote = new Vote().answer(AnswerType.YES);
     vote.setPollAndAddThisVoteToPoll(poll);
     vote.setVoterAndAddThisVoteToVoter(user);
 
@@ -62,15 +72,53 @@ public class PollServiceTest {
   @Test
   public void shouldCreateANewPollTest() {
     when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-    pollService.createPoll(poll, user.getId());
+    pollService.createPoll(createOrUpdatePollRequest, user.getId());
+    verify(pollRepository, times(1)).save(poll);
+  }
+
+  @Test
+  public void shouldCreateANewWithAllowedUsersPollTest() {
+    User user1 = new User().email("email1");
+    User user2 = new User().email("email2");
+
+    createOrUpdatePollRequest.emails(Arrays.asList(user1.getEmail(), user2.getEmail()));
+    createOrUpdatePollRequest.getPoll().visibilityType(PollVisibilityType.PRIVATE);
+
+    when(userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
+    when(userRepository.findByEmail(user2.getEmail())).thenReturn(Optional.of(user2));
+    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+    pollService.createPoll(createOrUpdatePollRequest, user.getId());
+    verify(userRepository, times(2)).findByEmail(anyString());
     verify(pollRepository, times(1)).save(poll);
   }
 
   @Test
   public void shouldNotCreateANewPollIfUserIsNotPresentTest() {
-    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.empty());
-    pollService.createPoll(poll, user.getId());
-    verify(pollRepository, times(0)).save(poll);
+    when(userRepository.findById(user.getId())).thenThrow(NotFoundException.class);
+    Assertions.assertThrows(
+        NotFoundException.class,
+        () -> pollService.createPoll(createOrUpdatePollRequest, user.getId()));
+  }
+
+  @Test
+  public void shouldUpdatePoll() {
+    when(pollRepository.save(any(Poll.class))).thenReturn(poll);
+    when(pollRepository.findById(poll.getId())).thenReturn(Optional.of(poll));
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    when(userRepository.findByEmail(user2.getEmail())).thenReturn(java.util.Optional.of(user2));
+
+    createOrUpdatePollRequest.setEmails(Collections.singletonList("account2"));
+    createOrUpdatePollRequest.getPoll().setQuestion("new question");
+    createOrUpdatePollRequest.getPoll().setVisibilityType(PollVisibilityType.PRIVATE);
+    createOrUpdatePollRequest.setPoll(poll);
+
+    pollService.updatePoll(poll.getId(), createOrUpdatePollRequest, user.getId());
+
+    Assertions.assertEquals("new question", poll.getQuestion());
+    Assertions.assertEquals(1, poll.getAllowedVoters().size());
+
+    verify(userRepository, times(1)).findByEmail(anyString());
   }
 
   @Test
@@ -90,16 +138,16 @@ public class PollServiceTest {
 
   @Test
   public void shouldDeleteAPollWhenUserIsAdminTest() {
-    User pollOwner = new User();
-    pollOwner.setId(3L);
+    User pollOwner = new User().admin(true);
+    pollOwner.setId(UUID.randomUUID());
+
     poll.setOwnerAndAddThisPollToOwner(pollOwner);
-    user.setIsAdmin(true);
 
     when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
-    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    when(userRepository.findById(pollOwner.getId())).thenReturn(java.util.Optional.of(pollOwner));
     when(voteRepository.findByPoll(poll)).thenReturn(Collections.singletonList(vote));
 
-    pollService.deletePoll(poll.getId(), user.getId());
+    pollService.deletePoll(poll.getId(), pollOwner.getId());
 
     verify(pollRepository, times(1)).delete(poll);
   }
@@ -107,7 +155,7 @@ public class PollServiceTest {
   @Test
   public void shouldNotDeletePollWhenUserIsNotOwnerOrAdminTest() {
     User pollOwner = new User();
-    pollOwner.setId(3L);
+    pollOwner.setId(UUID.randomUUID());
     poll.setOwnerAndAddThisPollToOwner(pollOwner);
 
     when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
@@ -136,9 +184,41 @@ public class PollServiceTest {
     poll.addVoteAndSetThisPollInVote(new Vote().answer(AnswerType.NO));
 
     when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
-    VotesResponse votes = pollService.getNumberOfVotes(poll.getId());
+    VotesResponse votes = pollService.getNumberOfVotes(poll.getId(), user.getId());
     Assertions.assertEquals(1, votes.getNo());
     Assertions.assertEquals(3, votes.getYes());
+  }
+
+  @Test
+  public void shouldNotGetPollResultWhenNotAllowedTest() {
+    poll.setVisibilityType(PollVisibilityType.PRIVATE);
+    when(userRepository.findById(any(UUID.class))).thenReturn(java.util.Optional.empty());
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+
+    Assertions.assertThrows(
+        BadCredentialsException.class,
+        () -> pollService.getNumberOfVotes(poll.getId(), UUID.randomUUID()));
+  }
+
+  @Test
+  public void shouldGetPollTest() {
+    poll.setVisibilityType(PollVisibilityType.PRIVATE);
+    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+
+    PollResponse pollResponse = pollService.getPoll(poll.getId(), user.getId());
+
+    Assertions.assertEquals(poll.getId(), pollResponse.getId());
+  }
+
+  @Test
+  public void shouldNotGetPollWhenNotAllowedTest() {
+    poll.setVisibilityType(PollVisibilityType.PRIVATE);
+    when(userRepository.findById(user2.getId())).thenReturn(java.util.Optional.of(user2));
+    when(pollRepository.findById(poll.getId())).thenReturn(java.util.Optional.ofNullable(poll));
+
+    Assertions.assertThrows(
+        BadCredentialsException.class, () -> pollService.getPoll(poll.getId(), user2.getId()));
   }
 
   @Test
@@ -161,31 +241,11 @@ public class PollServiceTest {
   }
 
   @Test
-  public void shouldOnlyGetAllPollsToUserWhenAdminTest() {
-    User admin = new User();
-    User notAdmin = new User();
-    notAdmin.setId(6L);
-    admin.setId(5L);
-    admin.setIsAdmin(true);
-    when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
-    when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.ofNullable(user));
-    when(userRepository.findById(notAdmin.getId())).thenReturn(java.util.Optional.of(notAdmin));
-
-    List<PollResponse> pollsFromServiceAsAdmin =
-        pollService.getUserPollsAsAdmin(user.getId(), admin.getId());
-    List<PollResponse> pollsFromServiceNotAdmin =
-        pollService.getUserPollsAsAdmin(user.getId(), notAdmin.getId());
-
-    Assertions.assertEquals(3, pollsFromServiceAsAdmin.size());
-    Assertions.assertNull(pollsFromServiceNotAdmin);
-  }
-
-  @Test
   public void shouldGiveFinishedAndPublicPollsTest() {
     this.poll.setStartTime(Date.from(Instant.now()));
     this.poll.setPollDuration(0);
     when(pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC))
-        .thenReturn(Arrays.asList(this.poll));
+        .thenReturn(Collections.singletonList(this.poll));
     Assertions.assertEquals(1, pollService.getAllFinishedPublicPolls().size());
   }
 
@@ -194,7 +254,7 @@ public class PollServiceTest {
     this.poll.setStartTime(null);
     this.poll.setPollDuration(1);
     when(pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC))
-        .thenReturn(Arrays.asList(this.poll));
+        .thenReturn(Collections.singletonList(this.poll));
     Assertions.assertEquals(0, pollService.getAllFinishedPublicPolls().size());
   }
 }
