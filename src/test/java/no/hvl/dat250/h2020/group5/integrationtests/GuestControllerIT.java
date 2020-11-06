@@ -85,9 +85,6 @@ public class GuestControllerIT {
 
     ResponseEntity<GuestResponse> result =
         template.postForEntity(loginUrl, request, GuestResponse.class);
-    System.out.println(result);
-    Assertions.assertTrue(result.getHeaders().containsKey("Set-Cookie"));
-    Assertions.assertNotNull(result.getHeaders().get("Set-Cookie"));
     Assertions.assertEquals("guest", result.getBody().getDisplayName());
   }
 
