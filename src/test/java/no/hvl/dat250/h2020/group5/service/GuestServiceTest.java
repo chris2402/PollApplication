@@ -14,6 +14,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
@@ -32,14 +33,14 @@ public class GuestServiceTest {
   @BeforeEach
   public void setup() {
 
-    this.guest1 = new Guest().username("Guest 1");
-    this.guest1.setId(1L);
+    this.guest1 = new Guest().displayName("Guest 1");
+    this.guest1.setId(UUID.randomUUID());
 
-    this.guest2 = new Guest().username("Guest 2");
-    this.guest2.setId(2L);
+    this.guest2 = new Guest().displayName("Guest 2");
+    this.guest2.setId(UUID.randomUUID());
 
-    this.guest3 = new Guest().username("Guest 3");
-    this.guest3.setId(3L);
+    this.guest3 = new Guest().displayName("Guest 3");
+    this.guest3.setId(UUID.randomUUID());
 
     when(guestRepository.save(guest1)).thenReturn(guest1);
     when(guestRepository.save(guest2)).thenReturn(guest2);
@@ -56,7 +57,7 @@ public class GuestServiceTest {
             new GuestResponse(guest1), new GuestResponse(guest2), new GuestResponse(guest3));
     int i = 0;
     for (Guest guest : guests) {
-      Assertions.assertEquals(guest.getUsername(), guestResponses.get(i).getUsername());
+      Assertions.assertEquals(guest.getDisplayName(), guestResponses.get(i).getDisplayName());
       i++;
     }
   }

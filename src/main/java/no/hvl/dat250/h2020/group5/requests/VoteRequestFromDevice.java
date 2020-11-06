@@ -7,6 +7,7 @@ import no.hvl.dat250.h2020.group5.enums.AnswerType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -14,12 +15,12 @@ public class VoteRequestFromDevice {
 
   private int numberOfYes = 0;
   private int numberOfNo = 0;
-  private Long deviceId;
+  private UUID id;
 
-  public VoteRequestFromDevice(Long deviceId, int numberOfYes, int numberOfNo) {
+  public VoteRequestFromDevice(UUID id, int numberOfYes, int numberOfNo) {
     this.numberOfNo = numberOfNo;
     this.numberOfYes = numberOfYes;
-    this.deviceId = deviceId;
+    this.id = id;
   }
 
   public List<Vote> getVotes() {

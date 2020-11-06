@@ -2,10 +2,15 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
+import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
+import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
+import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
+import no.hvl.dat250.h2020.group5.repositories.DeviceRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoterRepository;
-import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
+import no.hvl.dat250.h2020.group5.requests.VoteRequest;
 import no.hvl.dat250.h2020.group5.requests.VoteRequestFromDevice;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,89 +36,118 @@ public class VoteServiceTest {
 
   @Mock PollRepository pollRepository;
 
+  @Mock DeviceRepository deviceRepository;
+
   private Poll poll;
   private Voter voter;
   private Voter voter2;
   private Vote vote;
-  private CastVoteRequest castVoteRequest;
+  private VoteRequest voteRequest;
   private Vote yesVote;
   private Vote noVote;
   private VotingDevice device;
 
   @BeforeEach
   public void setUp() {
-    poll = new Poll().startTime(new Date()).pollDuration(100);
+    poll =
+        new Poll()
+            .startTime(new Date())
+            .pollDuration(100)
+            .visibilityType(PollVisibilityType.PUBLIC);
     poll.setId(1L);
 
     voter = new User();
-    voter.setId(2L);
+    voter.setId(UUID.randomUUID());
     voter2 = new User();
-    voter2.setId(5L);
+    voter2.setId(UUID.randomUUID());
 
     vote = new Vote();
     vote.setVoterAndAddThisVoteToVoter(voter);
     vote.setPollAndAddThisVoteToPoll(poll);
 
-    castVoteRequest = new CastVoteRequest();
-    castVoteRequest.setVote("YES");
+    voteRequest = new VoteRequest();
+    voteRequest.setVote("YES");
 
     yesVote = new Vote().answer(AnswerType.YES);
     noVote = new Vote().answer(AnswerType.NO);
 
     when(pollRepository.findById(1L)).thenReturn(Optional.ofNullable(poll));
     when(pollRepository.findById(3L)).thenReturn(Optional.empty());
-    when(voterRepository.findById(2L)).thenReturn(Optional.ofNullable(voter));
-    when(voterRepository.findById(4L)).thenReturn(Optional.empty());
+
+    when(voterRepository.findById(voter.getId())).thenReturn(Optional.ofNullable(voter));
+    when(voterRepository.findById(UUID.randomUUID())).thenReturn(Optional.empty());
+    when(voterRepository.findById(voter2.getId())).thenReturn(Optional.ofNullable(voter2));
 
     when(voteRepository.save(any(Vote.class))).thenReturn(vote);
     when(voteRepository.findByVoterAndPoll(voter, poll)).thenReturn(Optional.ofNullable(vote));
     when(voteRepository.findByVoterAndPoll(voter2, poll)).thenReturn(Optional.empty());
-    device = new VotingDevice();
+
+    device = new VotingDevice().displayName("Test");
+    when(deviceRepository.findById(device.getId())).thenReturn(Optional.ofNullable(device));
   }
 
   @Test
   public void shouldNotCastVoteWhenPollHaveNotStartedTest() {
     poll.setStartTime(null);
-    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    Assertions.assertThrows(
+        InvalidTimeException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), voteRequest));
   }
 
   @Test
   public void shouldCastVoteWhenPollIsOnGoingAndVoteIsValidTest() {
-    Assertions.assertEquals(vote, voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
-    castVoteRequest.setVote("NO");
-    Assertions.assertEquals(vote, voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    Assertions.assertEquals(vote, voteService.vote(poll.getId(), voter2.getId(), voteRequest));
+    voteRequest.setVote("NO");
+    Assertions.assertEquals(vote, voteService.vote(poll.getId(), voter2.getId(), voteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWhenPollHaveEndedTest() {
     poll.setStartTime(new GregorianCalendar(2014, Calendar.FEBRUARY, 11).getTime());
-    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    Assertions.assertThrows(
+        InvalidTimeException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), voteRequest));
+  }
+
+  @Test
+  public void shouldNotCastVoteWhenAlreadyVoted() {
+    Assertions.assertThrows(
+        AlreadyVotedException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), voteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWithOutAnswerTest() {
-    castVoteRequest.setVote("");
-    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    voteRequest.setVote(null);
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), voteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWhenAnswerIsNotValidTest() {
-    castVoteRequest.setVote("this is not valid");
-    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    voteRequest.setVote("this is not valid");
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), voteRequest));
   }
 
   @Test
   public void shouldNotCastVoteWithOutPollIdOrUserIdOrAnswerTest() {
     // castVoteRequest.setPollId(null);
-    Assertions.assertNull(voteService.vote(null, voter.getId(), castVoteRequest));
+    Assertions.assertThrows(
+        NotFoundException.class, () -> voteService.vote(null, voter.getId(), voteRequest));
 
     // castVoteRequest.setPollId(poll.getId());
     // castVoteRequest.setUserId(null);
-    Assertions.assertNull(voteService.vote(poll.getId(), null, castVoteRequest));
+    Assertions.assertThrows(
+        NotFoundException.class, () -> voteService.vote(poll.getId(), null, voteRequest));
 
     // castVoteRequest.setUserId(voter.getId());
-    castVoteRequest.setVote(null);
-    Assertions.assertNull(voteService.vote(poll.getId(), voter.getId(), castVoteRequest));
+    voteRequest.setVote(null);
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> voteService.vote(poll.getId(), voter.getId(), voteRequest));
   }
 
   @Test
@@ -128,7 +162,7 @@ public class VoteServiceTest {
 
   @Test
   public void shouldNotFindVoteWhenUserOrPollDoesNotExistsTest() {
-    Assertions.assertNull(voteService.findVote(poll.getId(), 4L));
+    Assertions.assertNull(voteService.findVote(poll.getId(), UUID.randomUUID()));
     Assertions.assertNull(voteService.findVote(3L, voter.getId()));
   }
 
@@ -146,7 +180,7 @@ public class VoteServiceTest {
 
   @Test
   public void shouldRegisterTwoYesAndThreeNoVoteFromDeviceTest() {
-    VotingDevice device = new VotingDevice();
+    VotingDevice device = new VotingDevice().displayName("uuid");
     VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 2, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, noVote, noVote, noVote);
 
@@ -164,7 +198,6 @@ public class VoteServiceTest {
 
   @Test
   public void shouldSaveAllVotesFromDeviceTest() {
-    VotingDevice device = new VotingDevice();
     VoteRequestFromDevice voteRequestFromDevice = new VoteRequestFromDevice(device.getId(), 4, 3);
     List<Vote> votes = Arrays.asList(yesVote, yesVote, yesVote, yesVote, noVote, noVote, noVote);
     voteService.saveVotesFromDevice(poll.getId(), voteRequestFromDevice);

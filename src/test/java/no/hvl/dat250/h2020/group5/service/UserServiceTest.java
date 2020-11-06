@@ -2,6 +2,7 @@ package no.hvl.dat250.h2020.group5.service;
 
 import no.hvl.dat250.h2020.group5.entities.User;
 import no.hvl.dat250.h2020.group5.entities.Vote;
+import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
 import no.hvl.dat250.h2020.group5.requests.UpdateUserRequest;
@@ -31,65 +32,70 @@ public class UserServiceTest {
 
   @Mock PasswordEncoder passwordEncoder;
 
-  private User user1;
+  private User user;
   private User user2;
+
   private Vote vote;
+  private User createUser;
 
   @BeforeEach
   public void setUp() {
-    user1 = new User().password("password");
-    user1.setId(1L);
-    user2 = new User();
-    user2.setId(2L);
+    user = new User().password("password");
+    user.setId(UUID.randomUUID());
+
+    user2 = new User().password("password");
+    user2.setId(UUID.randomUUID());
+
+    createUser = new User().displayName("test").password("password").email("test@test.com");
 
     vote = new Vote();
-    vote.setVoterAndAddThisVoteToVoter(user1);
+    vote.setVoterAndAddThisVoteToVoter(user);
 
     when(userRepository.save(any(User.class))).thenReturn(new User());
-    when(userRepository.findById(user1.getId())).thenReturn(Optional.ofNullable(user1));
+    when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
     when(userRepository.findById(user2.getId())).thenReturn(Optional.ofNullable(user2));
-    when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
+    when(userRepository.findAll()).thenReturn(Arrays.asList(user, user2));
 
     when(passwordEncoder.encode(anyString())).thenReturn("HashedString");
     when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
-    when(voteRepository.findByVoter(user1)).thenReturn(Collections.singletonList(vote));
+    when(voteRepository.findByVoter(user)).thenReturn(Collections.singletonList(vote));
     when(voteRepository.save(any(Vote.class))).thenReturn(vote);
   }
 
   @Test
   public void shouldCreateUserTest() {
-    Assertions.assertNotNull(userService.createUser(user1));
-    Assertions.assertEquals(UserResponse.class, userService.createUser(new User()).getClass());
+    Assertions.assertNotNull(userService.createAccount(createUser));
+    Assertions.assertEquals(UserResponse.class, userService.createAccount(createUser).getClass());
   }
 
   @Test
   public void shouldDeleteUserAndUserVotesTest() {
     Assertions.assertNotNull(vote.getVoter());
-    Assertions.assertTrue(userService.deleteUser(vote.getVoter().getId()));
+    Assertions.assertTrue(userService.deleteUser(user.getId()));
     Assertions.assertNull(vote.getVoter());
     verify(voteRepository, times(1)).saveAll(anyIterable());
-    verify(userRepository, times(1)).delete(user1);
+    verify(userRepository, times(1)).delete(user);
   }
 
   @Test
   public void shouldGiveAllUsersTest() {
-    Assertions.assertEquals(2, userService.getAllUsers().size());
+    Assertions.assertEquals(2, userService.getAllUserAccounts().size());
   }
 
   @Test
   public void shouldFindUserByUserId() {
-    Assertions.assertEquals(user1.getId(), userService.getUser(user1.getId()).getId());
+    Assertions.assertEquals(user.getId(), userService.getUser(user.getId()).getId());
   }
 
   @Test
   public void shouldUpdateUserNameWithValidUpdateUserRequestTest() {
     UpdateUserRequest updateUserRequest = new UpdateUserRequest();
-    updateUserRequest.setUsername("New username");
+    updateUserRequest.setEmail("New email");
 
-    Assertions.assertTrue(userService.updateUser(user1.getId(), updateUserRequest));
-    Assertions.assertEquals(updateUserRequest.getUsername(), user1.getUsername());
-    verify(userRepository, times(1)).save(user1);
+    Assertions.assertTrue(userService.updateAccount(user.getId(), updateUserRequest, anyBoolean()));
+    Assertions.assertEquals(updateUserRequest.getEmail(), user.getEmail());
+    verify(userRepository, times(1)).save(user);
   }
 
   @Test
@@ -98,17 +104,18 @@ public class UserServiceTest {
     updateUserRequest.setNewPassword("New password");
     updateUserRequest.setOldPassword("password");
 
-    Assertions.assertTrue(userService.updateUser(user1.getId(), updateUserRequest));
-    Assertions.assertEquals("HashedString", user1.getPassword());
-    verify(userRepository, times(1)).save(user1);
+    Assertions.assertTrue(userService.updateAccount(user.getId(), updateUserRequest, anyBoolean()));
+    Assertions.assertEquals("HashedString", user.getPassword());
+    verify(userRepository, times(1)).save(user);
   }
 
   @Test
   public void shouldNotUpdateUserWithInvalidUserRequest() {
     UpdateUserRequest updateUserRequest = new UpdateUserRequest();
 
-    Assertions.assertFalse(userService.updateUser(user1.getId(), updateUserRequest));
-    verify(userRepository, times(0)).save(user1);
+    Assertions.assertFalse(
+        userService.updateAccount(user.getId(), updateUserRequest, anyBoolean()));
+    verify(userRepository, times(0)).save(user);
   }
 
   @Test
@@ -117,14 +124,16 @@ public class UserServiceTest {
     updateUserRequest.setNewPassword("New password");
     updateUserRequest.setOldPassword("password");
 
-    Assertions.assertFalse(userService.updateUser(3L, updateUserRequest));
-    verify(userRepository, times(0)).save(user1);
+    Assertions.assertThrows(
+        NotFoundException.class,
+        () -> userService.updateAccount(UUID.randomUUID(), updateUserRequest, anyBoolean()));
+    verify(userRepository, times(0)).save(user);
   }
 
   @Test
   public void shouldNotDeleteVotesWhenUserIsDeletedTest() {
-    List<Vote> userVotes = new ArrayList<>(user1.getVotes());
-    userService.deleteUser(user1.getId());
+    List<Vote> userVotes = new ArrayList<>(user.getVotes());
+    userService.deleteUser(user.getId());
     verify(voteRepository, times(1)).saveAll(userVotes);
   }
 }

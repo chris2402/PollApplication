@@ -15,7 +15,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class User extends Voter {
 
-  private Boolean isAdmin = false;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<VotingDevice> votingDevices = new ArrayList<>();
 
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
@@ -27,9 +28,27 @@ public class User extends Voter {
       orphanRemoval = true)
   private List<Poll> userPolls = new ArrayList<>();
 
-  @Column(unique = true)
-  public User userName(String username) {
-    setUsername(username);
+  private String email;
+  private String password;
+  private Boolean isAdmin = false;
+
+  public void setPollOwnerAndAddToUserPoll(Poll poll) {
+    poll.setPollOwnerOnlyOnPollSide(this);
+    this.userPolls.add(poll);
+  }
+
+  public void detachPoll(Poll poll) {
+    poll.setPollOwnerOnlyOnPollSide(null);
+    userPolls.remove(poll);
+  }
+
+  public User displayName(String name) {
+    setDisplayName(name);
+    return this;
+  }
+
+  public User email(String email) {
+    setEmail(email);
     return this;
   }
 
@@ -41,15 +60,5 @@ public class User extends Voter {
   public User admin(boolean isAdmin) {
     setIsAdmin(isAdmin);
     return this;
-  }
-
-  public void setPollOwnerAndAddToUserPoll(Poll poll) {
-    poll.setPollOwnerOnlyOnPollSide(this);
-    this.userPolls.add(poll);
-  }
-
-  public boolean detachPoll(Poll poll) {
-    poll.setPollOwnerOnlyOnPollSide(null);
-    return userPolls.remove(poll);
   }
 }

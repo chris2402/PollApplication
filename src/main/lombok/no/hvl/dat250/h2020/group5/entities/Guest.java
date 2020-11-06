@@ -9,21 +9,8 @@ import javax.persistence.Entity;
 @Entity
 @EqualsAndHashCode(callSuper = true)
 public class Guest extends Voter {
-
-  String displayName;
-
-  public Guest displayName(String displayName) {
-    setDisplayName(displayName);
-    return this;
-  }
-
-  public Guest username(String username) {
-    setUsername(username);
-    return this;
-  }
-
-  public Guest password(String password) {
-    setPassword(password);
+  public Guest displayName(String name) {
+    setDisplayName(name);
     return this;
   }
 }

@@ -111,7 +111,7 @@ public class PollRepositoryTest {
             new Poll().visibilityType(PollVisibilityType.PUBLIC),
             new Poll().visibilityType(PollVisibilityType.PRIVATE)));
     Assertions.assertEquals(
-        2, pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC).size());
+        3, pollRepository.findAllByVisibilityType(PollVisibilityType.PUBLIC).size());
     Assertions.assertEquals(
         1, pollRepository.findAllByVisibilityType(PollVisibilityType.PRIVATE).size());
   }

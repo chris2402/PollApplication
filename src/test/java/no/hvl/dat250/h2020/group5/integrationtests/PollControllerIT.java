@@ -3,6 +3,7 @@ package no.hvl.dat250.h2020.group5.integrationtests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jcip.annotations.NotThreadSafe;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Guest;
 import no.hvl.dat250.h2020.group5.entities.Poll;
 import no.hvl.dat250.h2020.group5.entities.User;
@@ -14,6 +15,7 @@ import no.hvl.dat250.h2020.group5.repositories.GuestRepository;
 import no.hvl.dat250.h2020.group5.repositories.PollRepository;
 import no.hvl.dat250.h2020.group5.repositories.UserRepository;
 import no.hvl.dat250.h2020.group5.repositories.VoteRepository;
+import no.hvl.dat250.h2020.group5.requests.CreateOrUpdatePollRequest;
 import no.hvl.dat250.h2020.group5.responses.PollResponse;
 import no.hvl.dat250.h2020.group5.responses.VotesResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -24,15 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @NotThreadSafe
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -45,6 +45,7 @@ public class PollControllerIT {
   @Autowired VoteRepository voteRepository;
   @Autowired LoginUserInTest loginUserInTest;
   @Autowired ObjectMapper objectMapper;
+  @Autowired ExtractFromAuth extractFromAuth;
   @Autowired PasswordEncoder encoder;
   @LocalServerPort private int port;
 
@@ -68,13 +69,21 @@ public class PollControllerIT {
     userRepository.deleteAll();
     guestRepository.deleteAll();
 
-    User admin =
-        new User().admin(true).userName("mynameisadmin").password(encoder.encode("password"));
-    User user1 = new User().userName("oddhus").password(encoder.encode("12341234"));
-    User user2 = new User().userName("Not admin");
-    Guest guest1 = new Guest().username("guest1");
+    User adminUser =
+        new User()
+            .displayName("admin")
+            .email("mynameisadmin")
+            .password(encoder.encode("password"))
+            .admin(true);
 
-    userRepository.save(admin);
+    User user1 = new User().email("oddhus").password(encoder.encode("12341234"));
+
+    User user2 = new User().email("email2").password(encoder.encode("12341234"));
+    ;
+
+    Guest guest1 = new Guest().displayName("guest1");
+
+    userRepository.save(adminUser);
     savedUser1 = userRepository.save(user1);
     savedUser2 = userRepository.save(user2);
     savedGuest1 = guestRepository.save(guest1);
@@ -153,6 +162,22 @@ public class PollControllerIT {
   }
 
   @Test
+  public void shouldUpdatePollByPollId() {
+    Poll poll = new Poll().question("?").visibilityType(PollVisibilityType.PRIVATE);
+    CreateOrUpdatePollRequest createOrUpdatePollRequest =
+        new CreateOrUpdatePollRequest().poll(poll).emails(Collections.singletonList("email2"));
+
+    template.put(
+        base.toString() + "/" + savedPoll1.getId(), createOrUpdatePollRequest, PollResponse.class);
+
+    Optional<Poll> foundPoll = pollRepository.findById(savedPoll1.getId());
+
+    Assertions.assertTrue(foundPoll.isPresent());
+    Assertions.assertEquals(PollVisibilityType.PRIVATE, foundPoll.get().getVisibilityType());
+    Assertions.assertEquals("?", foundPoll.get().getQuestion());
+  }
+
+  @Test
   public void shouldGetPollByPollId() {
     ResponseEntity<PollResponse> response =
         template.getForEntity(base.toString() + "/" + this.savedPoll1.getId(), PollResponse.class);
@@ -160,6 +185,24 @@ public class PollControllerIT {
 
     Assertions.assertNotNull(poll);
     Assertions.assertEquals(savedPoll1.getId(), poll.getId());
+  }
+
+  @Test
+  public void shouldNotGetPollByPollIdIfPrivateAndNotAllowed() {
+    ResponseEntity<String> response =
+        template.getForEntity(base.toString() + "/" + this.savedPoll2.getId(), String.class);
+
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
+
+  @Test
+  public void shouldGetPollByPollIdIfPrivateAndAllowed() {
+    savedPoll2.getAllowedVoters().add(savedUser1);
+    pollRepository.save(savedPoll2);
+    ResponseEntity<PollResponse> response =
+        template.getForEntity(base.toString() + "/" + this.savedPoll2.getId(), PollResponse.class);
+    Assertions.assertNotNull(response.getBody());
+    Assertions.assertEquals(savedPoll2.getId(), response.getBody().getId());
   }
 
   @Test
@@ -197,7 +240,7 @@ public class PollControllerIT {
         "mynameisadmin", "password", "/auth/signin", port, template, objectMapper);
     ResponseEntity<PollResponse[]> response =
         template.getForEntity(
-            base.toString() + "/owner/" + savedUser2.getId(), PollResponse[].class);
+            base.toString() + "/owner/" + savedUser1.getId(), PollResponse[].class);
     PollResponse[] polls = response.getBody();
     Assertions.assertNotNull(polls);
     Assertions.assertEquals(1, polls.length);
@@ -208,14 +251,19 @@ public class PollControllerIT {
     Poll poll = new Poll();
     poll.setQuestion("Banana pizza?");
     poll.setName("Poll name");
+    poll.setVisibilityType(PollVisibilityType.PRIVATE);
+
+    CreateOrUpdatePollRequest createOrUpdatePollRequest =
+        new CreateOrUpdatePollRequest().poll(poll).emails(Collections.singletonList("email2"));
 
     ResponseEntity<PollResponse> response =
-        template.postForEntity(base.toString(), poll, PollResponse.class);
+        template.postForEntity(base.toString(), createOrUpdatePollRequest, PollResponse.class);
     PollResponse postedPoll = response.getBody();
 
     Assertions.assertNotNull(postedPoll);
     Assertions.assertNotNull(postedPoll.getId());
     Assertions.assertEquals(postedPoll.getQuestion(), "Banana pizza?");
+    Assertions.assertTrue(postedPoll.getAllowedVoters().contains("email2"));
   }
 
   @Test
@@ -247,7 +295,29 @@ public class PollControllerIT {
     ResponseEntity<VotesResponse> response =
         template.getForEntity(
             base.toString() + "/" + this.savedPoll1.getId() + "/votes", VotesResponse.class);
-    Assertions.assertEquals(Objects.requireNonNull(response.getBody()).getYes(), 1);
-    Assertions.assertEquals(Objects.requireNonNull(response.getBody()).getNo(), 2);
+    Assertions.assertEquals(1, Objects.requireNonNull(response.getBody()).getYes());
+    Assertions.assertEquals(2, Objects.requireNonNull(response.getBody()).getNo());
+  }
+
+  @Test
+  public void shouldNotGetNumberOfYesAndNoVotesIfPrivate() {
+    ResponseEntity<String> response =
+        template.getForEntity(
+            base.toString() + "/" + this.savedPoll2.getId() + "/votes", String.class);
+    Assertions.assertTrue(response.getBody().contains("not allowed"));
+  }
+
+  @Test
+  public void shouldGetNumberOfYesAndNoVotesIfPrivateAndAllowed() {
+    savedPoll2.getAllowedVoters().add(savedUser1);
+    pollRepository.save(savedPoll2);
+
+    ResponseEntity<VotesResponse> response =
+        template.getForEntity(
+            base.toString() + "/" + this.savedPoll2.getId() + "/votes", VotesResponse.class);
+    Assertions.assertNotNull(response.getBody());
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(0, Objects.requireNonNull(response.getBody()).getYes());
+    Assertions.assertEquals(1, Objects.requireNonNull(response.getBody()).getNo());
   }
 }

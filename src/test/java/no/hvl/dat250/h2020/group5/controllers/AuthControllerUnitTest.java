@@ -2,13 +2,12 @@ package no.hvl.dat250.h2020.group5.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.hvl.dat250.h2020.group5.controllers.utils.CreateCookie;
-import no.hvl.dat250.h2020.group5.entities.Guest;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
 import no.hvl.dat250.h2020.group5.entities.User;
-import no.hvl.dat250.h2020.group5.responses.GuestResponse;
+import no.hvl.dat250.h2020.group5.requests.CreateUserRequest;
+import no.hvl.dat250.h2020.group5.requests.LoginRequest;
 import no.hvl.dat250.h2020.group5.responses.UserResponse;
-import no.hvl.dat250.h2020.group5.service.GuestService;
 import no.hvl.dat250.h2020.group5.service.UserService;
-import no.hvl.dat250.h2020.group5.service.VotingDeviceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 import static no.hvl.dat250.h2020.group5.controllers.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -37,54 +36,50 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthControllerUnitTest {
 
   @MockBean CreateCookie createCookie;
+  @MockBean private ExtractFromAuth extractFromAuth;
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
-  @MockBean private GuestService guestService;
   @MockBean private UserService userService;
-  @MockBean private VotingDeviceService votingDeviceService;
   private UserResponse userResponse;
-  private GuestResponse guestResponse1;
 
   @BeforeEach
   public void setUp() {
-    Guest guest1 = new Guest().username("guest 123");
-    guest1.setId(1L);
-    guestResponse1 = new GuestResponse(guest1);
-
-    User user = new User().userName("my_awesome_name");
-    user.setId(1L);
+    User user = new User().displayName("hi").email("email").password("password");
+    user.setId(UUID.randomUUID());
     this.userResponse = new UserResponse(user);
   }
 
   @Test
-  public void shouldCreateUserTest() throws Exception {
-    when(userService.createUser(any(User.class))).thenReturn(userResponse);
+  public void shouldLoginUserAndAccountTest() throws Exception {
+    LoginRequest loginRequest = new LoginRequest().email("email").password("password");
+    when(userService.getUserAccountByEmail("email")).thenReturn(userResponse);
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/auth/signup")
-                .content("{\"username\":\"my_awesome_name\", \"password\":\"my_password\"}")
+            MockMvcRequestBuilders.post("/auth/signin")
+                .content(objectMapper.writeValueAsString(loginRequest))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().json("{\"id\":1, \"username\":my_awesome_name, \"isAdmin\":false}"));
+        .andExpect(responseBody().containsObjectAsJson(userResponse));
 
     verify(createCookie, times(1)).signIn(anyString(), anyString(), any(HttpServletResponse.class));
   }
 
   @Test
-  public void shouldCreateGuestTest() throws Exception {
-    when(guestService.createGuest(any(Guest.class))).thenReturn(guestResponse1);
-
+  public void shouldCreateUserAndAccountTest() throws Exception {
+    CreateUserRequest createUserRequest =
+        new CreateUserRequest().email("email").displayName("hi").password("password");
+    when(userService.createAccount(any(User.class))).thenReturn(userResponse);
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/auth/signup/guest")
+            MockMvcRequestBuilders.post("/auth/signup")
+                .content(objectMapper.writeValueAsString(createUserRequest))
                 .with(csrf())
-                .content(objectMapper.writeValueAsString(new Guest().username("guest")))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(responseBody().containsObjectAsJson(guestResponse1));
+        .andExpect(responseBody().containsObjectAsJson(userResponse));
 
     verify(createCookie, times(1)).signIn(anyString(), anyString(), any(HttpServletResponse.class));
   }

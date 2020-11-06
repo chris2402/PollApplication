@@ -28,6 +28,7 @@ public class GuestRepositoryTest {
   @BeforeEach
   public void setUp() {
     Guest guest = new Guest();
+
     Vote vote = new Vote().answer(AnswerType.YES);
     vote.setVoterAndAddThisVoteToVoter(guest);
     voteRepository.save(vote);

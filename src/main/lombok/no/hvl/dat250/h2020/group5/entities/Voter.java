@@ -8,6 +8,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -16,12 +17,8 @@ public abstract class Voter {
 
   @Id
   @EqualsAndHashCode.Include
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  protected Long id;
-
-  @Column(length = 40)
-  @EqualsAndHashCode.Include
-  protected String username;
+  @GeneratedValue(strategy = GenerationType.AUTO, generator = "pg-uuid")
+  protected UUID id;
 
   @OneToMany(
       mappedBy = "voter",
@@ -32,7 +29,8 @@ public abstract class Voter {
   @EqualsAndHashCode.Exclude
   protected List<Vote> votes = new ArrayList<>();
 
-  private String password;
+  @Column(length = 40)
+  protected String displayName;
 
   public void addVoteAndSetThisVoterInVote(Vote vote) {
     this.votes.add(vote);

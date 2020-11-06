@@ -1,9 +1,10 @@
 package no.hvl.dat250.h2020.group5.controllers;
 
-import no.hvl.dat250.h2020.group5.controllers.utils.ExtractIdFromAuth;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import no.hvl.dat250.h2020.group5.controllers.utils.ExtractFromAuth;
 import no.hvl.dat250.h2020.group5.entities.Vote;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
-import no.hvl.dat250.h2020.group5.requests.CastVoteRequest;
+import no.hvl.dat250.h2020.group5.requests.VoteRequest;
 import no.hvl.dat250.h2020.group5.service.VoteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +19,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.UUID;
+
+import static no.hvl.dat250.h2020.group5.controllers.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -31,8 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class VoteControllerTest {
 
   @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
   @MockBean private VoteService voteService;
-  @MockBean private ExtractIdFromAuth extractIdFromAuth;
+  @MockBean private ExtractFromAuth extractFromAuth;
 
   private Vote vote;
 
@@ -44,9 +48,9 @@ public class VoteControllerTest {
   }
 
   @Test
-  public void shouldCreateNewVoteTest() throws Exception {
-    when(voteService.vote(eq(1L), eq(1L), any(CastVoteRequest.class))).thenReturn(vote);
-    when(extractIdFromAuth.getIdFromAuth(any(Authentication.class))).thenReturn(1L);
+  public void shouldCreateNewVoteAsUserTest() throws Exception {
+    when(voteService.vote(eq(1L), any(UUID.class), any(VoteRequest.class))).thenReturn(vote);
+    when(extractFromAuth.userId(any(Authentication.class))).thenReturn(UUID.randomUUID());
 
     mockMvc
         .perform(
@@ -56,17 +60,35 @@ public class VoteControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().json("{\"id\":1, \"answer\":\"YES\"}"));
+        .andExpect(responseBody().containsObjectAsJson(vote));
+  }
+
+  @Test
+  public void shouldCreateNewVoteAsGuestTest() throws Exception {
+    VoteRequest voteRequest = new VoteRequest().vote("YES").id(UUID.randomUUID());
+
+    when(voteService.vote(eq(1L), eq(voteRequest.getId()), any(VoteRequest.class)))
+        .thenReturn(vote);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/votes/1")
+                .content(objectMapper.writeValueAsString(voteRequest))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(responseBody().containsObjectAsJson(vote));
   }
 
   @Test
   public void shouldGetVoteTest() throws Exception {
-    when(voteService.findVote(anyLong(), anyLong())).thenReturn(vote);
+    when(voteService.findVote(anyLong(), any(UUID.class))).thenReturn(vote);
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get("/votes?userId=1&pollId=1")
+            MockMvcRequestBuilders.get("/votes?userId=" + UUID.randomUUID() + "&pollId=1")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().json("{\"id\":1, \"answer\":\"YES\"}"));
+        .andExpect(responseBody().containsObjectAsJson(vote));
   }
 }
