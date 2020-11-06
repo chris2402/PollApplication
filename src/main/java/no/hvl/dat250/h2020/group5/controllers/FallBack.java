@@ -8,6 +8,6 @@ public class FallBack {
 
   @GetMapping("/")
   public String fallBack() {
-    return "Hello!";
+    return "Hello!!";
   }
 }
