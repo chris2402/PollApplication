@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -57,17 +56,5 @@ public class CreateCookie {
             .collect(Collectors.toList());
 
     return roles;
-  }
-
-  public void createGuestCookie(UUID id, HttpServletResponse response) {
-    response.setHeader(
-        "Set-Cookie",
-        "guest="
-            + id
-            + ";path=/;"
-            + (isTest ? "" : "SameSite=None;")
-            + (isTest ? "" : "Secure;")
-            + " Max-Age="
-            + Integer.MAX_VALUE);
   }
 }

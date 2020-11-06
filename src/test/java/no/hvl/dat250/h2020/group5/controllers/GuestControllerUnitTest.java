@@ -17,14 +17,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static no.hvl.dat250.h2020.group5.controllers.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,9 +64,6 @@ public class GuestControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(responseBody().containsObjectAsJson(guestResponse1));
-
-    verify(createCookie, times(1))
-        .createGuestCookie(any(UUID.class), any(HttpServletResponse.class));
   }
 
   @Test
