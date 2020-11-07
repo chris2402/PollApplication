@@ -70,6 +70,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
+        .antMatchers("/ws/**")
+        .permitAll()
         .antMatchers("/auth/**")
         .permitAll()
         .antMatchers("/polls")
