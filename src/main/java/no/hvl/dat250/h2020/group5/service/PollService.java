@@ -224,6 +224,14 @@ public class PollService {
     return countVotes(poll.get());
   }
 
+  public VotesResponse getNumberOfVotesSocket(Long pollId) {
+    Optional<Poll> poll = pollRepository.findById(pollId);
+    if (poll.isEmpty()) {
+      throw new NotFoundException("Poll not found");
+    }
+    return countVotes(poll.get());
+  }
+
   private VotesResponse countVotes(Poll poll) {
     VotesResponse votesResponse = new VotesResponse();
     int yes = 0;

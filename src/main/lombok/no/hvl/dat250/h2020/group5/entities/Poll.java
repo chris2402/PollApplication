@@ -52,6 +52,7 @@ public class Poll {
   @Setter(AccessLevel.PRIVATE)
   private List<Vote> votes = new ArrayList<>();
 
+  @ToString.Exclude
   @ManyToMany private List<User> allowedVoters = new ArrayList<>();
 
   public void setPollOwnerOnlyOnPollSide(User owner) {

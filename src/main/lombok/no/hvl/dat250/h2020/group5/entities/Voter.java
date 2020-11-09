@@ -22,7 +22,7 @@ public abstract class Voter {
 
   @OneToMany(
       mappedBy = "voter",
-      fetch = FetchType.EAGER,
+      fetch = FetchType.LAZY,
       cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JsonManagedReference
   @ToString.Exclude

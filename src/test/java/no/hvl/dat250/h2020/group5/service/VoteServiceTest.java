@@ -3,6 +3,7 @@ package no.hvl.dat250.h2020.group5.service;
 import no.hvl.dat250.h2020.group5.entities.*;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.eventCreators.VoteEventCreator;
 import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
 import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
@@ -37,6 +38,8 @@ public class VoteServiceTest {
   @Mock PollRepository pollRepository;
 
   @Mock DeviceRepository deviceRepository;
+
+  @Mock VoteEventCreator voteEventCreator;
 
   private Poll poll;
   private Voter voter;

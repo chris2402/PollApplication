@@ -8,6 +8,8 @@ import no.hvl.dat250.h2020.group5.entities.Voter;
 import no.hvl.dat250.h2020.group5.entities.VotingDevice;
 import no.hvl.dat250.h2020.group5.enums.AnswerType;
 import no.hvl.dat250.h2020.group5.enums.PollVisibilityType;
+import no.hvl.dat250.h2020.group5.eventCreators.VoteEventCreator;
+import no.hvl.dat250.h2020.group5.events.VoteReceivedEvent;
 import no.hvl.dat250.h2020.group5.exceptions.AlreadyVotedException;
 import no.hvl.dat250.h2020.group5.exceptions.InvalidTimeException;
 import no.hvl.dat250.h2020.group5.exceptions.NotFoundException;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class VoteService {
+
+  final VoteEventCreator voteEventCreator;
 
   final PollRepository pollRepository;
 
@@ -46,13 +50,15 @@ public class VoteService {
       VoteRepository voteRepository,
       UserRepository userRepository,
       DeviceRepository deviceRepository,
-      ExtractFromAuth extractFromAuth) {
+      ExtractFromAuth extractFromAuth,
+      VoteEventCreator voteEventCreator) {
     this.pollRepository = pollRepository;
     this.voterRepository = voterRepository;
     this.voteRepository = voteRepository;
     this.userRepository = userRepository;
     this.deviceRepository = deviceRepository;
     this.extractFromAuth = extractFromAuth;
+    this.voteEventCreator = voteEventCreator;
   }
 
   public Vote vote(Long pollId, UUID userId, VoteRequest voteRequest) {
@@ -70,8 +76,9 @@ public class VoteService {
     v.setPollAndAddThisVoteToPoll(p.get());
     v.setVoterAndAddThisVoteToVoter(u.get());
     v.setAnswer(answer);
-
-    return voteRepository.save(v);
+    Vote vote = voteRepository.save(v);
+    onVoteCasted(pollId);
+    return vote;
   }
 
   public Vote findVote(Long pollId, UUID userId) {
@@ -115,11 +122,19 @@ public class VoteService {
 
     List<Vote> votes = voteRequestFromDevice.getVotes();
     voteRepository.saveAll(votes);
-    return voteRepository.saveAll(
+    List<Vote> voteList = voteRepository.saveAll(
         votes.stream()
             .peek(vote -> vote.setPollAndAddThisVoteToPoll(poll.get()))
             .collect(Collectors.toList()));
+    onVoteCasted(pollId);
+    return voteList;
   }
+
+  protected boolean deviceAllowed(Poll poll, UUID voterId) {
+    return poll.getPollOwner().getVotingDevices().stream()
+        .anyMatch(device -> device.getId().equals(voterId));
+  }
+
 
   private void checkVote(Optional<Poll> p, Optional<Voter> v, AnswerType answer) {
     if (answer == null) {
@@ -146,8 +161,7 @@ public class VoteService {
     return Instant.now().isAfter(startTimePlusDuration);
   }
 
-  protected boolean deviceAllowed(Poll poll, UUID voterId) {
-    return poll.getPollOwner().getVotingDevices().stream()
-        .anyMatch(device -> device.getId().equals(voterId));
+  private void onVoteCasted(Long pollId){
+    voteEventCreator.createAndPublishVoteReceivedEvent(pollId);
   }
 }
