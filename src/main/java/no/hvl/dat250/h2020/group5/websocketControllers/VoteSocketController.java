@@ -26,7 +26,6 @@ public class VoteSocketController {
     @MessageMapping("/poll/{pollId}/votes")
     public void getVotes(@DestinationVariable Long pollId, @Header("deviceId") String deviceId){
         VotesResponse votesResponse = pollService.getNumberOfVotes(pollId, UUID.fromString(deviceId));
-        System.out.println(votesResponse.toJSON());
         sendVotesToSubscriber(pollId, votesResponse);
 
     }

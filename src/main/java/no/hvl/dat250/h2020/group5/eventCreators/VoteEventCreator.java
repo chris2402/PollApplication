@@ -21,8 +21,7 @@ public class VoteEventCreator {
 
 
     public void createAndPublishVoteReceivedEvent(Long pollId){
-        UUID deviceId = UUID.fromString("6e7c8ece-e7ac-4295-bbf8-50d36f2d83cc");
-        VotesResponse votesResponse = pollService.getNumberOfVotes(pollId, deviceId);
+        VotesResponse votesResponse = pollService.getNumberOfVotesSocket(pollId);
         VoteReceivedEvent voteReceivedEvent = new VoteReceivedEvent(this, votesResponse, pollId);
         applicationEventPublisher.publishEvent(voteReceivedEvent);
     }
