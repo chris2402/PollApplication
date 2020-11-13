@@ -51,7 +51,7 @@ public class PublisherTest {
     try {
       Thread.sleep(5000);
       publisher.stop();
-      verify(publisher, times(1)).send(anyString());
+      verify(publisher, times(2)).send(anyString());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }

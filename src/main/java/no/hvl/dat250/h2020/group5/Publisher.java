@@ -27,7 +27,7 @@ public class Publisher implements Runnable {
     this.rabbitTemplate = rabbitTemplate;
     this.pollService = pollService;
     this.sentPolls = new ArrayList<>();
-    Logger.getLogger("Publisher").info("Initialized publisher");
+    Logger.getLogger("Publisher").info("Initialized publisher.");
   }
 
   public void send(String message) {
@@ -63,6 +63,8 @@ public class Publisher implements Runnable {
   @Override
   public void run() {
     Logger.getLogger("Publisher").info("Started publisher");
+    send("started queue");
+    Logger.getLogger("Publisher").info("Created queue polls");
     while (running) {
       List<Poll> finishedPolls = pollService.getAllFinishedPublicPolls();
       if (!finishedPolls.isEmpty()) {
