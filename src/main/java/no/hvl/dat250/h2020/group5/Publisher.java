@@ -27,7 +27,8 @@ public class Publisher implements Runnable {
     this.rabbitTemplate = rabbitTemplate;
     this.pollService = pollService;
     this.sentPolls = new ArrayList<>();
-    Logger.getLogger("Publisher").info("Initialized publisher");
+    rabbitTemplate.convertAndSend(Main.topicExchangeName, Main.routingKey, "started queue");
+    Logger.getLogger("Publisher").info("Initialized publisher, with queue polls");
   }
 
   public void send(String message) {
